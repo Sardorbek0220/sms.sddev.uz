@@ -4,7 +4,9 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Hash;
 use App\Call;
+use AshAllenDesign\ShortURL\Classes\Builder;
 
 class Kernel extends ConsoleKernel
 {
@@ -26,12 +28,59 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            // Client::create([
-            //     'name' => 'ali',
-            //     'telephone' => '123123',
-            //     'company' => 'sdfsdf',
-            //     'server' => 'asdasda'
-            // ]);
+            $date1 = date("Y-m-d h:i:s", (time() - 60 * 21));
+            $date2 = date("Y-m-d h:i:s", (time() - 60 * 20));
+            $calls = Call::whereBetween('created_at', [$date1, $date2])->get();
+            $messages = [];
+            if (!empty($calls)) {
+                foreach ($calls as $call) {
+                    
+                    if ($call['sent_sms'] === 1) continue;
+                    
+                    $updCall = Call::find($call['id']);
+                    $updCall->update(['sent_sms' => true]);
+
+                    $hash = Hash::make($call['id']);
+                    $hash = str_replace ('/', 'withoutslashes', $hash);
+
+                    $builder = new Builder();
+                    $shortURLObject = $builder->destinationUrl("https://sms.sddev.uz/feedback/".$call['id']."___".$hash)->make();
+                    $shortURL = $shortURLObject->default_short_url;
+
+                    array_push($messages, [
+                        'phone' => $call['client_telephone'],
+                        'txt' => "Hurmatli mijoz taklif hamda shikoyatlaringizni ushbu havolaga ".$shortURL." kirib qoldirishingiz mumkin."
+                    ]);
+                }
+            }
+
+            if (!empty($messages)) {
+
+                $data = [
+                    'messages' => $messages
+                ];
+                $url = 'https://billing.salesdoc.io/api/sms/sendingForward';
+        
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_HTTPHEADER, []);
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+                $res = curl_exec($ch);
+        
+                if (curl_errno($ch)) {
+                    $error_msg = curl_error($ch);
+                }
+                curl_close($ch);
+        
+                if (isset($error_msg)) {
+                    // dd($error_msg);
+                    info($error_msg);
+                }
+                // dd($res);
+            }
         })->everyMinute();
     }
 

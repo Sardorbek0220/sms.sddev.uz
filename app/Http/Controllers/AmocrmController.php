@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -26,13 +25,11 @@ class AmocrmController extends Controller
 			$wm_string = iconv("windows-1251", "UTF-8", file_get_contents('php://input'));
 			parse_str(urldecode($wm_string), $contents);
 
-			$client_data = $this->getClientInfo($contents['caller']);
-
 			$client = Client::where('telephone', $contents['caller'])->first();
 			if (empty($client)) {
 
 				// $client_data = $this->getClientInfo($contents['caller']);
-				// $client_data = [];
+				$client_data = [];
 
 				$company_name = '';
 				$server_name = '';
@@ -222,7 +219,7 @@ class AmocrmController extends Controller
 
 	public function test(){
 		$date1 = date("Y-m-d h:i:s", (time() - 60 * 21));
-		$date2 = date("Y-m-d h:i:s", (time() - 60 * 20));
+		$date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
 		$calls = Call::whereBetween('created_at', [$date1, $date2])->get();
 		$messages = [];
 		if (!empty($calls)) {
