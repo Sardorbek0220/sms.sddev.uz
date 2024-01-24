@@ -28,8 +28,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            $date1 = date("Y-m-d h:i:s", (time() - 60 * 21));
-            $date2 = date("Y-m-d h:i:s", (time() - 60 * 20));
+            // $date1 = date("Y-m-d h:i:s", (time() - 60 * 5));
+            // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 21)).gettimeofday()["dsttime"], 0, -1);
+		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 20)).gettimeofday()["dsttime"], 0, -1);
             $calls = Call::whereBetween('created_at', [$date1, $date2])->get();
             $messages = [];
             if (!empty($calls)) {
@@ -77,7 +79,6 @@ class Kernel extends ConsoleKernel
         
                 if (isset($error_msg)) {
                     // dd($error_msg);
-                    info($error_msg);
                 }
                 // dd($res);
             }

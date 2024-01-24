@@ -218,9 +218,12 @@ class AmocrmController extends Controller
 	}
 
 	public function test(){
-		$date1 = date("Y-m-d h:i:s", (time() - 60 * 21));
-		$date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
-		$calls = Call::whereBetween('created_at', [$date1, $date2])->get();
+		$date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 120)).gettimeofday()["dsttime"], 0, -1);
+		$date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
+		// $date1 = date("Y-m-d h:i:s", (time() - 60 * 121));
+		// $date2 = date("Y-m-d h:i:s");
+		$calls = Call::whereBetween('created_at', [$date1, $date2])->get();		
+		dd($calls);
 		$messages = [];
 		if (!empty($calls)) {
 			foreach ($calls as $call) {
