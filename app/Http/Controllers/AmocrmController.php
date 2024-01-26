@@ -29,7 +29,7 @@ class AmocrmController extends Controller
 			$existCall = Call::where('uuid', $contents['uuid'])->first();
 			if (empty($existCall)) {
 
-				$client = Client::where('telephone', $contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller'])->first();
+				$client = Client::where('telephone', $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'])->first();
 				if (empty($client)) {
 
 					// $client_data = $this->getClientInfo($contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller']);
@@ -43,26 +43,36 @@ class AmocrmController extends Controller
 							$server_name .= (is_null($company['server']) ? '' : $company['server'].", ");
 						}
 					}
-					Client::create([
-						'name' => $client_data['name'] ?? '',
-						'telephone' => $contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller'],
-						'company' => $company_name,
-						'server' => $server_name
-					]);
+					if ($contents['direction'] === 'outbound') {
+						Client::create([
+							'name' => $client_data['name'] ?? '',
+							'telephone' => $contents['callee'],
+							'company' => $company_name,
+							'server' => $server_name
+						]);
+					}else{
+						Client::create([
+							'name' => $client_data['name'] ?? '',
+							'telephone' => $contents['caller'],
+							'company' => $company_name,
+							'server' => $server_name
+						]);
+					}
+					
 				}
 
-				$operator = Operator::where('phone', $contents['direction'] == 'outbound' ? $contents['caller'] : $contents['callee'])->first();
+				$operator = Operator::where('phone', $contents['direction'] === 'outbound' ? $contents['caller'] : $contents['callee'])->first();
 
 				if (empty($operator)) {
 					$operator = Operator::create([
 						'name' => 'Operator_name',
-						'phone' => $contents['direction'] == 'outbound' ? $contents['caller'] : $contents['callee'],
+						'phone' => $contents['direction'] === 'outbound' ? $contents['caller'] : $contents['callee'],
 						'active' => 'Y'
 					]);
 				}
 
 				$call = Call::create([
-					'client_telephone' => $contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller'],
+					'client_telephone' => $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'],
 					'operator_id' => $operator['id'],
 					'pbx_audio_url' => $contents['download_url'],
 					'telegram_audio_url' => '',
