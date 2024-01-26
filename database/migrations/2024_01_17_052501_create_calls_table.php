@@ -19,7 +19,9 @@ class CreateCallsTable extends Migration
             $table->integer('operator_id');
             $table->longText('pbx_audio_url');
             $table->longText('telegram_audio_url');
+            $table->string('event');
             $table->string('direction');
+            $table->integer('call_duration');
             $table->integer('dialog_duration');
             $table->string('uuid');
             $table->integer('gateway');

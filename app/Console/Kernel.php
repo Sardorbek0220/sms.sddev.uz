@@ -30,13 +30,13 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             // $date1 = date("Y-m-d h:i:s", (time() - 60 * 5));
             // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
-            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 21)).gettimeofday()["dsttime"], 0, -1);
-		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 20)).gettimeofday()["dsttime"], 0, -1);
-            $calls = Call::whereBetween('created_at', [$date1, $date2])->get();
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 30)).gettimeofday()["dsttime"], 0, -1);
+		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
+            $calls = Call::where('event', 'call_end')->whereBetween('created_at', [$date1, $date2])->get();
             $messages = [];
             if (!empty($calls)) {
                 foreach ($calls as $call) {
-                    
+                    if ($call['client_telephone'] != '945535570') continue;
                     if ($call['sent_sms'] === 1) continue;
                     
                     $updCall = Call::find($call['id']);
@@ -78,11 +78,16 @@ class Kernel extends ConsoleKernel
                 curl_close($ch);
         
                 if (isset($error_msg)) {
+                    info($error_msg);
                     // dd($error_msg);
                 }
                 // dd($res);
             }
         })->everyMinute();
+
+        // $schedule->call(function () {
+        //     info('5');
+        // })->everyFiveMinutes();
     }
 
     /**

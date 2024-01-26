@@ -27,7 +27,7 @@ Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedb
 Route::get('feedback/store/success', [FeedbackController::class, 'success'])->name('feedback.success');
 
 // Route::get('sendSms', [FeedbackController::class, 'sendSms']);
-Route::get('mainProcess', [AmocrmController::class, 'mainProcess']);
+Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);
 
 Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
@@ -41,6 +41,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
     Route::get('profile', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
-    Route::get('test', [AmocrmController::class, 'test']);
+    // Route::get('test', [AmocrmController::class, 'test']);
 });
 
