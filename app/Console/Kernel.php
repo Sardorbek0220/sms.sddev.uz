@@ -35,8 +35,9 @@ class Kernel extends ConsoleKernel
             $calls = Call::where('event', 'call_end')->whereBetween('created_at', [$date1, $date2])->get();
             $messages = [];
             if (!empty($calls)) {
+                $phones = ['945535570', '998902226777', '902226777', '998935279065', '935279065'];
                 foreach ($calls as $call) {
-                    if ($call['client_telephone'] != '945535570') continue;
+                    if (!in_array($call['client_telephone'], $phones)) continue;
                     if ($call['sent_sms'] === 1) continue;
                     
                     $updCall = Call::find($call['id']);
@@ -46,7 +47,7 @@ class Kernel extends ConsoleKernel
                     $hash = str_replace ('/', 'withoutslashes', $hash);
 
                     $builder = new Builder();
-                    $shortURLObject = $builder->destinationUrl("https://sms.sddev.uz/feedback/".$call['id']."___".$hash)->make();
+                    $shortURLObject = $builder->destinationUrl("https://sms.salesdoc.uz/feedback/".$call['id']."___".$hash)->make();
                     $shortURL = $shortURLObject->default_short_url;
 
                     array_push($messages, [

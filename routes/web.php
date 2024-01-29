@@ -24,7 +24,8 @@ Route::redirect('/','/login');
 
 Route::get('feedback/{id}', [FeedbackController::class, 'index']);
 Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
-Route::get('feedback/store/success', [FeedbackController::class, 'success'])->name('feedback.success');
+Route::post('feedback/afterStore', [FeedbackController::class, 'afterStore'])->name('feedback.afterStore');
+// Route::get('feedback/store/success', [FeedbackController::class, 'success'])->name('feedback.success');
 
 // Route::get('sendSms', [FeedbackController::class, 'sendSms']);
 Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);

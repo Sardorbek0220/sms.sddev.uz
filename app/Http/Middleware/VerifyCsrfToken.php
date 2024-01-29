@@ -12,6 +12,11 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'https://sms.sddev.uz/mainProcess'
+        'https://sms.sddev.uz/mainProcess',
+        'https://sms.sddev.uz/feedback/store',
+        'https://sms.sddev.uz/feedback/afterStore',
+        'https://sms.salesdoc.uz/mainProcess',
+        'https://sms.salesdoc.uz/feedback/store',
+        'https://sms.salesdoc.uz/feedback/afterStore'
     ];
 }

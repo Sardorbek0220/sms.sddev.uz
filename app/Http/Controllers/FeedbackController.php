@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Feedback;
+use Response;
 
 class FeedbackController extends Controller
 {
@@ -34,27 +35,53 @@ class FeedbackController extends Controller
 
     public function store(Request $request){
         
-        $existFeedback = Feedback::where('call_id', $request->call_id)->first();
+        // $existFeedback = Feedback::where('call_id', $request->call_id)->first();
         
-        if (empty($existFeedback)) {
-            $request->validate([
-                'complaint'=>'required',
-                'not_solved'=>'required'
-            ]);
+        // if (empty($existFeedback)) {
+        //     $request->validate([
+        //         'complaint'=>'required',
+        //         'not_solved'=>'required'
+        //     ]);
 
+        //     $feedback = Feedback::create([
+        //         'call_id' => $request->call_id,
+        //         'complaint' => $request->complaint,
+        //         'advice' => '',
+        //         'solved' => $request->not_solved,
+        //     ]);
+        //     if ($feedback->id) {
+        //         return redirect()->route('feedback.success');
+        //     }
+        // }else{
+        //     abort(404);
+        // }
+
+        $existFeedback = Feedback::where('call_id', $request->call_id)->first();
+        if (empty($existFeedback)) {
             $feedback = Feedback::create([
                 'call_id' => $request->call_id,
-                'complaint' => $request->complaint,
+                'complaint' => '',
                 'advice' => '',
-                'solved' => $request->not_solved,
+                'solved' => $request->solved,
             ]);
-            if ($feedback->id) {
-                return redirect()->route('feedback.success');
-            }
+            return Response::json($feedback);
         }else{
-            abort(404);
+            return Response::json([]);
         }
+
+    }
+
+    public function afterStore(Request $request){
         
+        $feedback = Feedback::where('call_id', $request->call_id)->first();
+        if (!empty($feedback)) {
+            $feedback->update([
+                'complaint' => $request->complaint
+            ]);
+            return Response::json($feedback);
+        }else{
+            return Response::json([]);
+        }
     }
 
     public function success(){
