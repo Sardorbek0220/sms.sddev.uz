@@ -33,16 +33,15 @@ class AmocrmController extends Controller
 				if (empty($client)) {
 
 					// $client_data = $this->getClientInfo($contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller']);
-					$client_data = [];
 
 					$company_name = '';
 					$server_name = '';
-					if (!empty($client_data['companies'])) {
-						foreach ($client_data['companies'] as $company) {
-							$company_name .= ($company['name'] == 'undefined' ? '' : $company['name'].", ");
-							$server_name .= (is_null($company['server']) ? '' : $company['server'].", ");
-						}
-					}
+					// if (!empty($client_data['companies'])) {
+					// 	foreach ($client_data['companies'] as $company) {
+					// 		$company_name .= ($company['name'] == 'undefined' ? '' : $company['name'].", ");
+					// 		$server_name .= (is_null($company['server']) ? '' : $company['server'].", ");
+					// 	}
+					// }
 					Client::create([
 						'name' => $client_data['name'] ?? '',
 						'telephone' => $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'],
