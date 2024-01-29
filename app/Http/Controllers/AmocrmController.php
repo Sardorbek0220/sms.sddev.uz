@@ -43,21 +43,12 @@ class AmocrmController extends Controller
 							$server_name .= (is_null($company['server']) ? '' : $company['server'].", ");
 						}
 					}
-					if ($contents['direction'] === 'outbound') {
-						Client::create([
-							'name' => $client_data['name'] ?? '',
-							'telephone' => $contents['callee'],
-							'company' => $company_name,
-							'server' => $server_name
-						]);
-					}else{
-						Client::create([
-							'name' => $client_data['name'] ?? '',
-							'telephone' => $contents['caller'],
-							'company' => $company_name,
-							'server' => $server_name
-						]);
-					}
+					Client::create([
+						'name' => $client_data['name'] ?? '',
+						'telephone' => $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'],
+						'company' => $company_name,
+						'server' => $server_name
+					]);
 					
 				}
 
