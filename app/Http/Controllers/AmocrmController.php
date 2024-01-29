@@ -29,7 +29,15 @@ class AmocrmController extends Controller
 			$existCall = Call::where('uuid', $contents['uuid'])->first();
 			if (empty($existCall)) {
 
-				$client = Client::where('telephone', $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'])->first();
+				if ($contents['direction'] === 'outbound') {
+					$clientTel = $contents['callee'];
+					$operTel = $contents['caller'];
+				}else{
+					$clientTel = $contents['caller'];
+					$operTel = $contents['callee'];
+				}
+
+				$client = Client::where('telephone', $clientTel)->first();
 				if (empty($client)) {
 
 					// $client_data = $this->getClientInfo($contents['direction'] == 'outbound' ? $contents['callee'] : $contents['caller']);
@@ -44,25 +52,25 @@ class AmocrmController extends Controller
 					// }
 					Client::create([
 						'name' => $client_data['name'] ?? '',
-						'telephone' => $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'],
+						'telephone' => $clientTel,
 						'company' => $company_name,
 						'server' => $server_name
 					]);
 					
 				}
 
-				$operator = Operator::where('phone', $contents['direction'] === 'outbound' ? $contents['caller'] : $contents['callee'])->first();
+				$operator = Operator::where('phone', $operTel)->first();
 
 				if (empty($operator)) {
 					$operator = Operator::create([
 						'name' => 'Operator_name',
-						'phone' => $contents['direction'] === 'outbound' ? $contents['caller'] : $contents['callee'],
+						'phone' => $operTel,
 						'active' => 'Y'
 					]);
 				}
 
 				$call = Call::create([
-					'client_telephone' => $contents['direction'] === 'outbound' ? $contents['callee'] : $contents['caller'],
+					'client_telephone' => $clientTel,
 					'operator_id' => $operator['id'],
 					'pbx_audio_url' => $contents['download_url'],
 					'telegram_audio_url' => '',
