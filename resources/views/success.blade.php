@@ -22,8 +22,8 @@
     <div class="row">
         <div class="col-md-12 mt-5">
             <div class="alert alert-success" role="alert">
-                <h4 class="alert-heading">Successfully !</h4>
-                <p>Thank you for writing, We always appreciate your suggestion.</p>
+                <h4 class="alert-heading">Юборилди !</h4>
+                <p>Таклиф хамда мурожатингиз учун ташаккур.</p>
                 <hr>
                 <p class="mb-0">Sales Doctor</p>
             </div>

@@ -51,7 +51,7 @@ class Kernel extends ConsoleKernel
 
                     array_push($messages, [
                         'phone' => $call['client_telephone'],
-                        'txt' => "Hurmatli mijoz taklif hamda shikoyatlaringizni ushbu havolaga ".$shortURL." kirib qoldirishingiz mumkin."
+                        'txt' => "Sales Doctor компанияси сизнинг 712079559 номер орқали сўнгги мурожаатингизга кўрсатилган хизматни баҳолашингизни сўрайди. Хавола: ".$shortURL.""
                     ]);
                 }
             }

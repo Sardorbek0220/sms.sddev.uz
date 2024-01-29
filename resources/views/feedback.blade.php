@@ -22,29 +22,43 @@
     <div class="row">
       <div class="col-md-12 mt-5">
         <div class="card card-success">
+          @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+          @endif
           <div class="card-header">
-            <h3 class="card-title">Send feedback</h3>
+            <h3 class="card-title">Кунгирок хакидаги сизнинг фикрингиз</h3>
           </div>
           <form action="{{route('feedback.store')}}" method="post">
             @csrf
             <div class="card-body">
-              <div class="form-group">
-                <label for="complaint">Complaint</label>
-                <input type="text" class="form-control" name="complaint" id="complaint" placeholder="Write your complaint">
+              <select class="form-select form-control" aria-label="" name="not_solved" id="not_solved">
+                <option value="0">жавоб олмадим</option>
+                <option value="1">етарли жавоб олмадим</option>
+                <option value="2">жавоб олдим</option>
+              </select>
+              <div class="form-group mt-3">
+                <!-- <label for="complaint">Complaint</label> -->
+                <textarea type="text" class="form-control" name="complaint" id="complaint" placeholder="Изох колдириш"></textarea>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="advice">Advice</label>
                 <input type="text" class="form-control" name="advice" id="advice" placeholder="Give your advice">
-              </div>
-              <div class="form-check">
+              </div> -->
+              <!-- <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="not_solved" id="not_solved">
                 <label class="form-check-label" for="not_solved">Your problem is not solved ?</label>
-              </div>
+              </div> -->
               <input type="text" hidden name="call_id" value="{{$call_id}}">
             </div>
 
             <div class="card-footer">
-              <button type="submit" class="btn btn-success">Submit</button>
+              <button type="submit" class="btn btn-success">Юбориш</button>
             </div>
           </form>
         </div>

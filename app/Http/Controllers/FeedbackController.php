@@ -33,24 +33,25 @@ class FeedbackController extends Controller
     }
 
     public function store(Request $request){
-        try {
+        
+        $existFeedback = Feedback::where('call_id', $request->call_id)->first();
+        
+        if (empty($existFeedback)) {
+            $request->validate([
+                'complaint'=>'required',
+                'not_solved'=>'required'
+            ]);
 
-            $existFeedback = Feedback::where('call_id', $request->call_id)->first();
-            if (empty($existFeedback)) {
-                $feedback = Feedback::create([
-                    'call_id' => $request->call_id,
-                    'complaint' => $request->complaint,
-                    'advice' => $request->advice,
-                    'solved' => $request->not_solved ? false : true,
-                ]);
-                if ($feedback->id) {
-                    return redirect()->route('feedback.success');
-                }
-            }else{
-                abort(404);
+            $feedback = Feedback::create([
+                'call_id' => $request->call_id,
+                'complaint' => $request->complaint,
+                'advice' => '',
+                'solved' => $request->not_solved,
+            ]);
+            if ($feedback->id) {
+                return redirect()->route('feedback.success');
             }
-            
-        } catch (\Throwable $th) {
+        }else{
             abort(404);
         }
         
