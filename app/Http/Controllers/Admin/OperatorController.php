@@ -15,7 +15,7 @@ class OperatorController extends Controller
      */
     public function index()
     {
-        $operators = Operator::get();        
+        $operators = Operator::paginate(10);        
         return view('admin.operator.index', compact('operators'));
     }
 
