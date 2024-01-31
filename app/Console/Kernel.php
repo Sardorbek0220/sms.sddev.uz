@@ -32,13 +32,23 @@ class Kernel extends ConsoleKernel
             // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
             $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 2)).gettimeofday()["dsttime"], 0, -1);
 		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
+            $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
             $calls = Call::where('event', 'call_end')->whereBetween('created_at', [$date1, $date2])->get();
+
+            $sentCalls = Call::where('event', 'call_end')->where('sent_sms', 1)->whereBetween('updated_at', [$date3, $date2])->get();
+            $sentPhones = [];
+            foreach ($sentCalls as $sent) {
+                $sentPhones[] = $sent['client_telephone'];
+            }
+
             $messages = [];
             if (!empty($calls)) {
                 $phones = ['945535570', '998902226777', '902226777', '998935279065', '935279065'];
                 foreach ($calls as $call) {
                     if (!in_array($call['client_telephone'], $phones)) continue;
-                    if ($call['sent_sms'] === 1) continue;
+                    
+                    if ($call['sent_sms'] === 1 || $call['dialog_duration'] < 30) continue;
+                    if (in_array($call['client_telephone'], $sentPhones)) continue;
                     
                     $updCall = Call::find($call['id']);
                     $updCall->update(['sent_sms' => true]);
