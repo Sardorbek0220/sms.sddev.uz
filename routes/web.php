@@ -21,6 +21,8 @@ use App\Http\Controllers\Admin\OperatorController;
 //     return view('welcome');
 // });
 
+Route::redirect('/home','/');
+
 Route::get('/', [UserController::class, 'redirect'])->name('redirect');
 
 Route::get('feedback/{id}', [FeedbackController::class, 'index']);
