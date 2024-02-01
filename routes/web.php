@@ -20,7 +20,8 @@ use App\Http\Controllers\Admin\OperatorController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-Route::redirect('/','/login');
+
+Route::get('/', [UserController::class, 'redirect'])->name('redirect');
 
 Route::get('feedback/{id}', [FeedbackController::class, 'index']);
 Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');

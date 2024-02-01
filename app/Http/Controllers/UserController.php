@@ -73,4 +73,15 @@ class UserController extends Controller
 		return view('monitoring');
 	}
 
+	public function redirect()
+	{
+		if (empty(Auth::user())) {
+			return redirect()->route('logout');
+		}else if(Auth::user()->email=='operator@gmail.com'){
+			return redirect()->route('monitoring');
+		}else if(Auth::user()->email=='admin@gmail.com'){
+			return redirect()->route('feedback.all');
+		}
+	}
+
 }
