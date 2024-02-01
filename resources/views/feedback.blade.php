@@ -88,6 +88,7 @@
               </div>
 
               <input type="text" hidden id="call_id" name="call_id" value="{{$call_id}}">
+              <input type="text" hidden id="message_id" name="message_id" value="">
             </div>
 
 
@@ -123,13 +124,14 @@
       url:'{{route("feedback.store")}}',
       data: formData,
       success:function(data) {
-        if (data.call_id) {
+        if (data.data) {
           document.querySelectorAll('.beforeCheck').forEach(function(el) {
             el.style.display = 'none';
           });
           document.querySelectorAll('.afterCheck').forEach(function(el) {
             el.style.display = 'block';
           });
+          document.getElementById("message_id").value = data.message_id;
         }else{
           alert("You have already sent a feedback !");
         }
@@ -142,6 +144,7 @@
   function saveFeedback() {
    
     let formData = {
+      message_id: $('#message_id').val(),
       call_id: $('#call_id').val(),
       complaint: $('#complaint').val()
     };

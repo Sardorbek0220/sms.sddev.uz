@@ -48,7 +48,7 @@ class Kernel extends ConsoleKernel
                     if (!in_array($call['client_telephone'], $phones)) continue;
                     
                     if ($call['sent_sms'] === 1 || $call['dialog_duration'] < 30) continue;
-                    if (in_array($call['client_telephone'], $sentPhones)) continue;
+                    // if (in_array($call['client_telephone'], $sentPhones)) continue;
                     
                     $updCall = Call::find($call['id']);
                     $updCall->update(['sent_sms' => true]);
