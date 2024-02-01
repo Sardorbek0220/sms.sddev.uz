@@ -24,6 +24,8 @@ class UserController extends Controller
 			
 			if(Auth::user()->email=='admin@gmail.com'){
 			    return redirect()->route('feedback.all');
+			}else if(Auth::user()->email=='operator@gmail.com'){
+			    return redirect()->route('monitoring');
 			}else{
 				return redirect()->route('logout');
 			}
@@ -41,25 +43,21 @@ class UserController extends Controller
 	    return redirect()->route('login');
   	}
 
-	public function profile()
+	public function profile($id)
 	{
-		$user = User::find(Auth::id());
+		$user = User::find($id);
 		return view('admin.profile', compact('user'));
 	}
 
 	public function profile_save(Request $request)
     {
-        $user = User::find(Auth::id());
+        $user = User::find($request->id);
         $request->validate([
             'name'=>'required',
             'password'=>'required|confirmed',
         ]);
 
-        if(Auth::attempt([
-          'email'=>$user->email,
-          'password'=>$request->password_now,
-        ])) {
-            $user = User::find(Auth::id());
+        if($user) {
             $user->update([
                 'name' => $request->name,
                 'password' => bcrypt($request->password)
@@ -69,5 +67,10 @@ class UserController extends Controller
             return redirect()->route('admin.profile');
         }        
     }
+
+	public function monitoring()
+	{
+		return view('monitoring');
+	}
 
 }

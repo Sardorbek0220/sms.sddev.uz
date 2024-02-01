@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Operator;
+use App\User;
 
 class OperatorController extends Controller
 {
@@ -15,8 +16,9 @@ class OperatorController extends Controller
      */
     public function index()
     {
+        $operator_id = User::where('email', 'operator@gmail.com')->first()['id'];
         $operators = Operator::paginate(10);        
-        return view('admin.operator.index', compact('operators'));
+        return view('admin.operator.index', compact('operators', 'operator_id'));
     }
 
     /**

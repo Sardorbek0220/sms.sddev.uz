@@ -24,6 +24,7 @@
             @endif
               <div class="card-header">
                 <h3 class="card-title"><a href="{{ route('operators.create') }}" class="btn btn-primary">{{__('Create')}}</a></h3>
+                <h3 class="card-title ml-1"><a href="{{ route('admin.profile', $operator_id) }}" class="btn btn-outline-success">{{__('Update for monitoring')}}</a></h3>
               </div>
               <div class="card-body">
                 <table class="table table-bordered">

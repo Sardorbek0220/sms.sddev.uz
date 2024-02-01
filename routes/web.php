@@ -40,8 +40,12 @@ Route::group(['middleware' => 'guest'], function () {
 Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('operators', 'OperatorController');
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
-    Route::get('profile', [UserController::class, 'profile'])->name('admin.profile');
+    Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
     // Route::get('test', [AmocrmController::class, 'test']);
+});
+
+Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
+    Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
 });
 

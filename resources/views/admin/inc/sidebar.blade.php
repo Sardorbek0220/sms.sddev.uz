@@ -5,7 +5,7 @@
         <img src="{{ asset('assets/logo.png')}}" class="img-circle elevation-2" alt="User Image">
       </div>
       <div class="info">
-        <a href="{{ route('admin.profile') }}" class="d-block">
+        <a href="{{ route('admin.profile', auth()->user()->id) }}" class="d-block">
             {{auth()->user()->name}} 
         </a>
       </div>

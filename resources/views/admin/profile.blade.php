@@ -40,6 +40,7 @@
                     <form class="form-horizontal" action="{{ route('admin.profile_save') }}" method="post" enctype="multipart/form-data">
                       @csrf
                       @method('PUT')
+                      <input type="hidden" id="id" name="id" value="{{ $user->id }}">
                       <div class="form-group row">
                         <label for="name" class="col-sm-2 col-form-label">Name</label>
                         <div class="col-sm-10">
@@ -52,12 +53,12 @@
                           <input type="email" disabled class="form-control" id="inputEmail" name="email" placeholder="Email" value="{{ $user->email }}">
                         </div>
                       </div>
-                      <div class="form-group row">
+                      <!-- <div class="form-group row">
                         <label for="password_now" class="col-sm-2 col-form-label">{{__('Old password')}}</label>
                         <div class="col-sm-10">
                           <input type="password" class="form-control" id="password_now" name="password_now">
                         </div>
-                      </div>
+                      </div> -->
                       <div class="form-group row">
                         <label for="password" class="col-sm-2 col-form-label">{{__('New password')}}</label>
                         <div class="col-sm-10">
