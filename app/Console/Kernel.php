@@ -48,7 +48,7 @@ class Kernel extends ConsoleKernel
                     if (!in_array($call['client_telephone'], $phones)) continue;
                     
                     if ($call['sent_sms'] === 1 || $call['dialog_duration'] < 30) continue;
-                    // if (in_array($call['client_telephone'], $sentPhones)) continue;
+                    if (in_array($call['client_telephone'], $sentPhones)) continue;
                     
                     $updCall = Call::find($call['id']);
                     $updCall->update(['sent_sms' => true]);
@@ -62,7 +62,7 @@ class Kernel extends ConsoleKernel
 
                     array_push($messages, [
                         'phone' => $call['client_telephone'],
-                        'txt' => "Sales Doctor kompaniyasi sizning 712079559 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. Havola: ".$shortURL.""
+                        'txt' => "Sales Doctor kompaniyasi sizning 712079559 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL.""
                     ]);
                 }
             }
