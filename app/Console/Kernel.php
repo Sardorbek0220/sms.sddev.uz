@@ -32,10 +32,13 @@ class Kernel extends ConsoleKernel
             // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
             $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 21)).gettimeofday()["dsttime"], 0, -1);
 		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 20)).gettimeofday()["dsttime"], 0, -1);
+
             $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
+            $date4 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
+            
             $calls = Call::where('event', 'call_end')->whereBetween('created_at', [$date1, $date2])->get();
 
-            $sentCalls = Call::where('event', 'call_end')->where('sent_sms', 1)->whereBetween('updated_at', [$date3, $date2])->get();
+            $sentCalls = Call::where('event', 'call_end')->where('sent_sms', 1)->whereBetween('updated_at', [$date3, $date4])->get();
             $sentPhones = [];
             foreach ($sentCalls as $sent) {
                 $sentPhones[] = $sent['client_telephone'];
