@@ -63,9 +63,10 @@ class FeedbackController extends Controller
 
                 $text = new Text();
 	
-                $text->appendEntity("Operator: ", "bold")->appendText("#".$operator->phone." ".$operator->name)->endl();
+                $text->appendEntity("Operator: ", "bold")->appendText("#n_".$operator->phone." ".$operator->name)->endl();
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
+                $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."sendAudio");
@@ -111,9 +112,10 @@ class FeedbackController extends Controller
 
                 $text = new Text();
 	
-                $text->appendEntity("Operator: ", "bold")->appendText("#".$operator->phone." ".$operator->name)->endl();
+                $text->appendEntity("Operator: ", "bold")->appendText("#n_".$operator->phone." ".$operator->name)->endl();
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$feedback->solved." ".STATUS[$feedback->solved])->endl();
+                $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("Izoh: ", "bold")->appendText($request->complaint)->endl();
                 $text->endl();
 
