@@ -45,27 +45,6 @@ class FeedbackController extends Controller
     }
 
     public function store(Request $request){
-        
-        // $existFeedback = Feedback::where('call_id', $request->call_id)->first();
-        
-        // if (empty($existFeedback)) {
-        //     $request->validate([
-        //         'complaint'=>'required',
-        //         'not_solved'=>'required'
-        //     ]);
-
-        //     $feedback = Feedback::create([
-        //         'call_id' => $request->call_id,
-        //         'complaint' => $request->complaint,
-        //         'advice' => '',
-        //         'solved' => $request->not_solved,
-        //     ]);
-        //     if ($feedback->id) {
-        //         return redirect()->route('feedback.success');
-        //     }
-        // }else{
-        //     abort(404);
-        // }
 
         $existFeedback = Feedback::where('call_id', $request->call_id)->first();
         if (empty($existFeedback)) {
@@ -84,13 +63,12 @@ class FeedbackController extends Controller
 
                 $text = new Text();
 	
-                $text->appendEntity("Operator: ", "bold")->appendText($operator->name)->endl();
+                $text->appendEntity("Operator: ", "bold")->appendText("#".$operator->phone." ".$operator->name)->endl();
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
-                $text->appendEntity("Baho: ", "bold")->appendText(STATUS[$request->solved])->endl();
-                $text->appendEntityUrl("Audio:  ", "bold")->appendText($infoCall->pbx_audio_url)->endl();
+                $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
                 $text->endl();
 
-                $ch = curl_init(BOT_URL."sendMessage");
+                $ch = curl_init(BOT_URL."sendAudio");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
@@ -98,8 +76,9 @@ class FeedbackController extends Controller
 
                 $request = [
                     "chat_id" => TG_USER_CHANNEL,
-                    "text" => $text->text,
-                    "entities" => $text->entities,
+                    "audio" => $infoCall->pbx_audio_url,
+                    "caption" => $text->text,
+                    "caption_entities" => $text->entities,
                 ];
 
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
@@ -132,14 +111,13 @@ class FeedbackController extends Controller
 
                 $text = new Text();
 	
-                $text->appendEntity("Operator: ", "bold")->appendText($operator->name)->endl();
+                $text->appendEntity("Operator: ", "bold")->appendText("#".$operator->phone." ".$operator->name)->endl();
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
-                $text->appendEntity("Baho: ", "bold")->appendText(STATUS[$feedback->solved])->endl();
+                $text->appendEntity("Baho: ", "bold")->appendText("#mark".$feedback->solved." ".STATUS[$feedback->solved])->endl();
                 $text->appendEntity("Izoh: ", "bold")->appendText($request->complaint)->endl();
-                $text->appendEntityUrl("Audio:  ", "bold")->appendText($infoCall->pbx_audio_url)->endl();
                 $text->endl();
 
-                $ch = curl_init(BOT_URL."editMessageText");
+                $ch = curl_init(BOT_URL."editMessageCaption");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
@@ -148,8 +126,8 @@ class FeedbackController extends Controller
                 $request = [
                     "chat_id" => TG_USER_CHANNEL,
                     "message_id" => intval($request->message_id),
-                    "text" => $text->text,
-                    "entities" => $text->entities,
+                    "caption" => $text->text,
+                    "caption_entities" => $text->entities,
                 ];
 
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
@@ -171,33 +149,34 @@ class FeedbackController extends Controller
         return view('admin.feedback', compact('allFeedback'));
     }
 
-    public function bot()
-    {
-        $text = new Text();
+    // public function bot()
+    // {
+    //     $text = new Text();
 	
-        $text->appendEntity("fffffffff", "bold")->endl()->endl();
-        $text->appendEntity("gggggggg", "bold")->endl()->endl();
-        $text->appendEntity("hhhhhhhhh", "bold")->endl()->endl();
-        $text->appendEntityUrl("eeee ", "bold")->appendText("https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3")->endl();
-        $text->endl();
+    //     $text->appendEntity("fffffffff", "bold")->endl()->endl();
+    //     $text->appendEntity("gggggggg", "bold")->endl()->endl();
+    //     $text->appendEntity("hhhhhhhhh", "bold")->endl()->endl();
+    //     $text->appendEntity("hhhhhhhhh", "bold")->endl()->endl();
+    //     $text->endl();
 
-        $ch = curl_init(BOT_URL."editMessageText");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json"
-        ]);
+    //     $ch = curl_init(BOT_URL."editMessageCaption");
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    //         "Content-Type: application/json"
+    //     ]);
 
-        $request = [
-            "chat_id" => TG_USER_CHANNEL,
-            "message_id" => 22,
-            "text" => $text->text,
-            "entities" => $text->entities,
-        ];
+    //     $request = [
+    //         "chat_id" => TG_USER_CHANNEL,
+    //         "message_id" => 32,
+    //         // "audio" => "https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3",
+    //         "caption" => $text->text,
+    //         "caption_entities" => $text->entities,
+    //     ];
 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-        $response = curl_exec($ch);
-        curl_close($ch);
+    //     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+    //     $response = curl_exec($ch);
+    //     curl_close($ch);
 
-        dd(json_decode($response));
-    }
+    //     dd(json_decode($response));
+    // }
 }

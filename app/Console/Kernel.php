@@ -30,8 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             // $date1 = date("Y-m-d h:i:s", (time() - 60 * 5));
             // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
-            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 2)).gettimeofday()["dsttime"], 0, -1);
-		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 21)).gettimeofday()["dsttime"], 0, -1);
+		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 20)).gettimeofday()["dsttime"], 0, -1);
             $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
             $calls = Call::where('event', 'call_end')->whereBetween('created_at', [$date1, $date2])->get();
 
@@ -43,9 +43,9 @@ class Kernel extends ConsoleKernel
 
             $messages = [];
             if (!empty($calls)) {
-                $phones = ['945535570', '998902226777', '902226777', '998935279065', '935279065'];
+                // $phones = ['945535570', '998902226777', '902226777', '998935279065', '935279065'];
                 foreach ($calls as $call) {
-                    if (!in_array($call['client_telephone'], $phones)) continue;
+                    // if (!in_array($call['client_telephone'], $phones)) continue;
                     
                     if ($call['sent_sms'] === 1 || $call['dialog_duration'] < 30) continue;
                     if (in_array($call['client_telephone'], $sentPhones)) continue;

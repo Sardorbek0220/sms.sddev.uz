@@ -17,10 +17,6 @@ use App\Http\Controllers\Admin\OperatorController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 Route::redirect('/home','/');
 
 Route::get('/', [UserController::class, 'redirect'])->name('redirect');
@@ -28,9 +24,7 @@ Route::get('/', [UserController::class, 'redirect'])->name('redirect');
 Route::get('feedback/{id}', [FeedbackController::class, 'index']);
 Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
 Route::post('feedback/afterStore', [FeedbackController::class, 'afterStore'])->name('feedback.afterStore');
-// Route::get('feedback/store/success', [FeedbackController::class, 'success'])->name('feedback.success');
 
-// Route::get('sendSms', [FeedbackController::class, 'sendSms']);
 Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);
 
 Route::get('/logout', [UserController::class, 'logout'])->name('logout');
@@ -46,7 +40,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
     // Route::get('test', [AmocrmController::class, 'test']);
-    Route::get('bot', [FeedbackController::class, 'bot']);
+    // Route::get('bot', [FeedbackController::class, 'bot']);
 });
 
 Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
