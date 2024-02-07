@@ -85,6 +85,7 @@ class FeedbackController extends Controller
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
                 $response = curl_exec($ch);
                 curl_close($ch);
+                info($response);
 
                 $response = json_decode($response);
                 if ($response->ok == true) {
@@ -116,7 +117,7 @@ class FeedbackController extends Controller
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$feedback->solved." ".STATUS[$feedback->solved])->endl();
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
-                $text->appendEntity("Izoh: ", "bold")->appendText($request->complaint)->endl();
+                $text->appendEntity("Izoh: ", "bold")->appendText($feedback->complaint)->endl();
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."editMessageCaption");
@@ -135,6 +136,7 @@ class FeedbackController extends Controller
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
                 $response = curl_exec($ch);
                 curl_close($ch);
+                info($response);
             }
             return Response::json($feedback);
         }else{
@@ -153,15 +155,16 @@ class FeedbackController extends Controller
 
     // public function bot()
     // {
+    //     $feedback = Feedback::find(54);
     //     $text = new Text();
 	
-    //     $text->appendEntity("fffffffff", "bold")->endl()->endl();
-    //     $text->appendEntity("gggggggg", "bold")->endl()->endl();
-    //     $text->appendEntity("hhhhhhhhh", "bold")->endl()->endl();
-    //     $text->appendEntity("hhhhhhhhh", "bold")->endl()->endl();
+    //     $text->appendEntity("fffffffff", "bold")->appendText("asdasd")->endl();
+    //     $text->appendEntity("gggggggg", "bold")->appendText("asdasd")->endl();
+    //     $text->appendEntity("hhhhhhhhh", "bold")->appendText("asdasd")->endl();
+    //     $text->appendEntity("hhhhhhhhh", "bold")->appendText($feedback->complaint)->endl();
     //     $text->endl();
 
-    //     $ch = curl_init(BOT_URL."editMessageCaption");
+    //     $ch = curl_init(BOT_URL."deleteMessage");
     //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     //     curl_setopt($ch, CURLOPT_HTTPHEADER, [
     //         "Content-Type: application/json"
@@ -169,14 +172,15 @@ class FeedbackController extends Controller
 
     //     $request = [
     //         "chat_id" => TG_USER_CHANNEL,
-    //         "message_id" => 32,
+    //         "message_id" => 68,
     //         // "audio" => "https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3",
-    //         "caption" => $text->text,
-    //         "caption_entities" => $text->entities,
+    //         // "caption" => $text->text,
+    //         // "caption_entities" => $text->entities,
     //     ];
 
     //     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
     //     $response = curl_exec($ch);
+    //     info($response);
     //     curl_close($ch);
 
     //     dd(json_decode($response));
