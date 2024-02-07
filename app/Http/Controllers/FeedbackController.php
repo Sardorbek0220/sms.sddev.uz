@@ -149,7 +149,7 @@ class FeedbackController extends Controller
     }
 
     public function all(){
-        $allFeedback = Feedback::paginate(10);
+        $allFeedback = Feedback::orderByDesc('created_at')->paginate(10);
         return view('admin.feedback', compact('allFeedback'));
     }
 
