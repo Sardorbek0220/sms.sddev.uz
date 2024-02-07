@@ -158,10 +158,10 @@ class FeedbackController extends Controller
     //     $feedback = Feedback::find(54);
     //     $text = new Text();
 	
-    //     $text->appendEntity("fffffffff", "bold")->appendText("asdasd")->endl();
-    //     $text->appendEntity("gggggggg", "bold")->appendText("asdasd")->endl();
-    //     $text->appendEntity("hhhhhhhhh", "bold")->appendText("asdasd")->endl();
-    //     $text->appendEntity("hhhhhhhhh", "bold")->appendText($feedback->complaint)->endl();
+    //     $text->appendEntity("test", "bold")->appendText(312)->endl();
+    //     $text->appendEntity("test", "bold")->appendText(123)->endl();
+    //     $text->appendEntity("test", "bold")->appendText(123)->endl();
+    //     $text->appendEntity("test", "bold")->appendText($feedback->complaint)->endl();
     //     $text->endl();
 
     //     $ch = curl_init(BOT_URL."deleteMessage");
@@ -172,7 +172,7 @@ class FeedbackController extends Controller
 
     //     $request = [
     //         "chat_id" => TG_USER_CHANNEL,
-    //         "message_id" => 68,
+    //         "message_id" => 70,
     //         // "audio" => "https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3",
     //         // "caption" => $text->text,
     //         // "caption_entities" => $text->entities,
