@@ -24,7 +24,6 @@
                       <th style="width: 2%">#</th>
                       <th>{{__('Operator')}}</th>
                       <th>{{__('Complaint')}}</th>
-                      <th>{{__('Advice')}}</th>
                       <th>{{__('Date')}}</th>
                     </tr>
                   </thead>
@@ -34,7 +33,6 @@
                       <td>{{$data->id}}</td>
                       <td>{{$data->call->operator->name}}</td>
                       <td>{{$data->complaint}}</td>
-                      <td>{{$data->advice}}</td>
                       <td>{{$data->created_at}}</td>
                     </tr>
                     @endforeach
