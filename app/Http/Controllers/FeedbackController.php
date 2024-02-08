@@ -61,8 +61,9 @@ class FeedbackController extends Controller
                 $infoCall = Call::find($request->call_id);
                 $operator = Operator::find($infoCall->operator_id);
 
+                $call_audio_url = $this->getUrl($infoCall->uuid);
+    
                 $text = new Text();
-	
                 $text->appendEntity("Operator: ", "bold")->appendText("#n_".$operator->phone." ".$operator->name)->endl();
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
@@ -77,7 +78,7 @@ class FeedbackController extends Controller
 
                 $request = [
                     "chat_id" => TG_USER_CHANNEL,
-                    "audio" => $infoCall->pbx_audio_url,
+                    "audio" => $call_audio_url,
                     "caption" => $text->text,
                     "caption_entities" => $text->entities,
                 ];
@@ -153,8 +154,58 @@ class FeedbackController extends Controller
         return view('admin.feedback', compact('allFeedback'));
     }
 
+    public function getUrl($uuid){
+        $postData = array(
+            'auth_key' => "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM"
+        );
+
+        $ch = curl_init("https://api2.onlinepbx.ru/pbx12127.onpbx.ru/auth.json");
+        curl_setopt_array($ch, array(
+            CURLOPT_POST => TRUE,
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+            CURLOPT_POSTFIELDS => json_encode($postData)
+        ));
+
+        $response = curl_exec($ch);
+        $response = json_decode($response);
+        if ($response->status == 1) {
+            $postData = array(
+                'uuid' => $uuid,
+                'download' => 1
+            );
+
+            $key = $response->data->key;
+            $key_id = $response->data->key_id;
+
+            $ch = curl_init("https://api2.onlinepbx.ru/pbx12127.onpbx.ru/mongo_history/search.json");
+            curl_setopt_array($ch, array(
+                CURLOPT_POST => TRUE,
+                CURLOPT_RETURNTRANSFER => TRUE,
+                CURLOPT_HTTPHEADER => array(
+                    'Content-Type: application/json',
+                    "x-pbx-authentication: $key_id:$key"
+                ),
+                CURLOPT_POSTFIELDS => json_encode($postData)
+            ));
+
+            $response = curl_exec($ch);
+            $response = json_decode($response);
+            if ($response->status == 1) {
+                return $response->data;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
     // public function bot()
     // {
+    //     // dd($this->getUrl("26a3f98b-5d2f-408d-bdc1-e57d1728bb23"));
     //     $feedback = Feedback::find(54);
     //     $text = new Text();
 	
@@ -172,7 +223,7 @@ class FeedbackController extends Controller
 
     //     $request = [
     //         "chat_id" => TG_USER_CHANNEL,
-    //         "message_id" => 70,
+    //         "message_id" => 100,
     //         // "audio" => "https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3",
     //         // "caption" => $text->text,
     //         // "caption_entities" => $text->entities,
