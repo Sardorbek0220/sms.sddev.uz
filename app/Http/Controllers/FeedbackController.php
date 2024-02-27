@@ -51,7 +51,6 @@ class FeedbackController extends Controller
             $feedback = Feedback::create([
                 'call_id' => $request->call_id,
                 'complaint' => '',
-                'advice' => '',
                 'solved' => $request->solved,
             ]);
 

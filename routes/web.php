@@ -5,6 +5,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\AmocrmController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\OperatorController;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
+    Route::get('report', [ReportController::class, 'index'])->name('admin.report');
     // Route::get('test', [AmocrmController::class, 'test']);
     // Route::get('bot', [FeedbackController::class, 'bot']);
 });

@@ -17,7 +17,6 @@ class CreateFeedbackTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('call_id');
             $table->longText('complaint');
-            $table->longText('advice');
             $table->boolean('solved');
             $table->timestamps();
         });

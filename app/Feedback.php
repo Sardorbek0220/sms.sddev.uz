@@ -10,7 +10,6 @@ class Feedback extends Model
         'id',
         'call_id',
         'complaint',
-        'advice',
         'solved',
         'created_at',
         'updated_at'
