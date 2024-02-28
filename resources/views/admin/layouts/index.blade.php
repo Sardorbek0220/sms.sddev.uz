@@ -33,6 +33,11 @@
   <link rel="stylesheet" href="{{ asset('assets/dist/css/adminlte.min.css')}}">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <style>
+    #example2_info{
+      display: none;
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -111,10 +116,18 @@
       "stateSave": true,
       "paging": true,
       "responsive": true, 
-      "lengthChange": false, 
       "autoWidth": false,
+      "lengthChange": false, 
       "buttons": ["excel", "pdf", "print", "colvis"]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    $("#example2").DataTable({
+      "scrollX": true,
+      "stateSave": true,
+      "paging": false,
+      "lengthChange": false, 
+      "autoWidth": true,
+      "buttons": ["excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
   });
 </script>
 </body>

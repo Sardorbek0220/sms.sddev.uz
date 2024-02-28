@@ -25,6 +25,8 @@ class ReportController extends Controller
             $to_date = $request->to_date;
         } 
 
+        // ----- first report -----
+
         $reports = DB::table('feedback')
             ->leftJoin('calls', 'feedback.call_id', '=', 'calls.id')
             ->leftJoin('operators', 'calls.operator_id', '=', 'operators.id')
@@ -66,8 +68,27 @@ class ReportController extends Controller
             'total' => 100 . " %",
             'name' => ''
         ];
+
+        // ----- second report -----
+
+        $reports_by_date = DB::table('feedback')
+            ->select(
+                DB::raw('SUM(CASE WHEN solved = 0 THEN 1 ELSE 0 END) AS mark0'),
+                DB::raw('SUM(CASE WHEN solved = 1 THEN 1 ELSE 0 END) AS mark1'),
+                DB::raw('SUM(CASE WHEN solved = 2 THEN 1 ELSE 0 END) AS mark2'),
+                DB::raw('SUM(CASE WHEN solved = 3 THEN 1 ELSE 0 END) AS mark3'),
+                DB::raw('DATE(created_at) day'),
+            )
+            ->whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])
+            ->groupBy('day')
+            ->get();  
+
+        $footReportsByDate = [];
+        foreach ($reports_by_date as $report) {
+            $footReportsByDate[] = (object) ['total' => ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3)];
+        }
                
-        return view('admin.report.index', compact('reports', 'footReports', 'from_date', 'to_date'));
+        return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'from_date', 'to_date'));
     }
 
 }
