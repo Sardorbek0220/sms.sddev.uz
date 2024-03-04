@@ -92,7 +92,7 @@ class ReportController extends Controller
             'day' => 'Total'
         ];
         foreach ($reports_by_date as $report) {
-            $report->day = substr($report->day, 5);
+            $report->day = date("Y/m/d", strtotime($report->day));
             $footReportsByDate[] = (object) ['total' => ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3)];
             $Total['total'] += ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3);
             $Total['mark0'] += $report->mark0;
