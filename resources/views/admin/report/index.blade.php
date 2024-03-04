@@ -38,6 +38,7 @@
                     <th>mark 2 <br> (Жавоб кутяпман)</th>
                     <th>mark 3 <br> (Жавоб олдим)</th>
                     <th>Total</th>
+                    <th>(%)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -49,6 +50,7 @@
                     <td>{{$data->mark2}}</td>
                     <td>{{$data->mark3}}</td>
                     <td>{{$data->total}}</td>
+                    <td>{{$data->percent}}</td>
                   </tr>
                 @endforeach
                 </tbody>
@@ -61,6 +63,7 @@
                     <th>{{$data->mark2}}</th>
                     <th>{{$data->mark3}}</th>
                     <th>{{$data->total}}</th>
+                    <td></td>
                   </tr>
                   @endforeach
                 </tfoot>

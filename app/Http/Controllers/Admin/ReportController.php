@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Operator;
-use App\User;
-use App\Feedback;
 use Illuminate\Support\Facades\DB;
+use DateTime;
 
 class ReportController extends Controller
 {
@@ -56,15 +54,16 @@ class ReportController extends Controller
             $total['mark3'] += $report->mark3;
             $report->total = $report->mark0 + $report->mark1 + $report->mark2 + $report->mark3;
             $total['total'] += $report->total;
+            $report->percent = $report->total == 0 ? 0 : number_format(($report->mark3/$report->total)*100, 1) . " %";
         }
 
         $footReports[] = (object) $total;
         $footReports[] = (object) 
         [
-            'mark0' => $total['total'] == 0 ? 0 : number_format(($total['mark0']/$total['total'])*100, 2) . " %",
-            'mark1' => $total['total'] == 0 ? 0 : number_format(($total['mark1']/$total['total'])*100, 2) . " %",
-            'mark2' => $total['total'] == 0 ? 0 : number_format(($total['mark2']/$total['total'])*100, 2) . " %",
-            'mark3' => $total['total'] == 0 ? 0 : number_format(($total['mark3']/$total['total'])*100, 2) . " %",
+            'mark0' => $total['total'] == 0 ? 0 : number_format(($total['mark0']/$total['total'])*100, 1) . " %",
+            'mark1' => $total['total'] == 0 ? 0 : number_format(($total['mark1']/$total['total'])*100, 1) . " %",
+            'mark2' => $total['total'] == 0 ? 0 : number_format(($total['mark2']/$total['total'])*100, 1) . " %",
+            'mark3' => $total['total'] == 0 ? 0 : number_format(($total['mark3']/$total['total'])*100, 1) . " %",
             'total' => 100 . " %",
             'name' => ''
         ];
@@ -84,11 +83,38 @@ class ReportController extends Controller
             ->get();  
 
         $footReportsByDate = [];
+        $Total = [
+            'mark0' => 0,
+            'mark1' => 0,
+            'mark2' => 0,
+            'mark3' => 0,
+            'total' => 0,
+            'day' => 'Total'
+        ];
         foreach ($reports_by_date as $report) {
+            $report->day = substr($report->day, 5);
             $footReportsByDate[] = (object) ['total' => ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3)];
+            $Total['total'] += ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3);
+            $Total['mark0'] += $report->mark0;
+            $Total['mark1'] += $report->mark1;
+            $Total['mark2'] += $report->mark2;
+            $Total['mark3'] += $report->mark3;
         }
-               
-        return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'from_date', 'to_date'));
+
+        $reports_by_date[] = (object) $Total;
+        $footReportsByDate[] = (object) ['total' => $Total['total']];
+
+        $reports_by_date[] = (object) [
+            'mark0' => $Total['total'] == 0 ? 0 : number_format(($Total['mark0']/$Total['total'])*100, 1) . " %",
+            'mark1' => $Total['total'] == 0 ? 0 : number_format(($Total['mark1']/$Total['total'])*100, 1) . " %",
+            'mark2' => $Total['total'] == 0 ? 0 : number_format(($Total['mark2']/$Total['total'])*100, 1) . " %",
+            'mark3' => $Total['total'] == 0 ? 0 : number_format(($Total['mark3']/$Total['total'])*100, 1) . " %",
+            'total' => "100 %",
+            'day' => '(%)'
+        ];
+        $footReportsByDate[] = (object) ['total' => '100 %'];
+        
+        return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'Total', 'from_date', 'to_date'));
     }
 
 }

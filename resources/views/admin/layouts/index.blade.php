@@ -118,7 +118,36 @@
       "responsive": true, 
       "autoWidth": false,
       "lengthChange": false, 
-      "buttons": ["excel", "pdf", "print", "colvis"]
+      "buttons": [
+        { extend: 'excel', footer: true, customize: (xlsx, config, dataTable) => {
+          let sheet = xlsx.xl.worksheets['sheet1.xml'];
+          let footerIndex = $('sheetData row', sheet).length;
+          let $footerRows = $('tr', dataTable.footer());
+
+          if ($footerRows.length > 1) {
+            for (let i = 1; i < $footerRows.length; i++) {
+              let $footerRow = $footerRows[i];
+              let $footerRowCols = $('th', $footerRow);
+
+              footerIndex++;
+              $('sheetData', sheet).append(`
+                <row r="${footerIndex}">
+                  ${$footerRowCols.map((index, el) => `
+                    <c t="inlineStr" r="${String.fromCharCode(65 + index)}${footerIndex}" s="2">
+                      <is>
+                        <t xml:space="preserve">${$(el).text()}</t>
+                      </is>
+                    </c>
+                  `).get().join('')}
+                </row>
+              `);
+            }
+          }
+        }},
+        { extend: 'pdf', footer: true },
+        { extend: 'print', footer: true },
+        { extend: 'colvis' }
+      ]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
     $("#example2").DataTable({
       "scrollX": true,
