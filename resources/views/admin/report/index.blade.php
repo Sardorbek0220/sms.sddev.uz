@@ -105,12 +105,20 @@
                     <td>{{ $data->mark3 }}</td>
                     @endforeach
                   </tr>
-                  <tr>
-                    <th>Total</th>
-                    @foreach($footReportsByDate as $data)
-                    <th>{{ $data->total }}</th>
-                    @endforeach
-                  </tr>
+                  <tfoot>
+                    <tr>
+                      <th>Total</th>
+                      @foreach($footReportsByDate as $data)
+                      <th>{{ $data->total }}</th>
+                      @endforeach
+                    </tr>
+                    <tr>
+                      <th></th>
+                      @foreach($footReportsByPercent as $data)
+                      <th>{{ $data->percent }}</th>
+                      @endforeach
+                    </tr>
+                  </tfoot>
                 </tbody>
               </table>
             </div>

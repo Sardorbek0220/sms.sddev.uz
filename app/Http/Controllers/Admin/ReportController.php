@@ -82,6 +82,7 @@ class ReportController extends Controller
             ->get();  
 
         $footReportsByDate = [];
+        $footReportsByPercent = [];
         $Total = [
             'mark0' => 0,
             'mark1' => 0,
@@ -91,17 +92,20 @@ class ReportController extends Controller
             'day' => 'Total'
         ];
         foreach ($reports_by_date as $report) {
+            $all_marks = ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3);
             $report->day = date("Y/m/d", strtotime($report->day));
-            $footReportsByDate[] = (object) ['total' => ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3)];
-            $Total['total'] += ($report->mark0 + $report->mark1 + $report->mark2 + $report->mark3);
+            $footReportsByDate[] = (object) ['total' => $all_marks];
+            $Total['total'] += $all_marks;
             $Total['mark0'] += $report->mark0;
             $Total['mark1'] += $report->mark1;
             $Total['mark2'] += $report->mark2;
             $Total['mark3'] += $report->mark3;
+            $footReportsByPercent[] = (object) ['percent' => $all_marks == 0 ? 0 : number_format(($report->mark3/$all_marks)*100, 1) . " %"];
         }
 
         $reports_by_date[] = (object) $Total;
         $footReportsByDate[] = (object) ['total' => $Total['total']];
+        $footReportsByPercent[] = (object) ['percent' => $Total['total'] == 0 ? 0 : number_format(($Total['mark3']/$Total['total'])*100, 1) . " %"];
 
         $reports_by_date[] = (object) [
             'mark0' => $Total['total'] == 0 ? 0 : number_format(($Total['mark0']/$Total['total'])*100, 1) . " %",
@@ -112,8 +116,9 @@ class ReportController extends Controller
             'day' => '(%)'
         ];
         $footReportsByDate[] = (object) ['total' => '100 %'];
+        $footReportsByPercent[] = (object) ['percent' => ''];
         
-        return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'Total', 'from_date', 'to_date'));
+        return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'footReportsByPercent', 'Total', 'from_date', 'to_date'));
     }
 
 }

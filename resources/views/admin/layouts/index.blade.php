@@ -155,7 +155,48 @@
       "paging": false,
       "lengthChange": false, 
       "autoWidth": true,
-      "buttons": ["excel", "pdf", "print", "colvis"]
+      "buttons": [
+        { extend: 'excel', footer: true, customize: (xlsx, config, dataTable) => {
+          let sheet = xlsx.xl.worksheets['sheet1.xml'];
+          let footerIndex = $('sheetData row', sheet).length;
+          let $footerRows = $('tr', dataTable.footer());
+
+          if ($footerRows.length > 1) {
+            for (let i = 1; i < $footerRows.length; i++) {
+              let $footerRow = $footerRows[i];
+              let $footerRowCols = $('th', $footerRow);
+
+              footerIndex++;
+              $('sheetData', sheet).append(`
+                <row r="${footerIndex}">
+                  ${$footerRowCols.map((index, el) => `
+                    <c t="inlineStr" r="${String.fromCharCode(65 + index)}${footerIndex}" s="2">
+                      <is>
+                        <t xml:space="preserve">${$(el).text()}</t>
+                      </is>
+                    </c>
+                  `).get().join('')}
+                </row>
+              `);
+            }
+          }
+        }},
+        { extend: 'pdf', footer: true },
+        { extend: 'print', footer: true },
+        { extend: 'colvis' }
+      ],
+      "fnInitComplete": function(){
+        $('.dataTables_scrollBody').css({
+          'overflow': 'hidden',
+          'border': '0'
+        });
+
+        $('.dataTables_scrollFoot').css('overflow', 'auto');
+
+        $('.dataTables_scrollFoot').on('scroll', function () {
+          $('.dataTables_scrollBody').scrollLeft($(this).scrollLeft());
+        });                    
+      },
     }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
   });
 </script>
