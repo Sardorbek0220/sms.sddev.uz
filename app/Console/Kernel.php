@@ -30,8 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             // $date1 = date("Y-m-d h:i:s", (time() - 60 * 5));
             // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
-            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 21)).gettimeofday()["dsttime"], 0, -1);
-		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 20)).gettimeofday()["dsttime"], 0, -1);
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 13)).gettimeofday()["dsttime"], 0, -1);
+		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 12)).gettimeofday()["dsttime"], 0, -1);
 
             $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
             $date4 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
