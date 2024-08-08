@@ -19,7 +19,7 @@ class OperatorMiddleware
     {
         if (Auth::check() && Auth::user()->email=='operator@gmail.com') {
             return $next($request);
-          }
-          abort(404);
+        }
+        return redirect()->route('logout');
     }
 }
