@@ -201,38 +201,4 @@ class FeedbackController extends Controller
             return false;
         }
     }
-
-    // public function bot()
-    // {
-    //     // dd($this->getUrl("26a3f98b-5d2f-408d-bdc1-e57d1728bb23"));
-    //     $feedback = Feedback::find(54);
-    //     $text = new Text();
-	
-    //     $text->appendEntity("test", "bold")->appendText(312)->endl();
-    //     $text->appendEntity("test", "bold")->appendText(123)->endl();
-    //     $text->appendEntity("test", "bold")->appendText(123)->endl();
-    //     $text->appendEntity("test", "bold")->appendText($feedback->complaint)->endl();
-    //     $text->endl();
-
-    //     $ch = curl_init(BOT_URL."deleteMessage");
-    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    //         "Content-Type: application/json"
-    //     ]);
-
-    //     $request = [
-    //         "chat_id" => TG_USER_CHANNEL,
-    //         "message_id" => 100,
-    //         // "audio" => "https://pbx12127.onpbx.ru/download_amocrm/eyJ1IjoiYWQwZmMyYTUtN2U4Yy00N2UxLWI5N2EtNGIzYWE3MDdmOTZmIiwiZCI6OTAsInNzIjoxNzA1MDU1ODEwLCJmIjoiOTA1NDQwNzAxIiwidCI6IjExMCIsImlkIjoieFVhS2dJTndHeGJvTEVRRCJ9_pVf2cvQQJ6IJJfVC+X9qjYMhq5542n48y6Py1ViyN4M=/rec.mp3",
-    //         // "caption" => $text->text,
-    //         // "caption_entities" => $text->entities,
-    //     ];
-
-    //     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-    //     $response = curl_exec($ch);
-    //     info($response);
-    //     curl_close($ch);
-
-    //     dd(json_decode($response));
-    // }
 }

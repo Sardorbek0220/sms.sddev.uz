@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Response;
+use App\All_call;
+use App\Operators;
 
 class ReportController extends Controller
 {
@@ -119,6 +122,28 @@ class ReportController extends Controller
         $footReportsByPercent[] = (object) ['percent' => ''];
         
         return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'footReportsByPercent', 'Total', 'from_date', 'to_date'));
+    }
+
+    public function monitoring()
+    {
+        $auth = json_decode(file_get_contents("configs/auth.txt"));
+        $key_and_id = $auth->key_id.":".$auth->key;
+
+        return view('admin.monitoring', compact('key_and_id'));
+    }
+
+    public function monitoringData(Request $request)
+    {
+        $calls = All_call::where('start_stamp', '>', $request['from'])->where('start_stamp', '<', $request['to'])->get();
+
+        return Response::json($calls);
+    }
+
+    public function monitoringUsers(Request $request)
+    {
+        $users = DB::table('operators')->select('name', 'phone as num')->get();
+
+        return Response::json($users);
     }
 
 }

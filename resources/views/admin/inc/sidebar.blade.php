@@ -38,6 +38,14 @@
           </a>
         </li>
         <li class="nav-item">
+          <a href="{{ route('monitoring') }}" class="nav-link">
+            <i class="nav-icon fas fa-file"></i>
+            <p>
+              {{__('Monitoring')}}
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="{{ route('logout') }}" class="nav-link">
             <i class="nav-icon fas fa-window-close"></i>
             <p>{{__('Log out')}}</p>

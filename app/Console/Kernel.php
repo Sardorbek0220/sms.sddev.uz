@@ -6,10 +6,12 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Hash;
 use App\Call;
+use App\All_call;
 use AshAllenDesign\ShortURL\Classes\Builder;
 
 class Kernel extends ConsoleKernel
 {
+    private $authKeyForAuth = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
     /**
      * The Artisan commands provided by your application.
      *
@@ -28,8 +30,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            // $date1 = date("Y-m-d h:i:s", (time() - 60 * 5));
-            // $date2 = date("Y-m-d h:i:s", (time() - 60 * 0));
+            
             $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 13)).gettimeofday()["dsttime"], 0, -1);
 		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 12)).gettimeofday()["dsttime"], 0, -1);
 
@@ -93,16 +94,114 @@ class Kernel extends ConsoleKernel
         
                 if (isset($error_msg)) {
                     info($error_msg);
-                    // dd($error_msg);
                 }
-                // dd($res);
             }
         })->everyMinute();
 
-        // $schedule->call(function () {
-        //     info('5');
-        // })->everyFiveMinutes();
+        $schedule->call(function () {
+            self::getMonitoringCalls();
+        })->everyMinute();
     }
+
+	public function getMonitoringCalls(): void
+	{
+		$auth = json_decode(file_get_contents("/var/www/sms.sddev.uz/public/configs/auth.txt"));
+		if (empty($auth->key) || empty($auth->key_id)) {
+			$this->auth();
+			$this->getMonitoringCalls();
+		}
+
+		$timeStamp = strtotime(date('Y-m-d H:i:s'));
+
+		$data = [
+			'start_stamp_from' => $timeStamp,
+			'start_stamp_to' => $timeStamp
+		];
+		$url = 'https://api2.onlinepbx.ru/pbx12127.onpbx.ru/mongo_history/search.json';
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ["x-pbx-authentication: ".$auth->key_id.":".$auth->key]);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		$res = json_decode(curl_exec($ch));
+
+		if (curl_errno($ch)) {
+			curl_close($ch);
+			info(curl_error($ch));
+			exit;
+		}
+		curl_close($ch);
+
+		if ($res->status == '0') {
+			$this->auth();
+			$this->getMonitoringCalls();
+		}
+
+		if ($res->status == '1') {
+			$insert_rows = [];
+			$uuids = [];
+			foreach ($res->data as $datum) {
+				$uuids[] = $datum->uuid;
+			}
+			
+			$existCalls = All_call::whereIn("uuid", $uuids)->cursor();
+			
+			$existUuids = [];
+			foreach ($existCalls as $call) {
+				$existUuids[] = $call->uuid;
+			}
+
+			foreach ($res->data as $call) {
+				if (!in_array($call->uuid, $existUuids)) {
+					$insert_rows[] = [
+						'uuid' => $call->uuid,
+						'caller_id_name' => $call->caller_id_name,
+						'caller_id_number' => $call->caller_id_number,
+						'destination_number' => $call->destination_number,
+						'start_stamp' => $call->start_stamp,
+						'end_stamp' => $call->end_stamp,
+						'duration' => $call->duration,
+						'user_talk_time' => $call->user_talk_time,
+						'accountcode' => $call->accountcode,
+						'gateway' => $call->gateway,
+					];
+				}
+			}
+
+			All_call::insert($insert_rows);
+		}
+	}
+
+    private function auth(): void
+	{
+		$data = [
+			'auth_key' => $this->authKeyForAuth
+		];
+		$url = 'https://api2.onlinepbx.ru/pbx12127.onpbx.ru/auth.json';
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		$res = json_decode(curl_exec($ch));
+
+		if (curl_errno($ch)) {
+			curl_close($ch);
+			info(curl_error($ch));
+			exit;
+		}
+		curl_close($ch);
+
+		if ($res->status == '1') {
+			file_put_contents("/var/www/sms.sddev.uz/public/configs/auth.txt", json_encode($res->data));
+		}
+	}
 
     /**
      * Register the commands for the application.
