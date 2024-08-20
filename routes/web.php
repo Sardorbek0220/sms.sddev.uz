@@ -44,7 +44,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
     Route::get('report', [ReportController::class, 'index'])->name('admin.report');
 
-    Route::get('monitoring', [ReportController::class, 'monitoring'])->name('monitoring');
+    Route::get('monitoring', [ReportController::class, 'monitoring'])->name('admin.monitoring');
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
 });

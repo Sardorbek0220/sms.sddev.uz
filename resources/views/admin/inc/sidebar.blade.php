@@ -38,7 +38,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('monitoring') }}" class="nav-link">
+          <a href="{{ route('admin.monitoring') }}" class="nav-link">
             <i class="nav-icon fas fa-file"></i>
             <p>
               {{__('Monitoring')}}
