@@ -156,6 +156,9 @@ class Kernel extends ConsoleKernel
 
 			foreach ($res->data as $call) {
 				if (!in_array($call->uuid, $existUuids)) {
+					if ($call->accountcode == 'inbound' && $call->duration <= 5) {
+						continue;
+					}
 					$insert_rows[] = [
 						'uuid' => $call->uuid,
 						'caller_id_name' => $call->caller_id_name,

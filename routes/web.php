@@ -46,12 +46,16 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     Route::get('monitoring', [ReportController::class, 'monitoring'])->name('admin.monitoring');
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
+    Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
+    Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
 });
 
 Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
     Route::get('monitoring', [ReportController::class, 'monitoring'])->name('monitoring');
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
+    Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
+    Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
 });
 

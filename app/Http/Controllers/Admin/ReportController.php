@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Response;
 use App\All_call;
 use App\Operators;
+use App\Feedback;
 
 class ReportController extends Controller
 {
@@ -129,7 +130,9 @@ class ReportController extends Controller
         $auth = json_decode(file_get_contents("configs/auth.txt"));
         $key_and_id = $auth->key_id.":".$auth->key;
 
-        return view('admin.monitoring', compact('key_and_id'));
+        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
+
+        return view('admin.monitoring', compact('key_and_id', 'auth_key'));
     }
 
     public function monitoringData(Request $request)
@@ -144,6 +147,34 @@ class ReportController extends Controller
         $users = DB::table('operators')->select('name', 'phone as num')->get();
 
         return Response::json($users);
+    }
+
+    public function monitoringUsersFeedbacks(Request $request)
+    {
+        $reports = DB::table('feedback')
+            ->leftJoin('calls', 'feedback.call_id', '=', 'calls.id')
+            ->leftJoin('operators', 'calls.operator_id', '=', 'operators.id')
+            ->select(
+                DB::raw('SUM(CASE WHEN feedback.solved != 3 THEN 1 ELSE 0 END) AS mark0'),
+                DB::raw('SUM(CASE WHEN feedback.solved = 3 THEN 1 ELSE 0 END) AS mark3'),
+                'operators.name',
+                'operators.phone'
+            )
+            ->whereBetween('feedback.created_at', [$request->from." 00:00:00", $request->to." 23:59:59"])
+            ->groupBy('calls.operator_id')
+            ->get();  
+
+        return Response::json($reports);
+    }
+
+    public function monitoringBigData(Request $request)
+    {
+        $from = strtotime(substr($request['date'], 0, -2) . "01 00:00:00");
+        $to = strtotime($request['date'] . " 23:59:59");
+        
+        $calls = All_call::whereBetween('start_stamp', [$from, $to])->cursor();
+
+        return Response::json($calls);
     }
 
 }
