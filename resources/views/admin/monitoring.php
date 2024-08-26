@@ -162,15 +162,15 @@
 									</tr>
 									<tr>
 										<td>Пропущенные:</td>
-										<td>{{todayData.missed}} ({{((todayData.missed/(todayData.answered + todayData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{weekData.missed}} ({{((weekData.missed/(weekData.answered + weekData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{monthData.missed}} ({{((monthData.missed/(monthData.answered + monthData.missed))*100).toFixed(0)}} %)</td>
+										<td>{{todayData.missed}} ({{((todayData.missed/(todayData.answered + todayData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{weekData.missed}} ({{((weekData.missed/(weekData.answered + weekData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{monthData.missed}} ({{((monthData.missed/(monthData.answered + monthData.missed))*100).toFixed(1)}} %)</td>
 									</tr>
 									<tr>
 										<td>Пропущенний в раб. время:</td>
-										<td>{{todayData.missed_in}} ({{((todayData.missed_in/(todayData.answered + todayData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{weekData.missed_in}} ({{((weekData.missed_in/(weekData.answered + weekData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{monthData.missed_in}} ({{((monthData.missed_in/(monthData.answered + monthData.missed))*100).toFixed(0)}} %)</td>
+										<td>{{todayData.missed_in}} ({{((todayData.missed_in/(todayData.answered + todayData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{weekData.missed_in}} ({{((weekData.missed_in/(weekData.answered + weekData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{monthData.missed_in}} ({{((monthData.missed_in/(monthData.answered + monthData.missed))*100).toFixed(1)}} %)</td>
 									</tr>
 									<tr>
 										<td>Среднее время разговора:</td>
@@ -243,9 +243,9 @@
 									</tr>
 									<tr>
 										<td>Не дозвонились:</td>
-										<td>{{out_todayData.missed}} ({{((out_todayData.missed/(out_todayData.answered + out_todayData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{out_weekData.missed}} ({{((out_weekData.missed/(out_weekData.answered + out_weekData.missed))*100).toFixed(0)}} %)</td>
-										<td>{{out_monthData.missed}} ({{((out_monthData.missed/(out_monthData.answered + out_monthData.missed))*100).toFixed(0)}} %)</td>
+										<td>{{out_todayData.missed}} ({{((out_todayData.missed/(out_todayData.answered + out_todayData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{out_weekData.missed}} ({{((out_weekData.missed/(out_weekData.answered + out_weekData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{out_monthData.missed}} ({{((out_monthData.missed/(out_monthData.answered + out_monthData.missed))*100).toFixed(1)}} %)</td>
 									</tr>
 									<tr>
 										<td>Среднее время разговора:</td>
@@ -415,9 +415,9 @@
 		    </template>
 		</v-simple-table>
 		<div class="ml-2">
-			<span class="dot mt-2" style="background: blue"></span> - ringing, &nbsp
-			<span class="dot mt-4" style="background: yellow"></span> - hangup, &nbsp
-			<span class="dot mt-4" style="background: green"></span> - answering, &nbsp
+			<span class="dot mt-2" style="background: blue"></span> - qo'ng'iroq qilinyapti, &nbsp
+			<span class="dot mt-4" style="background: yellow"></span> - qo'ng'iroq tugatildi, &nbsp
+			<span class="dot mt-4" style="background: green"></span> - javob berilyapti, &nbsp
 			<span class="dot mt-2" style="background: red"></span> - offline, &nbsp
 			<span class="dot mt-4" style="background: #bbb"></span> - online
 		</div>
