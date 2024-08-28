@@ -9,6 +9,7 @@ use Response;
 use App\All_call;
 use App\Operators;
 use App\Feedback;
+use App\Operator_time;
 
 class ReportController extends Controller
 {
@@ -25,6 +26,13 @@ class ReportController extends Controller
         }else{
             $to_date = $request->to_date;
         } 
+
+        // $times = Operator_time::where('uid', '=', '118')->where('ip', '!=', '185.209.112.43')->whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])->orderBy('timestamp', 'asc')->cursor();
+        // $oper_times = [];
+        // foreach ($times as $time) {
+        //     $oper_times[$time['uid']][$time['status']][] = $time['timestamp'];
+        // }
+        // dd($oper_times);
 
         // ----- first report -----
 
