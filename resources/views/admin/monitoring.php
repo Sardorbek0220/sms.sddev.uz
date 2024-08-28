@@ -17,7 +17,7 @@
 		.dot {
 			height: 15px;
 			width: 15px;
-			background-color: #bbb;
+			background-color: red;
 			border-radius: 50%;
 			display: inline-block;
 		}
@@ -267,12 +267,13 @@
 				</v-list-item>
 			</v-card>
 			<v-checkbox
-				style="margin-top: 2%; margin-left: 1%; width: 10%"
+				style="margin-top: 2%; margin-left: 1%; width: 10%; display:inline-block"
 				v-model="filters"
 				label="Фильтры"
 				@change="!filters"
 				class="filtersCheckbox"
 			></v-checkbox>
+			<span style="display:inline-block;margin-left:60%;background:gainsboro;padding:1%;">Посл. обновление: {{today.toLocaleTimeString()}}</span>
       	</v-col>
     </v-row>
     <v-row v-show="filters">
@@ -619,9 +620,10 @@
 			$('#get_date').val(today);
 			$('#start_date').val(today);
 
-			this.loading = true;
-
 			await this.get_date();
+
+			this.loading = true; 
+
 		    await this.getUsers();
 			await this.get_users_feedbacks();
 		    this.getInfos_5995();
@@ -631,7 +633,9 @@
 			this.set_data_from_date();
 
 			await this.getBigData();
-			this.setTable()
+			this.setTable();
+
+			await this.getOperatorCondition();
 
 			this.loading = false;
 	  	},
@@ -664,6 +668,17 @@
 		    clearInterval(this.interval)
 		},
 	  	methods: {
+			async getOperatorCondition(){
+				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
+					if (response.status == 200) {
+						for (const id in response.data) {
+							let data = response.data[id]							
+							let uid = "num_"+data.uid;
+							document.getElementById(uid).style.background=statusColors[data.status];
+						}
+					}
+				});	
+			}, 
 			async filter(){
 				await this.get_date();
 				await this.get_users_feedbacks();
@@ -1077,9 +1092,12 @@
 				let fromDate = Math.floor(new Date(startDate).getTime() / 1000);
 				let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
+				this.loading = true;
 				await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
 					if (response.status == 200) {
 						this.calls = response.data
+						this.today = new Date()
+						this.loading = false
 					}
 				});		
 			},

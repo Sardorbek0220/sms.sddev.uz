@@ -185,4 +185,14 @@ class ReportController extends Controller
         return Response::json($calls);
     }
 
+    public function monitoringOperatorCondition(Request $request)
+    {
+        $from = strtotime($request['date'] . " 00:00:00");
+        $to = strtotime($request['date'] . " 23:59:59");
+        
+        $calls = Operator_time::select('uid', 'status')->whereBetween('timestamp', [$from, $to])->orderBy('timestamp', 'desc')->get()->unique('uid');
+
+        return Response::json($calls);
+    }
+
 }
