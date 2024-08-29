@@ -14,6 +14,12 @@
 	<link rel="icon" href="../assets/logo.png">
 	<title>Monitoring | Sales Doctor</title>
 	<style scoped>
+		.online_text {
+			background: seagreen;
+			padding: 5px;
+			border-radius: 10px;
+			color: white;
+		}
 		.dot {
 			height: 15px;
 			width: 15px;
@@ -335,7 +341,7 @@
 	  </div>
 	</template>
     <v-row class="mb-6 mt-4" no-gutters>
-      <v-col cols="6">
+      <v-col cols="5">
         <v-simple-table>
 		    <template v-slot:default>
 		      <thead style="border: solid 1px grey;">
@@ -384,28 +390,30 @@
 		    </template>
 		</v-simple-table>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="7">
         <v-simple-table>
 		    <template v-slot:default>
 		      <thead style="border: solid 1px grey;">
 		        <tr>
-		          	<th class="text-left" width="150px">имя</th>
-		          	<th class="text-left" width="15px">вход. звон</th>
-		          	<th class="text-left">время</th>
-		          	<th class="text-left" width="15px">исход. звон</th>
-		          	<th class="text-left">время</th>
-		          	<th class="text-left">общ. вре.</th>
-					<th class="text-left">%</th>
-					<th class="text-left">👍</th>
-					<th class="text-left">☹️</th>
+		          	<th class="text-center" width="220px">Имя</th>
+					<th class="text-center" width="160px"><span class="online_text">онлайн-время</span></th>
+		          	<th class="text-center" width="15px">Вход. звон</th>
+		          	<th class="text-center">Время</th>
+		          	<th class="text-center" width="15px">Исход. звон</th>
+		          	<th class="text-center">Время</th>
+		          	<th class="text-center">Общ. вре.</th>
+					<th class="text-center">%</th>
+					<th class="text-center">👍</th>
+					<th class="text-center">☹️</th>
 		        </tr>
 		      </thead>
 		      <tbody style="border: solid 1px grey;">
 		      	<tr v-for="report in users_5995">
-		          	<td width="230px"><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
-		          	<td width="15px">{{report.vxod_count}}</td>
+		          	<td><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
+					<td><span class="online_text">{{ calcHMS(oper_times[report.num]) }}</span></td>
+		          	<td>{{report.vxod_count}}</td>
 		          	<td>{{report.vxod_time}}</td>
-		          	<td width="15px">{{report.isxod_count}}</td>
+		          	<td>{{report.isxod_count}}</td>
 		          	<td>{{report.isxod_time}}</td>
 		          	<td>{{report.all_time}}</td>
 					<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
@@ -522,12 +530,11 @@
 
 	exampleSocket.onmessage = function (e) {
 		var data = JSON.parse(e.data)
+		var id = "num_"+data.data.uid;
 		if (data.event == 'user_blf') {
-			let id = "num_"+data.data.uid;
 			document.getElementById(id).style.background=statusColors[data.data.status];
 		}
 		if (data.event == 'user_registration') {
-			let id = "num_"+data.data.uid;
 			document.getElementById(id).style.background=statusColors[data.data.state];
 		}
 	}
@@ -611,6 +618,7 @@
 			out_todayData: {},
 			out_weekData: {},
 			out_monthData: {},
+			oper_times: {}
 	  	},
 	  	async mounted () {
 			var day = ("0" + this.today.getDate()).slice(-2);
@@ -626,6 +634,7 @@
 
 		    await this.getUsers();
 			await this.get_users_feedbacks();
+			await this.getOperatorTime();
 		    this.getInfos_5995();
 		    this.getReport_5995();
 		    await this.getFifo();
@@ -646,6 +655,9 @@
 
 			this.interval = setInterval(() =>{
 		      	this.get_users_feedbacks()},600000)
+
+			this.interval = setInterval(() =>{
+		      	this.getOperatorTime()},30000)
 
 		    this.interval = setInterval(() =>{
 		      	this.getInfos_5995()},30000)
@@ -671,11 +683,32 @@
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {
-						for (const id in response.data) {
-							let data = response.data[id]							
+						for (const id in response.data.calls) {
+							let data = response.data.calls[id]							
 							let uid = "num_"+data.uid;
 							document.getElementById(uid).style.background=statusColors[data.status];
 						}
+					}
+				});	
+			}, 
+			async getOperatorTime(){
+				await axios.get('monitoring/operatorTime', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+					if (response.status == 200) {
+						const date = new Date();
+    					const unixTimestamp = Math.floor(date.getTime() / 1000);
+						
+						for (const num in response.data.oper_times) {
+							const oper = response.data.oper_times[num];
+							if(oper.register && oper.unregister){
+								if (oper.register.length == oper.unregister.length) {
+									this.oper_times[num] = oper.online_time
+								}else{
+									this.oper_times[num] = oper.online_time + ( unixTimestamp - oper.register[oper.unregister.length] )
+								}
+							}else if(oper.register){
+								this.oper_times[num] = unixTimestamp - oper.register[0]
+							}
+						}						
 					}
 				});	
 			}, 
@@ -1077,6 +1110,9 @@
 		  		let set_support = [];
 
 		  		for (var a = 0; a < reports_support.length; a++) {
+					if (reports_support[a].num == '120') {
+						continue;
+					}
 		  			for (var b = 0; b < myArray_5995.length; b++) {
 		  				if (reports_support[a].num == myArray_5995[b]) {
 		  					set_support.push(reports_support[a])

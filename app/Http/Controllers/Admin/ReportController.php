@@ -27,22 +27,6 @@ class ReportController extends Controller
             $to_date = $request->to_date;
         } 
 
-        // $times = Operator_time::where('ip', '!=', '185.209.112.43')->whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])->orderBy('timestamp', 'asc')->cursor();
-        // $oper_times = [];
-        // foreach ($times as $time) {
-        //     $oper_times[$time['uid']][$time['status']][] = $time['timestamp'];
-        //     if ($time['status'] == 'unregister') {
-
-        //         if (!array_key_exists('online_time', $oper_times[$time['uid']])) {
-        //             $oper_times[$time['uid']]['online_time'] = 0;
-        //         }
-                
-        //         $index = count($oper_times[$time['uid']]['register'])-1;
-        //         $oper_times[$time['uid']]['online_time'] += ($time['timestamp'] - $oper_times[$time['uid']]['register'][$index]);
-        //     }
-        // }
-        // dd($oper_times);
-
         // ----- first report -----
 
         $reports = DB::table('feedback')
@@ -199,9 +183,32 @@ class ReportController extends Controller
         $from = strtotime($request['date'] . " 00:00:00");
         $to = strtotime($request['date'] . " 23:59:59");
         
-        $calls = Operator_time::select('uid', 'status')->where('ip', '!=', '185.209.112.43')->whereBetween('timestamp', [$from, $to])->orderBy('timestamp', 'desc')->get()->unique('uid');
+        $calls = Operator_time::select('uid', 'status')->where('ip', '=', '178.218.201.191')->whereBetween('timestamp', [$from, $to])->orderBy('timestamp', 'desc')->get()->unique('uid');
 
-        return Response::json($calls);
+        return Response::json(['calls' => $calls]);
+    }
+
+    public function monitoringOperatorTime(Request $request)
+    {
+        $from = $request['from'] . " 00:00:00";
+        $to = $request['to'] . " 23:59:59";
+        
+        $times = Operator_time::where('ip', '=', '178.218.201.191')->whereBetween('created_at', [$from, $to])->orderBy('timestamp', 'asc')->cursor();
+        $oper_times = [];
+        foreach ($times as $time) {
+            $oper_times[$time['uid']][$time['status']][] = $time['timestamp'];
+            if ($time['status'] == 'unregister') {
+
+                if (!array_key_exists('online_time', $oper_times[$time['uid']])) {
+                    $oper_times[$time['uid']]['online_time'] = 0;
+                }
+                
+                $index = count($oper_times[$time['uid']]['register'])-1;
+                $oper_times[$time['uid']]['online_time'] += ($time['timestamp'] - $oper_times[$time['uid']]['register'][$index]);
+            }
+        }
+
+        return Response::json(['oper_times' => $oper_times]);
     }
 
 }
