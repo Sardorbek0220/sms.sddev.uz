@@ -39,12 +39,12 @@ class WebSocketClient
                 $conn->on('message', function ($msg) {
                     $data = json_decode($msg);
                     if ($data->event == 'user_registration') {
-                        echo "Received: {$msg}\n";
                         info("Received: {$msg}\n");
                         $operator_time = Operator_time::create([
                             'uid' => $data->data->uid,
                             'status' => $data->data->state,
                             'ip' => $data->data->ip,
+                            'port' => $data->data->port,
                             'timestamp' => $data->data->date,
                         ]);
                         $operator_time->save();
