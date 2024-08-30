@@ -13,6 +13,7 @@ class Operator_time extends Model
         'status',
         'timestamp',
         'ip',
+        'port',
         'created_at',
         'updated_at'
     ];
