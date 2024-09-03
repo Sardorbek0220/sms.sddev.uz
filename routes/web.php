@@ -65,5 +65,7 @@ Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
 
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
+
+    // Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
 });
 
