@@ -682,11 +682,11 @@
 	  	methods: {
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
-					if (response.status == 200) {
+					if (response.status == 200) {						
 						for (const id in response.data.calls) {
 							let data = response.data.calls[id]							
 							let uid = "num_"+data.uid;
-							document.getElementById(uid).style.background=statusColors[data.status];
+							document.getElementById(uid).style.background=statusColors['register'];
 						}
 					}
 				});	
@@ -694,21 +694,7 @@
 			async getOperatorTime(){
 				await axios.get('monitoring/operatorTime', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
 					if (response.status == 200) {
-						const date = new Date();
-    					const unixTimestamp = Math.floor(date.getTime() / 1000);
-						
-						for (const num in response.data.oper_times) {
-							const oper = response.data.oper_times[num];
-							if(oper.register && oper.unregister){
-								if (oper.register.length == oper.unregister.length) {
-									this.oper_times[num] = oper.online_time
-								}else{
-									this.oper_times[num] = oper.online_time + ( unixTimestamp - oper.register[oper.unregister.length] )
-								}
-							}else if(oper.register){
-								this.oper_times[num] = unixTimestamp - oper.register[0]
-							}
-						}						
+						this.oper_times = response.data.oper_times			
 					}
 				});	
 			}, 
@@ -1021,7 +1007,7 @@
 			    }
 			    var byVxod_count = reps.slice(0);
 				byVxod_count.sort(function(a,b) {
-				    return b.vxod_count - a.vxod_count;
+					return a.name.localeCompare(b.name)
 				});
 			    this.real_reports_5995 = byVxod_count
 		  	},

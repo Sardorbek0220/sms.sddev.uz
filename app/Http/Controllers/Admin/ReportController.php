@@ -183,7 +183,7 @@ class ReportController extends Controller
         $from = strtotime($request['date'] . " 00:00:00");
         $to = strtotime($request['date'] . " 23:59:59");
         
-        $calls = Operator_time::select('uid', 'status')->where('ip', '=', '178.218.201.191')->whereBetween('timestamp', [$from, $to])->orderBy('timestamp', 'desc')->get()->unique('uid');
+        $calls = Operator_time::select('uid')->where('unregister', 0)->whereBetween('timestamp_reg', [$from, $to])->get()->unique('uid');
 
         return Response::json(['calls' => $calls]);
     }
@@ -193,22 +193,52 @@ class ReportController extends Controller
         $from = $request['from'] . " 00:00:00";
         $to = $request['to'] . " 23:59:59";
         
-        $times = Operator_time::where('ip', '=', '178.218.201.191')->whereBetween('created_at', [$from, $to])->orderBy('timestamp', 'asc')->cursor();
-        $oper_times = [];
-        foreach ($times as $time) {
-            $oper_times[$time['uid']][$time['status']][] = $time['timestamp'];
-            if ($time['status'] == 'unregister') {
-
-                if (!array_key_exists('online_time', $oper_times[$time['uid']])) {
-                    $oper_times[$time['uid']]['online_time'] = 0;
-                }
-                
-                $index = count($oper_times[$time['uid']]['register'])-1;
-                $oper_times[$time['uid']]['online_time'] += ($time['timestamp'] - $oper_times[$time['uid']]['register'][$index]);
-            }
+        $times = Operator_time::select('uid', 'timestamp_reg', 'timestamp_unreg')->whereBetween('created_at', [$from, $to])->orderBy('timestamp_reg', 'asc')->cursor();
+        $array = [];
+        foreach ($times as $ope) {
+            $array[] = ['uid' => $ope->uid, 'in' => $ope->timestamp_reg, 'out' => $ope->timestamp_unreg === null ? time() : $ope->timestamp_unreg];
         }
+        
+        $oper_times = $this->calculate_total_time($array);
 
         return Response::json(['oper_times' => $oper_times]);
     }
 
+    public function calculate_total_time($array) {
+        $user_intervals = [];
+        
+        foreach ($array as $entry) {
+            $user_intervals[$entry['uid']][] = $entry;
+        }
+        
+        $total_times = [];
+        
+        foreach ($user_intervals as $uid => $intervals) {
+            $merged_intervals = $this->merge_intervals($intervals);
+            $total_time = 0;
+            foreach ($merged_intervals as $interval) {
+                $total_time += $interval['out'] - $interval['in'];
+            }
+            $total_times[$uid] = $total_time;
+        }
+        
+        return $total_times;
+    }
+    
+    public function merge_intervals($intervals) {
+        usort($intervals, function($a, $b) {
+            return $a['in'] <=> $b['in'];
+        });
+    
+        $merged = [];
+        foreach ($intervals as $interval) {
+            if (empty($merged) || end($merged)['out'] < $interval['in']) {
+                $merged[] = $interval;
+            } else {
+                $merged[count($merged) - 1]['out'] = max(end($merged)['out'], $interval['out']);
+            }
+        }
+        
+        return $merged;
+    }
 }

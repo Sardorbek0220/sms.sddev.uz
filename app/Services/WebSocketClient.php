@@ -40,15 +40,27 @@ class WebSocketClient
                     $data = json_decode($msg);
                     if ($data->event == 'user_registration') {
                         info("Received: {$msg}\n");
-                        $operator_time = Operator_time::create([
-                            'uid' => $data->data->uid,
-                            'status' => $data->data->state,
-                            'ip' => $data->data->ip,
-                            'port' => $data->data->port,
-                            'timestamp' => $data->data->date,
-                        ]);
-                        $operator_time->save();
-                        
+                        if ($data->data->ip == '178.218.201.191') {
+                            if ($data->data->state == 'register') {
+                                $operator_time = Operator_time::create([
+                                    'uid' => $data->data->uid,
+                                    'register' => 1,
+                                    'unregister' => 0,
+                                    'ip' => $data->data->ip,
+                                    'port' => $data->data->port,
+                                    'timestamp_reg' => $data->data->date,
+                                ]);
+                                $operator_time->save();
+                            }else{
+                                $operator_time = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->orderBy('timestamp_reg', 'desc')->first();
+                                if($operator_time != null){
+                                    $operator_time->unregister = 1;
+                                    $operator_time->timestamp_unreg = $data->data->date;
+                                    $operator_time->save();
+                                }
+                                
+                            }
+                        }
                     }
                     
                 });
