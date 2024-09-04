@@ -405,6 +405,7 @@
 					<th class="text-center">%</th>
 					<th class="text-center">👍</th>
 					<th class="text-center">☹️</th>
+					<th class="text-center">❌</th>
 		        </tr>
 		      </thead>
 		      <tbody style="border: solid 1px grey;">
@@ -419,6 +420,7 @@
 					<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
 					<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 					<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+					<td>{{ oper_misseds[report.num] ?? 0 }}</td>
 		        </tr>
 		      </tbody>
 		    </template>
@@ -618,7 +620,9 @@
 			out_todayData: {},
 			out_weekData: {},
 			out_monthData: {},
-			oper_times: {}
+			oper_times: {},
+			availableOperators: [],
+			oper_misseds: {}
 	  	},
 	  	async mounted () {
 			var day = ("0" + this.today.getDate()).slice(-2);
@@ -638,7 +642,7 @@
 		    this.getInfos_5995();
 		    this.getReport_5995();
 		    await this.getFifo();
-			this.fifoToReport();
+			await this.fifoToReport();
 			this.set_data_from_date();
 
 			await this.getBigData();
@@ -680,6 +684,25 @@
 		    clearInterval(this.interval)
 		},
 	  	methods: {
+			async personalMissed(){	
+				await axios.get('monitoring/personalMissed', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
+					if (response.status == 200) {	
+						this.oper_misseds = []		
+						for (const res of response.data) {
+							if ( 
+								this.availableOperators.includes(res.destination_number) && 
+								!this.availableOperators.includes(res.caller_number) && 
+								res.caller_number.search(".onpbx.ru") < 0
+							) {
+								if (!this.oper_misseds[res.destination_number]) {
+									this.oper_misseds[res.destination_number] = 0;
+								}
+								this.oper_misseds[res.destination_number] += 1;								
+							}
+						}			
+					}
+				});									
+		  	},
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {						
@@ -1082,7 +1105,7 @@
 				});
 				this.fifos = response.data.data;		 		
 		  	},
-			fifoToReport(){
+			async fifoToReport(){
 				let user_5995;
 
 				for (var i = 0; i < this.fifos.length; i++) {
@@ -1091,7 +1114,11 @@
 					}
 				}
 				
-				var myArray_5995 = user_5995.split(";");				
+				var myArray_5995 = user_5995.split(";");	
+				this.availableOperators = myArray_5995;
+
+				await this.personalMissed();
+							
 				let reports_support = this.real_reports_5995;
 		  		let set_support = [];
 

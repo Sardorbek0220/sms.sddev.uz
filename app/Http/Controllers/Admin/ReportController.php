@@ -204,6 +204,32 @@ class ReportController extends Controller
         return Response::json(['oper_times' => $oper_times]);
     }
 
+    public function monitoringPersonalMissed(Request $request){
+        
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, "https://161.97.137.120:8441/download/v2");
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); // Disable SSL verification
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // Disable host verification
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			"Content-Type: application/json"
+		]);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+			'date' => $request->date
+		]));
+
+		$output = curl_exec($ch);
+
+		if ($output === false) {
+            return Response::json(['error' => curl_error($ch)]);
+		}
+		curl_close($ch);
+
+        return Response::json(json_decode($output));
+    }
+
     public function calculate_total_time($array) {
         $user_intervals = [];
         
