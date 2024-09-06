@@ -692,8 +692,9 @@
 							if ( 
 								this.availableOperators.includes(res.destination_number) && 
 								!this.availableOperators.includes(res.caller_number) && 
-								res.caller_number.search(".onpbx.ru") < 0
-							) {
+								res.caller_number.search(".onpbx.ru") < 0 && 
+								res.hangup_cause == "NO_ANSWER"
+							) {								
 								if (!this.oper_misseds[res.destination_number]) {
 									this.oper_misseds[res.destination_number] = 0;
 								}
