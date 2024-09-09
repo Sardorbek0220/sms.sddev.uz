@@ -689,12 +689,15 @@
 					if (response.status == 200) {	
 						this.oper_misseds = []		
 						for (const res of response.data) {
+							var create = new Date(res.create_timestamp);
+							var destroy = new Date(res.destroy_timestamp);
 							if ( 
 								this.availableOperators.includes(res.destination_number) && 
 								!this.availableOperators.includes(res.caller_number) && 
 								res.caller_number.search(".onpbx.ru") < 0 && 
-								res.hangup_cause == "NO_ANSWER"
-							) {								
+								Math.abs(destroy - create) > 4000
+							) {		
+								console.log(res);					
 								if (!this.oper_misseds[res.destination_number]) {
 									this.oper_misseds[res.destination_number] = 0;
 								}
