@@ -15,10 +15,10 @@
 	<title>Monitoring | Sales Doctor</title>
 	<style scoped>
 		.online_text {
-			background: seagreen;
+			background: chartreuse;
 			padding: 5px;
 			border-radius: 10px;
-			color: white;
+			color: black;
 		}
 		.dot {
 			height: 15px;
@@ -304,12 +304,16 @@
 		   		<div class="d-inline-block">
 		   			<v-row>
 		   				<v-col>
-		   					<button style="margin-right: 20px; border-radius: 8px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable','excel','excel')">EXCEL</button>
+		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable','excel','excel')">EXCEL 1</button>
+            				<a id="dlink"  href="" style="display: none"></a>
+		   				</v-col>
+						<v-col>
+		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL 2</button>
             				<a id="dlink"  href="" style="display: none"></a>
 		   				</v-col>
 		   			</v-row>
 				</div>
-		   		<div class="d-inline-block">
+		   		<div class="d-inline-block ml-2">
 					<label for="" class="mt-4 font-weight-bold">Со вчера: </label>
 					<label class="switch mr-5 ml-4 mb-2">
 					  <input type="checkbox" id="yesterday" name="yesterday" value="1" @change="get_with_yesterday()">
@@ -341,149 +345,183 @@
 	  </div>
 	</template>
     <v-row class="mb-6 mt-4" no-gutters>
-      <v-col cols="5">
-        <v-simple-table>
-		    <template v-slot:default>
-		      <thead style="border: solid 1px grey;">
-		        <tr>
-		          	<th class="text-left" width="100px;">Время</th>
-		          	<th class="text-left">Номер</th>
-		          	<th class="text-left">Кол. пропущ.</th>
-		          	<th class="text-left">Кол. перезв.</th>
-		          	<th class="text-left">Статус</th>
-		          	<th class="text-left">Инициатор</th>
-		          	<th class="text-left">Нач. разг.</th>
-		          	<th class="text-left">До разг.</th>
-		          	<th class="text-left">Дл.(сек)</th>
-		        </tr>
-		      </thead>
-		      <tbody style="border: solid 1px grey;">
-		      	<tr v-for="report in pro_infos_5995">
-		          	<td>
-		          		<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() && report.start_stamp_ymd.getMonth() === today.getMonth() && report.start_stamp_ymd.getDate() === today.getDate() ? 'date_none' : 'date_ymd']">
-		          			<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
-		          				{{report.start_stamp_ymd.getFullYear()}}
-		          			</span>
-		          			{{report.start_stamp_ymd.getDate()}}-{{months[report.start_stamp_ymd.getMonth()]}}
-		          		</span>
-		          		
-		          		<br>{{report.start_stamp}}
-		          	</td>
-		          	<td>{{report.number}}</td>
-		          	<td>{{report.count_pro}}</td>
-		          	<td>{{report.count_nedoz}}</td>
-		          	<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
-		          	<td>{{report.user_call}}</td>
-		          	<td>
-		          		<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
-		          			<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
-			          			{{report.start_talking_ymd.getFullYear()}}
-			          		</span>
-		          			{{report.start_talking_ymd.getDate()}}-{{months[report.start_talking_ymd.getMonth()]}}
-		          		</span>
-		          		<br>{{report.start_talking}}
-		          	</td>
-		          	<td>{{report.for_talking}}</td>
-		          	<td>{{report.talk_time}}</td>
-		        </tr>
-		      </tbody>
-		    </template>
-		</v-simple-table>
-      </v-col>
-      <v-col cols="7">
-        <v-simple-table>
-		    <template v-slot:default>
-		      <thead style="border: solid 1px grey;">
-		        <tr>
-		          	<th class="text-center" width="220px">Имя</th>
-					<th class="text-center" width="160px"><span class="online_text">онлайн-время</span></th>
-		          	<th class="text-center" width="15px">Вход. звон</th>
-		          	<th class="text-center">Время</th>
-		          	<th class="text-center" width="15px">Исход. звон</th>
-		          	<th class="text-center">Время</th>
-		          	<th class="text-center">Общ. вре.</th>
-					<th class="text-center">%</th>
-					<th class="text-center">👍</th>
-					<th class="text-center">☹️</th>
-					<th class="text-center">❌</th>
-		        </tr>
-		      </thead>
-		      <tbody style="border: solid 1px grey;">
-		      	<tr v-for="report in users_5995">
-		          	<td><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
-					<td><span class="online_text">{{ calcHMS(oper_times[report.num]) }}</span></td>
-		          	<td>{{report.vxod_count}}</td>
-		          	<td>{{report.vxod_time}}</td>
-		          	<td>{{report.isxod_count}}</td>
-		          	<td>{{report.isxod_time}}</td>
-		          	<td>{{report.all_time}}</td>
-					<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
-					<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
-					<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
-					<td>{{ oper_misseds[report.num] ?? 0 }}</td>
-		        </tr>
-		      </tbody>
-		    </template>
-		</v-simple-table>
-		<div class="ml-2">
-			<span class="dot mt-2" style="background: blue"></span> - qo'ng'iroq qilinyapti, &nbsp
-			<span class="dot mt-4" style="background: yellow"></span> - qo'ng'iroq tugatildi, &nbsp
-			<span class="dot mt-4" style="background: green"></span> - javob berilyapti, &nbsp
-			<span class="dot mt-2" style="background: red"></span> - offline, &nbsp
-			<span class="dot mt-4" style="background: #bbb"></span> - online
-		</div>
-      </v-col>
+		<v-col cols="5">
+			<v-simple-table>
+				<template v-slot:default>
+				<thead style="border: solid 1px grey;">
+					<tr>
+						<th class="text-left" width="100px;">Время</th>
+						<th class="text-left">Номер</th>
+						<th class="text-left">Кол. пропущ.</th>
+						<th class="text-left">Кол. перезв.</th>
+						<th class="text-left">Статус</th>
+						<th class="text-left">Инициатор</th>
+						<th class="text-left">Нач. разг.</th>
+						<th class="text-left">До разг.</th>
+						<th class="text-left">Дл.(сек)</th>
+					</tr>
+				</thead>
+				<tbody style="border: solid 1px grey;">
+					<tr v-for="report in pro_infos_5995">
+						<td>
+							<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() && report.start_stamp_ymd.getMonth() === today.getMonth() && report.start_stamp_ymd.getDate() === today.getDate() ? 'date_none' : 'date_ymd']">
+								<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
+									{{report.start_stamp_ymd.getFullYear()}}
+								</span>
+								{{report.start_stamp_ymd.getDate()}}-{{months[report.start_stamp_ymd.getMonth()]}}
+							</span>
+							
+							<br>{{report.start_stamp}}
+						</td>
+						<td>{{report.number}}</td>
+						<td>{{report.count_pro}}</td>
+						<td>{{report.count_nedoz}}</td>
+						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
+						<td>{{report.user_call}}</td>
+						<td>
+							<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
+								<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
+									{{report.start_talking_ymd.getFullYear()}}
+								</span>
+								{{report.start_talking_ymd.getDate()}}-{{months[report.start_talking_ymd.getMonth()]}}
+							</span>
+							<br>{{report.start_talking}}
+						</td>
+						<td>{{report.for_talking}}</td>
+						<td>{{report.talk_time}}</td>
+					</tr>
+				</tbody>
+				</template>
+			</v-simple-table>
+		</v-col>
+		<v-col cols="7">
+			<v-simple-table>
+				<template v-slot:default>
+				<thead style="border: solid 1px grey;">
+					<tr>
+						<th class="text-center" width="220px">Имя</th>
+						<th class="text-center" width="160px"><span class="online_text">онлайн-время</span></th>
+						<th class="text-center" width="15px">Вход. звон</th>
+						<th class="text-center">Время</th>
+						<th class="text-center" width="15px">Исход. звон</th>
+						<th class="text-center">Время</th>
+						<th class="text-center">Общ. вре.</th>
+						<th class="text-center">%</th>
+						<th class="text-center">👍</th>
+						<th class="text-center">☹️</th>
+						<th class="text-center">❌</th>
+					</tr>
+				</thead>
+				<tbody style="border: solid 1px grey;">
+					<tr v-for="report in users_5995">
+						<td><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
+						<td><span v-show="oper_times[report.num] > 0" class="online_text">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+						<td>{{report.vxod_count}}</td>
+						<td>{{report.vxod_time}}</td>
+						<td>{{report.isxod_count}}</td>
+						<td>{{report.isxod_time}}</td>
+						<td>{{report.all_time}}</td>
+						<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
+						<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
+						<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+						<td>{{ oper_misseds[report.num] ?? 0 }}</td>
+					</tr>
+				</tbody>
+				</template>
+			</v-simple-table>
+			<div class="ml-2">
+				<span class="dot mt-2" style="background: blue"></span> - qo'ng'iroq qilinyapti, &nbsp
+				<span class="dot mt-4" style="background: yellow"></span> - qo'ng'iroq tugatildi, &nbsp
+				<span class="dot mt-4" style="background: green"></span> - javob berilyapti, &nbsp
+				<span class="dot mt-2" style="background: red"></span> - offline, &nbsp
+				<span class="dot mt-4" style="background: chartreuse"></span> - online
+			</div>
+		</v-col>
 
-      <!-- export excel -->
-      <v-col style="display: none">
-        <v-simple-table style="border-top: solid 1px grey;" id="exportTable">
-		    <template v-slot:default>
-		      <thead style="border-left: solid 1px grey;">
-		        <tr>
-		          	<th class="text-left" width="100px;">Время</th>
-		          	<th class="text-left">Номер</th>
-		          	<th class="text-left">Кол. пропущ.</th>
-		          	<th class="text-left">Кол. перезв.</th>
-		          	<th class="text-left">Статус</th>
-		          	<th class="text-left">Инициатор</th>
-		          	<th class="text-left">Нач. разг.</th>
-		          	<th class="text-left">До разг.</th>
-		          	<th class="text-left">Дл.(сек)</th>
-		        </tr>
-		      </thead>
-		      <tbody style="border-left: solid 1px grey;">
-		      	<tr v-for="report in pro_infos_5995">
-		          	<td>
-		          		<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() && report.start_stamp_ymd.getMonth() === today.getMonth() && report.start_stamp_ymd.getDate() === today.getDate() ? 'date_none' : 'date_ymd']">
-		          			<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
-		          				{{report.start_stamp_ymd.getFullYear()}}
-		          			</span>
-		          			{{report.start_stamp_ymd.getDate()}}-{{months[report.start_stamp_ymd.getMonth()]}}
-		          		</span>
-		          		
-		          		<br>{{report.start_stamp}}
-		          	</td>
-		          	<td>{{report.number}}</td>
-		          	<td>{{report.count_pro}}</td>
-		          	<td>{{report.count_nedoz}}</td>
-		          	<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
-		          	<td>{{report.user_call}}</td>
-		          	<td>
-		          		<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
-		          			<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
-			          			{{report.start_talking_ymd.getFullYear()}}
-			          		</span>
-		          			{{report.start_talking_ymd.getDate()}}-{{months[report.start_talking_ymd.getMonth()]}}
-		          		</span>
-		          		<br>{{report.start_talking}}
-		          	</td>
-		          	<td>{{report.for_talking}}</td>
-		          	<td>{{report.talk_time_Excel}}</td>
-		        </tr>
-		      </tbody>
-		    </template>
-		</v-simple-table>
-      </v-col>
+		<!-- export excel -->
+		<v-col style="display: none">
+			<v-simple-table style="border-top: solid 1px grey;" id="exportTable">
+				<template v-slot:default>
+					<thead style="border-left: solid 1px grey;">
+						<tr>
+							<th class="text-left" width="100px;">Время</th>
+							<th class="text-left">Номер</th>
+							<th class="text-left">Кол. пропущ.</th>
+							<th class="text-left">Кол. перезв.</th>
+							<th class="text-left">Статус</th>
+							<th class="text-left">Инициатор</th>
+							<th class="text-left">Нач. разг.</th>
+							<th class="text-left">До разг.</th>
+							<th class="text-left">Дл.(сек)</th>
+						</tr>
+					</thead>
+					<tbody style="border-left: solid 1px grey;">
+						<tr v-for="report in pro_infos_5995">
+							<td>
+								<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() && report.start_stamp_ymd.getMonth() === today.getMonth() && report.start_stamp_ymd.getDate() === today.getDate() ? 'date_none' : 'date_ymd']">
+									<span :class="[report.start_stamp_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
+										{{report.start_stamp_ymd.getFullYear()}}
+									</span>
+									{{report.start_stamp_ymd.getDate()}}-{{months[report.start_stamp_ymd.getMonth()]}}
+								</span>
+								
+								<br>{{report.start_stamp}}
+							</td>
+							<td>{{report.number}}</td>
+							<td>{{report.count_pro}}</td>
+							<td>{{report.count_nedoz}}</td>
+							<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
+							<td>{{report.user_call}}</td>
+							<td>
+								<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
+									<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() ? 'date_none' : 'date_ymd']">
+										{{report.start_talking_ymd.getFullYear()}}
+									</span>
+									{{report.start_talking_ymd.getDate()}}-{{months[report.start_talking_ymd.getMonth()]}}
+								</span>
+								<br>{{report.start_talking}}
+							</td>
+							<td>{{report.for_talking}}</td>
+							<td>{{report.talk_time_Excel}}</td>
+						</tr>
+					</tbody>
+				</template>
+			</v-simple-table>
+			<v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
+				<template v-slot:default>
+					<thead style="border: solid 1px grey;">
+						<tr>
+							<th class="text-center" width="220px">Имя</th>
+							<th class="text-center" width="160px"><span class="online_text">онлайн-время</span></th>
+							<th class="text-center" width="15px">Вход. звон</th>
+							<th class="text-center">Время</th>
+							<th class="text-center" width="15px">Исход. звон</th>
+							<th class="text-center">Время</th>
+							<th class="text-center">Общ. вре.</th>
+							<th class="text-center">%</th>
+							<th class="text-center">👍</th>
+							<th class="text-center">☹️</th>
+							<th class="text-center">❌</th>
+						</tr>
+					</thead>
+					<tbody style="border: solid 1px grey;">
+						<tr v-for="report in users_5995">
+							<td>{{report.name}}</td>
+							<td><span class="online_text">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+							<td>{{report.vxod_count}}</td>
+							<td>{{report.vxod_time}}</td>
+							<td>{{report.isxod_count}}</td>
+							<td>{{report.isxod_time}}</td>
+							<td>{{report.all_time}}</td>
+							<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
+							<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
+							<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+							<td>{{ oper_misseds[report.num] ?? 0 }}</td>
+						</tr>
+					</tbody>
+				</template>
+			</v-simple-table>
+		</v-col>
       <!-- ------------ -->
     </v-row>
 	<v-row>
@@ -503,12 +541,12 @@
 <script>
 
 	const statusColors = {
-		registered: '#bbb',
+		registered: 'chartreuse',
 		unregistered: 'black',
 		ringing: 'blue',
 		hangup: 'yellow',
 		answered: 'green',
-		register: '#bbb',
+		register: 'chartreuse',
 		unregister: 'red',
 		pre_register: 'brown',
 		register_attempt: 'brown',
@@ -1038,7 +1076,7 @@
 				});
 			    this.real_reports_5995 = byVxod_count
 		  	},
-		  	calcHMS: function(d){
+		  	calcHMS: function(d, format = '0'){
 		  		if (d == 0) {
 	      			return 0;
 	      		}else {
@@ -1050,6 +1088,10 @@
 				    var hDisplay = h > 0 ? h + (h == 1 ? " час, " : " час, ") : "";
 				    var mDisplay = m > 0 ? m + (m == 1 ? " мин, " : " мин, ") : "";
 				    var sDisplay = s > 0 ? s + (s == 1 ? " с" : " с") : "";
+					if (format == '1') {
+						mDisplay = m > 0 ? m + (m == 1 ? " мин" : " мин") : "";
+						sDisplay = "";
+					}
 				    return hDisplay + mDisplay + sDisplay;
 	      		}
 		  	},
