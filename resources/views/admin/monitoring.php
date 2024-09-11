@@ -417,10 +417,10 @@
 						<td><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
 						<td><span v-show="oper_times[report.num] > 0" class="online_text">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
 						<td>{{report.vxod_count}}</td>
-						<td>{{report.vxod_time}}</td>
+						<td>{{calcHMS(report.vxod_time)}}</td>
 						<td>{{report.isxod_count}}</td>
-						<td>{{report.isxod_time}}</td>
-						<td>{{report.all_time}}</td>
+						<td>{{calcHMS(report.isxod_time)}}</td>
+						<td>{{calcHMS(report.all_time)}}</td>
 						<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
 						<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
@@ -502,6 +502,7 @@
 							<th class="text-center">👍</th>
 							<th class="text-center">☹️</th>
 							<th class="text-center">❌</th>
+							<th class="text-center">Дата</th>
 						</tr>
 					</thead>
 					<tbody style="border: solid 1px grey;">
@@ -517,6 +518,7 @@
 							<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 							<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
 							<td>{{ oper_misseds[report.num] ?? 0 }}</td>
+							<td>{{ today.getFullYear()+"-"+("0" + (today.getMonth() + 1)).slice(-2)+"-"+("0" + today.getDate()).slice(-2) }}</td>
 						</tr>
 					</tbody>
 				</template>
@@ -921,7 +923,7 @@
 					groupByNum[num] = groupByNum[num].reduce((a, b) => a + b);
 					resultArr.push({
 						'num': num,
-						'vxod_time': this.calcHMS(groupByNum[num]),
+						'vxod_time': groupByNum[num],
 						'for_all_time': groupByNum[num],
 						'vxod_count': counter
 					})
@@ -983,7 +985,7 @@
 					groupByNum1[num] = groupByNum1[num].reduce((a, b) => a + b);
 					resultArr1.push({
 						'num': num,
-						'isxod_time': this.calcHMS(groupByNum1[num]),
+						'isxod_time': groupByNum1[num],
 						'for_all_time': groupByNum1[num],
 						'isxod_count': counter
 					})
@@ -1034,7 +1036,7 @@
 		      					vxod_time: vxods[n].vxod_time,
 		      					isxod_count: isxods[m].isxod_count,
 		      					isxod_time: isxods[m].isxod_time,
-		      					all_time: this.calcHMS(isxods[m].for_all_time+vxods[n].for_all_time),
+		      					all_time: isxods[m].for_all_time+vxods[n].for_all_time,
 								all_time_s: isxods[m].for_all_time+vxods[n].for_all_time,
 			      			}
 			      			reports.push(infoss);
