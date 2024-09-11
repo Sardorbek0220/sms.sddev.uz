@@ -6,6 +6,7 @@ use App\Http\Controllers\AmocrmController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\PbxBot\PbxBotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedb
 Route::post('feedback/afterStore', [FeedbackController::class, 'afterStore'])->name('feedback.afterStore');
 
 Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);
+Route::post('pbxBot', [PbxBotController::class, 'send']);
 // ----------------
 // Route::get('auth', [AmocrmController::class, 'getMonitoringCalls']);
 // ----------------
