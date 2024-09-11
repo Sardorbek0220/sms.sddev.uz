@@ -507,7 +507,7 @@
 					<tbody style="border: solid 1px grey;">
 						<tr v-for="report in users_5995">
 							<td>{{report.name}}</td>
-							<td><span class="online_text">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+							<td><span class="online_text">{{ oper_times[report.num] }}</span></td>
 							<td>{{report.vxod_count}}</td>
 							<td>{{report.vxod_time}}</td>
 							<td>{{report.isxod_count}}</td>
