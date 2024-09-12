@@ -2,7 +2,7 @@
 namespace App\Pbx;
 
 class Text {
-	public $text = "(test)";
+	public $text = "";
 	public $entities = [];
 
 	public function appendText($text) {

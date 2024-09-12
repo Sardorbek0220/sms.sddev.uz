@@ -13,9 +13,11 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'https://sms.sddev.uz/mainProcess',
+        'https://sms.sddev.uz/pbxBot',
         'https://sms.sddev.uz/feedback/store',
         'https://sms.sddev.uz/feedback/afterStore',
         'https://sms.salesdoc.uz/mainProcess',
+        'https://sms.salesdoc.uz/pbxBot',
         'https://sms.salesdoc.uz/feedback/store',
         'https://sms.salesdoc.uz/feedback/afterStore'
     ];
