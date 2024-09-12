@@ -10,6 +10,7 @@ use App\All_call;
 use App\Operators;
 use App\Feedback;
 use App\Operator_time;
+use App\Unknown_client;
 
 class ReportController extends Controller
 {
@@ -170,8 +171,13 @@ class ReportController extends Controller
 
     public function monitoringBigData(Request $request)
     {
-        $from = strtotime(substr($request['date'], 0, -2) . "01 00:00:00");
-        $to = strtotime($request['date'] . " 23:59:59");
+        if ($request['date']) {
+            $from = strtotime(substr($request['date'], 0, -2) . "01 00:00:00");
+            $to = strtotime($request['date'] . " 23:59:59");
+        }else{
+            $from = strtotime($request['from'] . " 00:00:00");
+            $to = strtotime($request['to'] . " 23:59:59");
+        }
         
         $calls = All_call::whereBetween('start_stamp', [$from, $to])->cursor();
 
@@ -202,6 +208,20 @@ class ReportController extends Controller
         $oper_times = $this->calculate_total_time($array);
 
         return Response::json(['oper_times' => $oper_times]);
+    }
+
+    public function monitoringUnknownClients(Request $request)
+    {
+        $from = $request['from'] . " 00:00:00";
+        $to = $request['to'] . " 23:59:59";
+        
+        $clients = DB::table('unknown_clients')
+            ->select('operator', 'direction', DB::raw('COUNT(DISTINCT phone) as count'))
+            ->where('event', '=', 'call_end')
+            ->whereBetween('created_at', [$from, $to])
+            ->groupByRaw('direction, operator')
+            ->get();
+        return Response::json($clients);
     }
 
     public function monitoringPersonalMissed(Request $request){

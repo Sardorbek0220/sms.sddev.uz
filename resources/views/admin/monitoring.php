@@ -502,7 +502,12 @@
 							<th class="text-center">👍</th>
 							<th class="text-center">☹️</th>
 							<th class="text-center">❌</th>
-							<th class="text-center">Дата</th>
+							<th class="text-center">от</th>
+							<th class="text-center">до</th>
+							<th class="text-center">Входящие</th>
+							<th class="text-center">Пропущенные</th>
+							<th class="text-center">Незарег. вход. клиенты</th>
+							<th class="text-center">Незарег. исход. клиенты</th>
 						</tr>
 					</thead>
 					<tbody style="border: solid 1px grey;">
@@ -518,7 +523,12 @@
 							<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 							<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
 							<td>{{ oper_misseds[report.num] ?? 0 }}</td>
-							<td>{{ today.getFullYear()+"-"+("0" + (today.getMonth() + 1)).slice(-2)+"-"+("0" + today.getDate()).slice(-2) }}</td>
+							<td>{{ from_date }}</td>
+							<td>{{ to_date }}</td>
+							<td>{{ bigDataPeriod.answered+bigDataPeriod.missed }}</td>
+							<td>{{ bigDataPeriod.missed }}</td>
+							<td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
+							<td>{{ unknownClients.outbound[report.num] ? unknownClients.outbound[report.num] : 0 }}</td>
 						</tr>
 					</tbody>
 				</template>
@@ -654,6 +664,7 @@
 				mark3: {}
 			},
 			bigData: [],
+			bigDataPeriod: [],
 			todayData: {},
 			weekData: {},
 			monthData: {},
@@ -662,12 +673,21 @@
 			out_monthData: {},
 			oper_times: {},
 			availableOperators: [],
-			oper_misseds: {}
+			oper_misseds: {},
+			from_date: "",
+			to_date: "",
+			unknownClients: {
+				inbound: {},
+				outbound: {}
+			}
 	  	},
 	  	async mounted () {
 			var day = ("0" + this.today.getDate()).slice(-2);
 			var month = ("0" + (this.today.getMonth() + 1)).slice(-2);
 			var today = this.today.getFullYear()+"-"+(month)+"-"+(day);
+
+			this.from_date = today
+			this.to_date = today
 
 			$('#get_date').val(today);
 			$('#start_date').val(today);
@@ -684,6 +704,7 @@
 		    await this.getFifo();
 			await this.fifoToReport();
 			this.set_data_from_date();
+			this.bigDataPeriod = this.todayData;
 
 			await this.getBigData();
 			this.setTable();
@@ -737,7 +758,6 @@
 								res.caller_number.search(".onpbx.ru") < 0 && 
 								Math.abs(destroy - create) > 4000
 							) {		
-								console.log(res);					
 								if (!this.oper_misseds[res.destination_number]) {
 									this.oper_misseds[res.destination_number] = 0;
 								}
@@ -765,13 +785,69 @@
 					}
 				});	
 			}, 
+			async getUnknownClients(){
+				await axios.get('monitoring/unknownClients', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+					if (response.status == 200) {
+						for (const datum of response.data) {
+							if (datum.direction == 'inbound') {
+								if (!this.unknownClients.inbound[datum.operator]) {
+									this.unknownClients.inbound[datum.operator] = 0
+								}
+								this.unknownClients.inbound[datum.operator] = datum.count
+							}else{
+								if (!this.unknownClients.outbound[datum.operator]) {
+									this.unknownClients.outbound[datum.operator] = 0
+								}
+								this.unknownClients.outbound[datum.operator] = datum.count
+							}
+							
+						}
+					}
+				});	
+			}, 
 			async filter(){
+				this.from_date = $('#start_date').val()
+				this.to_date = $('#get_date').val()
+				
 				await this.get_date();
+
+				this.loading = true;
+
 				await this.get_users_feedbacks();
+				await this.getOperatorTime();
 				this.getInfos_5995();
 		    	this.getReport_5995();
 				this.fifoToReport();
 				this.set_data_from_date();
+				await this.getBigDataPeriod();
+
+				this.loading = false;
+			},
+			async getBigDataPeriod(){
+				await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+					if (response.status == 200) {
+						this.bigDataPeriod = {
+							answered: 0,
+							missed: 0,
+							missed_in: 0,
+							talking_time: 0
+						}
+
+						for (const datum of response.data) {
+							if (datum.accountcode == 'inbound') {
+
+								this.bigDataPeriod.talking_time += datum.user_talk_time
+								if (datum.user_talk_time > 0) {
+									this.bigDataPeriod.answered += 1;
+								}else{
+									this.bigDataPeriod.missed += 1;
+									this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
+								}
+
+							}
+						}
+					}
+				});	
 			},
 			async getBigData(){
 				await axios.get('monitoring/bigData', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
@@ -1166,6 +1242,7 @@
 				this.availableOperators = myArray_5995;
 
 				await this.personalMissed();
+				await this.getUnknownClients();
 							
 				let reports_support = this.real_reports_5995;
 		  		let set_support = [];

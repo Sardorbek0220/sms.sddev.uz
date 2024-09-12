@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Response;
-
+use App\Unknown_client;
 use App\Pbx\Text;
 use App\Pbx\Amocrm;
 use App\Pbx\Onlinepbx;
@@ -120,17 +120,17 @@ class PbxBotController extends Controller
         $client;
         $operator;
         if ($_POST["direction"] == "outbound") {
-            $text->appendEntity("Исходящий звонок", "bold")->endl()->endl();
+            $text->appendEntity("(test) Исходящий звонок", "bold")->endl()->endl();
             $client = $_POST["callee"];
             $operator = $_POST["caller"];
         }
         else if ($_POST["direction"] == "inbound") {
 
             if ($_POST["event"] == "call_missed") {
-                $text->appendEntity("Пропущенный входящий звонок", "bold")->endl()->endl();
+                $text->appendEntity("(test) Пропущенный входящий звонок", "bold")->endl()->endl();
             }
             else {
-                $text->appendEntity("Входящий звонок", "bold")->endl()->endl();
+                $text->appendEntity("(test) Входящий звонок", "bold")->endl()->endl();
             }
             $client = $_POST["caller"];
             $operator = $_POST["callee"];
@@ -152,6 +152,12 @@ class PbxBotController extends Controller
                 if (count($info["companies"]) == 0) {
                     $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
                     $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
+                    Unknown_client::create([
+                        'phone' => $client,
+                        'direction' => $_POST["direction"],
+                        'operator' => $operator,
+                        'event' => $_POST["event"]
+                    ]);
                 }
                 else {
                     foreach($info["companies"] as $company) {
@@ -173,7 +179,12 @@ class PbxBotController extends Controller
                         }
 
                         if (empty($serverName) || empty($info["name"])) {
-                            
+                            Unknown_client::create([
+                                'phone' => $client,
+                                'direction' => $_POST["direction"],
+                                'operator' => $operator,
+                                'event' => $_POST["event"]
+                            ]);
                         }
                     }
                 }
@@ -182,6 +193,12 @@ class PbxBotController extends Controller
                 $text->appendEntity("    Имя: ", "bold")->appendText("Не указана")->endl();
                 $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
                 $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
+                Unknown_client::create([
+                    'phone' => $client,
+                    'direction' => $_POST["direction"],
+                    'operator' => $operator,
+                    'event' => $_POST["event"]
+                ]);
             }
         }
         catch(Exception $e) {
@@ -189,6 +206,12 @@ class PbxBotController extends Controller
             $text->appendEntity("    Имя: ", "bold")->appendText("Не указана")->endl();
             $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
             $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
+            Unknown_client::create([
+                'phone' => $client,
+                'direction' => $_POST["direction"],
+                'operator' => $operator,
+                'event' => $_POST["event"]
+            ]);
         }
         $text->endl();
 
@@ -209,9 +232,9 @@ class PbxBotController extends Controller
         // add date
         $text->appendEntity("Дата: ", "bold")->appendText(date("Y-m-d H:i:s", $_POST["date"]))->endl();
 
-        if ($_POST['event'] === 'call_missed') {
+        if ($_POST['event'] == 'call_missed') {
             $result = $pbx->getCall($_POST['uuid']);
-            $text->appendEntity('Длительность: ', 'bold')->appendText($result['duration'])->endl();
+            $text->appendEntity('Длительность: ', 'bold')->appendText('')->endl();
         }
 
         return $text;

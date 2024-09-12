@@ -52,6 +52,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     Route::get('monitoring/operatorCondition', [ReportController::class, 'monitoringOperatorCondition']);
     Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);
+    Route::get('monitoring/unknownClients', [ReportController::class, 'monitoringUnknownClients']);
 
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
@@ -65,6 +66,7 @@ Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
 
     Route::get('monitoring/operatorCondition', [ReportController::class, 'monitoringOperatorCondition']);
     Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);
+    Route::get('monitoring/unknownClients', [ReportController::class, 'monitoringUnknownClients']);
 
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
