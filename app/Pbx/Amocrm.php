@@ -130,7 +130,8 @@ class Amocrm {
 			curl_close($ch);
 
 			if ($code >= 200 && $code < 300) {
-				return json_decode($response ? $response : [], true);
+				info("response: ".$response);
+				return empty($response) ? [] : json_decode($response, true);
 			}
 			else if (($code == 401 || $code == 403) && (--$maxAttempt)> 0) {
 				$accessToken = $this->getAccessToken(true);
@@ -178,8 +179,13 @@ class Amocrm {
 	}
 	
 	public function getClientInfo($phoneNumber) {
+
+		$infoClient = $this->get("/api/v4/contacts", ["query" => $phoneNumber]);
+		if (empty($infoClient)) {
+			return false;
+		}
 		
-		$contacts = $this->get("/api/v4/contacts", ["query" => $phoneNumber])["_embedded"]["contacts"];
+		$contacts = $infoClient["_embedded"]["contacts"];
 		
 		if (count($contacts) == 0) {
 			return false;

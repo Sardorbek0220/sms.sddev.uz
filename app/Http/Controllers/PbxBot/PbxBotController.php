@@ -120,17 +120,17 @@ class PbxBotController extends Controller
         $client;
         $operator;
         if ($_POST["direction"] == "outbound") {
-            $text->appendEntity("(test) Исходящий звонок", "bold")->endl()->endl();
+            $text->appendEntity("Исходящий звонок", "bold")->endl()->endl();
             $client = $_POST["callee"];
             $operator = $_POST["caller"];
         }
         else if ($_POST["direction"] == "inbound") {
 
             if ($_POST["event"] == "call_missed") {
-                $text->appendEntity("(test) Пропущенный входящий звонок", "bold")->endl()->endl();
+                $text->appendEntity("Пропущенный входящий звонок", "bold")->endl()->endl();
             }
             else {
-                $text->appendEntity("(test) Входящий звонок", "bold")->endl()->endl();
+                $text->appendEntity("Входящий звонок", "bold")->endl()->endl();
             }
             $client = $_POST["caller"];
             $operator = $_POST["callee"];
