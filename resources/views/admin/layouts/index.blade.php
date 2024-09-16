@@ -149,6 +149,7 @@
         { extend: 'colvis' }
       ]
     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+
     $("#example2").DataTable({
       "scrollX": true,
       "stateSave": true,
@@ -198,6 +199,82 @@
         });                    
       },
     }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
+
+    $("#example_like").DataTable({
+      "stateSave": true,
+      "paging": false,
+      "responsive": true, 
+      "autoWidth": false,
+      "lengthChange": false, 
+      "buttons": [
+        { extend: 'excel', footer: true, customize: (xlsx, config, dataTable) => {
+          let sheet = xlsx.xl.worksheets['sheet1.xml'];
+          let footerIndex = $('sheetData row', sheet).length;
+          let $footerRows = $('tr', dataTable.footer());
+
+          if ($footerRows.length > 1) {
+            for (let i = 1; i < $footerRows.length; i++) {
+              let $footerRow = $footerRows[i];
+              let $footerRowCols = $('th', $footerRow);
+
+              footerIndex++;
+              $('sheetData', sheet).append(`
+                <row r="${footerIndex}">
+                  ${$footerRowCols.map((index, el) => `
+                    <c t="inlineStr" r="${String.fromCharCode(65 + index)}${footerIndex}" s="2">
+                      <is>
+                        <t xml:space="preserve">${$(el).text()}</t>
+                      </is>
+                    </c>
+                  `).get().join('')}
+                </row>
+              `);
+            }
+          }
+        }},
+        { extend: 'pdf', footer: true },
+        { extend: 'print', footer: true },
+        { extend: 'colvis' }
+      ]
+    }).buttons().container().appendTo('#example_like_wrapper .col-md-6:eq(0)');
+
+    $("#example_product").DataTable({
+      "stateSave": true,
+      "paging": false,
+      "responsive": true, 
+      "autoWidth": false,
+      "lengthChange": false, 
+      "buttons": [
+        { extend: 'excel', footer: true, customize: (xlsx, config, dataTable) => {
+          let sheet = xlsx.xl.worksheets['sheet1.xml'];
+          let footerIndex = $('sheetData row', sheet).length;
+          let $footerRows = $('tr', dataTable.footer());
+
+          if ($footerRows.length > 1) {
+            for (let i = 1; i < $footerRows.length; i++) {
+              let $footerRow = $footerRows[i];
+              let $footerRowCols = $('th', $footerRow);
+
+              footerIndex++;
+              $('sheetData', sheet).append(`
+                <row r="${footerIndex}">
+                  ${$footerRowCols.map((index, el) => `
+                    <c t="inlineStr" r="${String.fromCharCode(65 + index)}${footerIndex}" s="2">
+                      <is>
+                        <t xml:space="preserve">${$(el).text()}</t>
+                      </is>
+                    </c>
+                  `).get().join('')}
+                </row>
+              `);
+            }
+          }
+        }},
+        { extend: 'pdf', footer: true },
+        { extend: 'print', footer: true },
+        { extend: 'colvis' }
+      ]
+    }).buttons().container().appendTo('#example_product_wrapper .col-md-6:eq(0)');
   });
 </script>
 </body>

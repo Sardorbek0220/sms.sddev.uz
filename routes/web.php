@@ -41,6 +41,9 @@ Route::group(['middleware' => 'guest'], function () {
 
 Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('operators', 'OperatorController');
+    Route::resource('likes', 'LikeController');
+    Route::resource('products', 'ProductController');
+
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');

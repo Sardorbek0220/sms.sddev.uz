@@ -14,18 +14,18 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-          <a href="{{ route('admin.report') }}" class="nav-link">
-            <i class="nav-icon fas fa-file-alt"></i>
+          <a href="{{ route('admin.monitoring') }}" class="nav-link">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
-              {{__('Reports')}}
+              {{__('Monitoring')}}
             </p>
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('operators.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-users-cog"></i>
+          <a href="{{ route('admin.report') }}" class="nav-link">
+            <i class="nav-icon fas fa-file-alt"></i>
             <p>
-              {{__('Operators')}}
+              {{__('Reports')}}
             </p>
           </a>
         </li>
@@ -38,10 +38,26 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('admin.monitoring') }}" class="nav-link">
-            <i class="nav-icon fas fa-file"></i>
+          <a href="{{ route('operators.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-users-cog"></i>
             <p>
-              {{__('Monitoring')}}
+              {{__('Operators')}}
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('likes.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-user-plus"></i>
+            <p>
+              {{__('Like / Punishment')}}
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('products.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-user-check"></i>
+            <p>
+              {{__('Script / Product')}}
             </p>
           </a>
         </li>
