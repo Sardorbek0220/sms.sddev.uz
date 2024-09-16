@@ -14,6 +14,12 @@ use App\Unknown_client;
 
 class ReportController extends Controller
 {
+    const url = "https://api.workly.uz/v1/oauth/token";
+    const client_id = "d63626d920a18be0ce20fa5ea6768b2c662a17dfd3b93";
+    const client_secret = "8988c625e95402bb7eba5cc622247d68662a17dfd3b99";
+    const username = "oybek.mirkasimov@gmail.com";
+    const password = "P@ssw0rd";
+
     public function index(Request $request)
     {
         if ($request->from_date == null) {
@@ -224,7 +230,8 @@ class ReportController extends Controller
         return Response::json($clients);
     }
 
-    public function monitoringPersonalMissed(Request $request){
+    public function monitoringPersonalMissed(Request $request)
+    {
         
 		$ch = curl_init();
 
@@ -250,7 +257,8 @@ class ReportController extends Controller
         return Response::json(json_decode($output));
     }
 
-    public function calculate_total_time($array) {
+    public function calculate_total_time($array) 
+    {
         $user_intervals = [];
         
         foreach ($array as $entry) {
@@ -271,7 +279,8 @@ class ReportController extends Controller
         return $total_times;
     }
     
-    public function merge_intervals($intervals) {
+    public function merge_intervals($intervals) 
+    {
         usort($intervals, function($a, $b) {
             return $a['in'] <=> $b['in'];
         });
@@ -287,4 +296,35 @@ class ReportController extends Controller
         
         return $merged;
     }
+
+    // ------------ workly data ---------------
+
+    private function auth()
+    {
+
+        $data = "client_id=".self::client_id."&client_secret=".self::client_secret."&grant_type=password&username=".self::username."&password=".self::password;
+
+        $ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, self::url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, [
+			"Content-type: application/x-www-form-urlencoded"
+		]);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+		$output = curl_exec($ch);
+        curl_close($ch);
+
+        return $output;
+    }
+
+    public function worklyData()
+    {
+        $auth = self::auth();
+        dd(json_decode($auth));
+    } 
 }
