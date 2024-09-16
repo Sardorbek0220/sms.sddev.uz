@@ -7,7 +7,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>{{__('Edit product')}}</h1>
+            <h1>{{__('Редактировать')}}</h1>
           </div>
         </div>
       </div>
@@ -24,46 +24,46 @@
                 <div class="card-body">
                     <div class="form-group row">
                         <div class="col-sm-2">
-                            <label for="">Name</label>
+                            <label for="">Имя</label>
                             <input type="text" readonly class="form-control" name="operator" value="<?=$operators[$product->operator]?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Comment</label>
-                            <input type="text" class="form-control" name="comment" placeholder="Comment" value="<?=$product->comment?>">
-                        </div>
-                        <div class="col-sm-1">
-                            <label for="">Client phone</label>
+                            <label for="">Телефон клиента</label>
                             <input type="text" class="form-control" name="client_phone" placeholder="Client phone" value="<?=$product->client_phone?>"> 
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Audio url</label>
+                            <label for="">URL-адрес аудио</label>
                             <input type="text" class="form-control" name="audio_url" placeholder="Audio url" value="<?=$product->audio_url?>">
                         </div>
                         <div class="col-sm-2">
-                            <label for="">Request</label>
+                            <label for="">Запрос</label>
                             <input type="text" class="form-control" name="requestt" placeholder="Request" value="<?=$product->request?>">
                         </div>
                         <div class="col-sm-2">
-                            <label for="">Response</label>
+                            <label for="">Ответ</label>
                             <input type="text" class="form-control" name="response" placeholder="Response" value="<?=$product->response?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Date</label>
+                            <label for="">Комментарий</label>
+                            <input type="text" class="form-control" name="comment" placeholder="Comment" value="<?=$product->comment?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Дата</label>
                             <input type="date" class="form-control" name="date" value="<?=date_format(date_create($product->date), 'Y-m-d')?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Script</label>
+                            <label for="">Скрипт</label>
                             <input type="number" class="form-control" name="script" placeholder="Script" min="0" max="10" value="<?=$product->script?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Product</label>
+                            <label for="">Продукт</label>
                             <input type="number" class="form-control" name="product" placeholder="Product" min="0" max="10" value="<?=$product->product?>">
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Save</button>
-                  <a href="{{ route('products.index') }}" class="btn btn-default float-right">Cancel</a>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <a href="{{ route('products.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
             </div>

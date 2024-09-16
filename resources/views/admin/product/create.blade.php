@@ -7,7 +7,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>{{__('Script / Product')}}</h1>
+            <h1>{{__('Скрипт / Продукт')}}</h1>
           </div>
         </div>
       </div>
@@ -27,35 +27,35 @@
                             <input type="text" readonly class="form-control" name="operator[<?=$id?>]" value="<?=$oper?>">
                         </div>
                         <div class="col-sm-1">
-                            <input type="text" class="form-control" name="comment[<?=$id?>]" placeholder="Comment">
+                            <input type="text" class="form-control" name="client_phone[<?=$id?>]" placeholder="Телефон клиента">
                         </div>
                         <div class="col-sm-1">
-                            <input type="text" class="form-control" name="client_phone[<?=$id?>]" placeholder="Client phone">
+                            <input type="text" class="form-control" name="audio_url[<?=$id?>]" placeholder="URL-адрес аудио">
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" name="requestt[<?=$id?>]" placeholder="Запрос">
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" name="response[<?=$id?>]" placeholder="Ответ">
                         </div>
                         <div class="col-sm-1">
-                            <input type="text" class="form-control" name="audio_url[<?=$id?>]" placeholder="Audio url">
-                        </div>
-                        <div class="col-sm-2">
-                            <input type="text" class="form-control" name="requestt[<?=$id?>]" placeholder="Request">
-                        </div>
-                        <div class="col-sm-2">
-                            <input type="text" class="form-control" name="response[<?=$id?>]" placeholder="Response">
+                            <input type="text" class="form-control" name="comment[<?=$id?>]" placeholder="Комментарий">
                         </div>
                         <div class="col-sm-1">
                             <input type="date" class="form-control" name="date[<?=$id?>]" value="<?=date('Y-m-d')?>">
                         </div>
                         <div class="col-sm-1">
-                            <input type="number" class="form-control" name="script[<?=$id?>]" placeholder="Script" min="0" max="10">
+                            <input type="number" class="form-control" name="script[<?=$id?>]" placeholder="Скрипт" min="0" max="10">
                         </div>
                         <div class="col-sm-1">
-                            <input type="number" class="form-control" name="product[<?=$id?>]" placeholder="Product" min="0" max="10">
+                            <input type="number" class="form-control" name="product[<?=$id?>]" placeholder="Продукт" min="0" max="10">
                         </div>
                     </div>
                   <?}?>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Save</button>
-                  <a href="{{ route('products.index') }}" class="btn btn-default float-right">Cancel</a>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <a href="{{ route('products.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
             </div>

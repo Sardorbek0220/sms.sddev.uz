@@ -7,7 +7,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>{{__('Like / Punishment')}}</h1>
+            <h1>{{__('Нравится / Наказание')}}</h1>
           </div>
         </div>
       </div>
@@ -27,7 +27,7 @@
                         <input type="text" readonly class="form-control" name="operator[<?=$id?>]" id="operator" value="<?=$oper?>">
                       </div>
                       <div class="col-sm-5">
-                        <input type="text" class="form-control" name="comment[<?=$id?>]" id="comment" placeholder="Comment">
+                        <input type="text" class="form-control" name="comment[<?=$id?>]" id="comment" placeholder="Комментарий">
                       </div>
                       <div class="col-sm-2">
                         <input type="date" class="form-control" name="date[<?=$id?>]" id="date" value="<?=date('Y-m-d')?>">
@@ -46,8 +46,8 @@
                   <?}?>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Save</button>
-                  <a href="{{ route('likes.index') }}" class="btn btn-default float-right">Cancel</a>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <a href="{{ route('likes.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
             </div>
