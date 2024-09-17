@@ -56,7 +56,7 @@ class LikeController extends Controller
     public function store(Request $request)
     {
         foreach ($request->operator as $id => $name) {
-            if (empty($request->comment[$id]) || !$request->like[$id]) {
+            if (empty($request->comment[$id]) || !isset($request->punish[$id])) {
                 continue;
             }
             Like::create([
