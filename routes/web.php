@@ -47,6 +47,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('scores', 'ScoreController');
 
     Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');
+    Route::get('piece', [BigreportController::class, 'piece'])->name('admin.piece');
     Route::get('bigreport/extra', [BigreportController::class, 'extra']);
 
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');

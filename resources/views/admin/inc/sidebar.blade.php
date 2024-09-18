@@ -76,6 +76,14 @@
               </a>
             </li>
             <li class="nav-item">
+              <a href="{{ route('admin.piece') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-th-list"></i>
+                <p>
+                  {{__('Pieces')}}
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
               <a href="{{ route('scores.index') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-tools"></i>
                 <p>
