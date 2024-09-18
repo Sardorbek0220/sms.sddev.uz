@@ -45,8 +45,8 @@
                   </div>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Save</button>
-                  <a href="{{ route('likes.index') }}" class="btn btn-default float-right">Cancel</a>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <a href="{{ route('likes.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
             </div>

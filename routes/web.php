@@ -6,6 +6,7 @@ use App\Http\Controllers\AmocrmController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\BigreportController;
 use App\Http\Controllers\PbxBot\PbxBotController;
 
 /*
@@ -43,6 +44,10 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('operators', 'OperatorController');
     Route::resource('likes', 'LikeController');
     Route::resource('products', 'ProductController');
+    Route::resource('scores', 'ScoreController');
+
+    Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');
+    Route::get('bigreport/extra', [BigreportController::class, 'extra']);
 
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');

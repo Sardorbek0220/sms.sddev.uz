@@ -14,7 +14,7 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-          <a href="{{ route('admin.monitoring') }}" class="nav-link">
+          <a href="#" onclick="window.open('/admin/monitoring')" class="nav-link">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
               {{__('Monitoring')}}
@@ -46,20 +46,44 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ route('likes.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-user-plus"></i>
-            <p>
-              {{__('Like / Punishment')}}
-            </p>
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-chart-bar"></i>
+            <p>Automatization<i class="fas fa-angle-left right"></i></p>
           </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ route('products.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-user-check"></i>
-            <p>
-              {{__('Script / Product')}}
-            </p>
-          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="#" onclick="window.open('/admin/bigreport')" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-th-list"></i>
+                <p>
+                  {{__('Big report')}}
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('likes.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-user-plus"></i>
+                <p>
+                  {{__('Like / Punishment')}}
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('products.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-user-check"></i>
+                <p>
+                  {{__('Script / Product')}}
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('scores.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-tools"></i>
+                <p>
+                  {{__('Scores')}}
+                </p>
+              </a>
+            </li>
+          </ul>
         </li>
         <li class="nav-item">
           <a href="{{ route('logout') }}" class="nav-link">

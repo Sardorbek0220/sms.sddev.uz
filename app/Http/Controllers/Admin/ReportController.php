@@ -222,7 +222,7 @@ class ReportController extends Controller
         $to = $request['to'] . " 23:59:59";
         
         $clients = DB::table('unknown_clients')
-            ->select('operator', 'direction', DB::raw('COUNT(DISTINCT phone) as count'))
+            ->select('operator', 'direction', DB::raw('COUNT(phone) as count'))
             ->where('event', '=', 'call_end')
             ->whereBetween('created_at', [$from, $to])
             ->groupByRaw('direction, operator')
