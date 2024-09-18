@@ -18,7 +18,7 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-                <h3 class="card-title mt-2"><a href="{{ route('scores.create') }}" class="btn btn-primary">{{__('Создать')}}</a></h3>
+              <h3 class="card-title mt-2"><a href="{{ route('scores.create') }}" class="btn btn-primary">{{__('Создать')}}</a></h3>
             </div>
             <div class="card-body">
               <table id="example1" class="table table-bordered table-striped" style="width: 100%">
@@ -27,8 +27,6 @@
                     <th style="width: 2%">#</th>
                     <th>{{__('Тип оценки')}}</th>
                     <th>{{__('Значение')}}</th>
-                    <th>{{__('Под')}}</th>
-                    <th>{{__('После (значение)')}}</th>
                     <th>{{__('Дата')}}</th>
                     <th style="width: 10%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
@@ -38,9 +36,15 @@
                   <tr>
                     <td>{{$data->id}}</td>
                     <td>{{$keys[$data->key_text]}}</td>
-                    <td>{{$data->value}}</td>
-                    <td>{{$data->under}}</td>
-                    <td>{{$data->after_value}}</td>
+                    <td>
+                      @if(isset($data->value['value'])) 
+                        {{$data->value['value']}} 
+                      @else 
+                        @foreach($data->value as $val)
+                          {{$val->value}} ( От {{$val->from}} - До {{$val->to}} ) </br>
+                        @endforeach
+                      @endif
+                    </td>
                     <td>{{date_format(date_create($data->created_at), 'd.m.Y')}}</td>
                     <td style="text-align: center;">
                       <a class="d-inline-block mr-2" href="{{ route('scores.edit', ['score'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">

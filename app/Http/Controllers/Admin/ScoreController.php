@@ -17,6 +17,9 @@ class ScoreController extends Controller
     {
         $scores = Score::get();
         $keys = Score::keys;
+        foreach ($scores as &$score) {
+            $score->value = (array) json_decode($score->value);
+        }
         return view('admin.score.index', compact('scores', 'keys'));
     }
 
@@ -39,12 +42,17 @@ class ScoreController extends Controller
      */
     public function store(Request $request)
     {        
-        Score::create([
-            'key_text' => $request->key,
-            'value' => $request->value,
-            'under' => $request->under,
-            'after_value' => $request->after_value,
-        ]);
+        if (empty($request->value)) {
+            Score::create([
+                'key_text' => $request->key,
+                'value' => json_encode($request->data),
+            ]);
+        }else{
+            Score::create([
+                'key_text' => $request->key,
+                'value' => json_encode(['value' => $request->value]),
+            ]);
+        }
         
         return redirect()->route('scores.index');
     }
@@ -69,6 +77,7 @@ class ScoreController extends Controller
     public function edit($id)
     {
         $score = Score::find($id);
+        $score->value = (array) json_decode($score->value);
         $keys = Score::keys;
         return view('admin.score.edit', compact('score', 'keys'));
     }
@@ -83,12 +92,15 @@ class ScoreController extends Controller
     public function update(Request $request, $id)
     {        
         $score = Score::find($id);
-        $score->update([
-            'key_text' => $request->key,
-            'value' => $request->value,
-            'under' => $request->under,
-            'after_value' => $request->after_value,
-        ]);
+        if (empty($request->value)) {
+            $score->update([
+                'value' => json_encode($request->data)
+            ]);
+        }else{
+            $score->update([
+                'value' => json_encode(['value' => $request->value])
+            ]);
+        }
 
         return redirect()->route('scores.index');
     }
