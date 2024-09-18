@@ -52,7 +52,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="#" onclick="window.open('/admin/bigreport')" class="nav-link" style="background: dimgrey;">
+              <a href="{{ route('admin.bigreport') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-th-list"></i>
                 <p>
                   {{__('Big report')}}
@@ -77,9 +77,9 @@
             </li>
             <li class="nav-item">
               <a href="{{ route('admin.piece') }}" class="nav-link" style="background: dimgrey;">
-                <i class="nav-icon fas fa-th-list"></i>
+                <i class="nav-icon fas fa-tasks"></i>
                 <p>
-                  {{__('Pieces')}}
+                  {{__('Statistics')}}
                 </p>
               </a>
             </li>

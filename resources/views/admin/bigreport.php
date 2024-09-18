@@ -113,15 +113,17 @@
 </head>
 <body>
 	
-<div id="app">
-<template>
-  <v-container fluid class="grey lighten-5 mt-3">
+<div id="app" class="content-wrapper">
+<section class="content-header">
+</section>
+<template class="content">
+  <v-container fluid class="grey lighten-5">
     <v-row>
     	<v-col>
     		<div class="float-right">
           <input class="form-control" type="date" id="start_date" name="start_date" style="display: inline;width: auto;">
             <input class="form-control" type="date" id="get_date" name="get_date" style="display: inline;width: auto;">
-            <button class="mb-1 btn btn-primary text-white" :loading="loading" type="button" @click="filter()">Поиск</button>
+            <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Поиск</button>
           </div>
           <div class="float-left">
             <!-- <div class="d-inline-block">
@@ -198,50 +200,7 @@
 		  <!-- export excel -->
       <v-col style="display: none">
         <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-          <template v-slot:default>
-            <thead style="border: solid 1px grey;">
-              <tr>
-                <th class="text-left" width="220px">Имя</th>
-                <th class="text-left" width="160px"><span class="online_text">онлайн-время</span></th>
-                <th class="text-left" width="15px">Вход. звон</th>
-                <th class="text-left">Время</th>
-                <th class="text-left" width="15px">Исход. звон</th>
-                <th class="text-left">Время</th>
-                <th class="text-left">Общ. вре.</th>
-                <th class="text-left">%</th>
-                <th class="text-left">👍</th>
-                <th class="text-left">☹️</th>
-                <th class="text-left">❌</th>
-                <th class="text-left">от</th>
-                <th class="text-left">до</th>
-                <th class="text-left">Входящие</th>
-                <th class="text-left">Пропущенные</th>
-                <th class="text-left">Незарег. вход. клиенты</th>
-                <th class="text-left">Незарег. исход. клиенты</th>
-              </tr>
-            </thead>
-            <tbody style="border: solid 1px grey;">
-              <tr v-for="report in users_5995">
-                <td>{{report.name}}</td>
-                <td><span class="online_text">{{ oper_times[report.num] }}</span></td>
-                <td>{{report.vxod_count}}</td>
-                <td>{{report.vxod_time}}</td>
-                <td>{{report.isxod_count}}</td>
-                <td>{{report.isxod_time}}</td>
-                <td>{{report.all_time}}</td>
-                <td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
-                <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
-                <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
-                <td>{{ oper_misseds[report.num] ?? 0 }}</td>
-                <td>{{ from_date }}</td>
-                <td>{{ to_date }}</td>
-                <td>{{ bigDataPeriod.answered+bigDataPeriod.missed }}</td>
-                <td>{{ bigDataPeriod.missed }}</td>
-                <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-                <td>{{ unknownClients.outbound[report.num] ? unknownClients.outbound[report.num] : 0 }}</td>
-              </tr>
-            </tbody>
-          </template>
+          
         </v-simple-table>
       </v-col>
       <!-- ------------ -->

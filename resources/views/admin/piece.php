@@ -163,11 +163,7 @@
                                 <th class="text-left">Вход. звон</th>
                                 <th class="text-left">Total feedback %</th>
                                 <th class="text-left">Feedback 👍 %</th>
-                                <th class="text-left">Like</th>
-                                <th class="text-left">Punishment</th>
                                 <th class="text-left">Незарег. вход. клиенты</th>
-                                <th class="text-left">Script</th>
-                                <th class="text-left">Product</th>
                                 <th class="text-left">👍</th>
                                 <th class="text-left">☹️</th>
                                 <th class="text-left" width="160px"><span>онлайн-время</span></th>
@@ -182,11 +178,7 @@
                                 <td>{{ report.vxod_count }}</td>
                                 <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
                                 <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ extra.likes[report.num] ? extra.likes[report.num].likes : 0 }}</td>
-                                <td>{{ extra.likes[report.num] ? extra.likes[report.num].punishments : 0 }}</td>
                                 <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-                                <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_script).toFixed(1)) : 0 }}</td>
-                                <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_product).toFixed(1)) : 0 }}</td>
                                 <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
                                 <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
                                 <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
@@ -209,11 +201,7 @@
                                 <th class="text-left">Вход. звон</th>
                                 <th class="text-left">Total feedback %</th>
                                 <th class="text-left">Feedback 👍 %</th>
-                                <th class="text-left">Like</th>
-                                <th class="text-left">Punishment</th>
                                 <th class="text-left">Незарег. вход. клиенты</th>
-                                <th class="text-left">Script</th>
-                                <th class="text-left">Product</th>
                                 <th class="text-left">👍</th>
                                 <th class="text-left">☹️</th>
                                 <th class="text-left" width="160px"><span>онлайн-время</span></th>
@@ -228,11 +216,7 @@
                                 <td>{{ report.vxod_count }}</td>
                                 <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
                                 <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ extra.likes[report.num] ? extra.likes[report.num].likes : 0 }}</td>
-                                <td>{{ extra.likes[report.num] ? extra.likes[report.num].punishments : 0 }}</td>
                                 <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-                                <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_script).toFixed(1)) : 0 }}</td>
-                                <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_product).toFixed(1)) : 0 }}</td>
                                 <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
                                 <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
                                 <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
@@ -276,51 +260,47 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
-        loading: false,
-        today: new Date(),
-        interval:null,
-        calls: [],
-        users: [],
-        inbounds_5995: [],
-        inTalk_5995: [], 
-        inSumTalk_5995: null,
-        inGetProg_5995: null,
-        outbounds_5995: [],
-        outTalk_5995: [],
-        outSumTalk_5995:null,
-        outGetProg_5995: null,
-        inreports_5995: [],
-        outreports_5995: [],
-        real_reports_5995: [],
-        fifos: [],
-        users_5995: [],
-        notTalk_5995: [],
-        notAnswer_5995: [],
-        feedbacks: {
-            mark0: {},
-            mark3: {}
-        },
-        bigData: [],
-        bigDataPeriod: [],
-        todayData: {},
-        weekData: {},
-        monthData: {},
-        out_todayData: {},
-        out_weekData: {},
-        out_monthData: {},
-        oper_times: {},
-        availableOperators: [],
-        oper_misseds: {},
-        from_date: "",
-        to_date: "",
-        unknownClients: {
-            inbound: {},
-            outbound: {}
-        },
-        extra: {
-            likes: {},
-            products: {}
-        }
+      loading: false,
+      today: new Date(),
+      interval:null,
+      calls: [],
+      users: [],
+      inbounds_5995: [],
+      inTalk_5995: [], 
+      inSumTalk_5995: null,
+      inGetProg_5995: null,
+      outbounds_5995: [],
+      outTalk_5995: [],
+      outSumTalk_5995:null,
+      outGetProg_5995: null,
+      inreports_5995: [],
+      outreports_5995: [],
+      real_reports_5995: [],
+      fifos: [],
+      users_5995: [],
+      notTalk_5995: [],
+      notAnswer_5995: [],
+      feedbacks: {
+        mark0: {},
+        mark3: {}
+      },
+      bigData: [],
+      bigDataPeriod: [],
+      todayData: {},
+      weekData: {},
+      monthData: {},
+      out_todayData: {},
+      out_weekData: {},
+      out_monthData: {},
+      oper_times: {},
+      availableOperators: [],
+      oper_misseds: {},
+      from_date: "",
+      to_date: "",
+      unknownClients: {
+        inbound: {},
+        outbound: {}
+      }
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
@@ -373,20 +353,6 @@ new Vue({
       clearInterval(this.interval)
     },
     methods: {
-      async getExtra(){
-        await axios.get('bigreport/extra', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
-          if (response.status == 200) {
-            if (response.data.likes.length > 0) {
-              for (const like of response.data.likes) {
-                this.extra.likes[like.operator] = like
-              }
-              for (const product of response.data.products) {
-                this.extra.products[product.operator] = product
-              }
-            }            
-          }
-        });	
-      }, 
       async personalMissed(){	
         await axios.get('monitoring/personalMissed', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
           if (response.status == 200) {	
@@ -791,7 +757,6 @@ new Vue({
 
         await this.personalMissed();
         await this.getUnknownClients();
-        await this.getExtra();
               
         let reports_support = this.real_reports_5995;
         let set_support = [];
