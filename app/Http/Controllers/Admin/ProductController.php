@@ -55,17 +55,22 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        Product::create([
-            'operator' => $request->operator,
-            'comment' => $request->comment,
-            'client_phone' => $request->client_phone,
-            'audio_url' => $request->audio_url,
-            'request' => $request->requestt,
-            'response' => $request->response,
-            'date' => $request->date,
-            'script' => $request->script,
-            'product' => $request->product
-        ]);
+        foreach ($request->data as $datum) {
+            if (empty($datum['script']) || empty($datum['product'])) {
+                continue;
+            }
+            Product::create([
+                'operator' => $datum['operator'],
+                'comment' => $datum['comment'],
+                'client_phone' => $datum['client_phone'],
+                'audio_url' => $datum['audio_url'],
+                'request' => $datum['requestt'],
+                'response' => $datum['response'],
+                'date' => $datum['date'],
+                'script' => $datum['script'],
+                'product' => $datum['product']
+            ]);
+        }
         
         return redirect()->route('products.index');
     }

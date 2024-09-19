@@ -75,8 +75,8 @@
               </table>
             </div>
             <div class="card-footer clearfix">
-              <ul class="pagination pagination-sm m-0 float-right">
-              {!! $likes->links() !!}
+              <ul class="pagination pagination m-0 float-right">
+              {!! $likes->appends(request()->query())->links() !!}
               </ul>
             </div>
           </div>
