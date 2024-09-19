@@ -123,7 +123,7 @@
     		<div class="float-right">
           <input class="form-control" type="date" id="start_date" name="start_date" style="display: inline;width: auto;">
             <input class="form-control" type="date" id="get_date" name="get_date" style="display: inline;width: auto;">
-            <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Поиск</button>
+            <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
           </div>
           <div class="float-left">
             <!-- <div class="d-inline-block">
@@ -204,12 +204,6 @@
         </v-simple-table>
       </v-col>
       <!-- ------------ -->
-    </v-row>
-    <v-row>
-      <v-col cols="11"></v-col>
-      <v-col cols="1">
-        <a href="/logout" class="mb-2 btn btn-outline-dark float-right">Выйти</a>
-      </v-col>
     </v-row>
   </v-container>
 </template>
