@@ -128,8 +128,7 @@
                         <div class="d-inline-block">
                             <v-row>
                                 <v-col>
-                                <button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL</button>
-                                    <a id="dlink"  href="" style="display: none"></a>
+                                  <h4>Statistics</h4>
                                 </v-col>
                             </v-row>
                         </div>
@@ -226,6 +225,13 @@
                 </v-simple-table>
             </v-col>
             <!-- ------------ -->
+            </v-row>
+            <v-row>
+              <v-col cols="11"></v-col>
+              <v-col cols="1">
+                <button class="float-right btn-primary" style="border-radius: 4px; padding: 8px; border: 1px solid white; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL</button>
+                <a id="dlink"  href="" style="display: none"></a>
+              </v-col>
             </v-row>
         </v-container>
     </template>

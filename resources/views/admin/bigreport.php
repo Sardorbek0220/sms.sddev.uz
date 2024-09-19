@@ -126,14 +126,13 @@
             <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
           </div>
           <div class="float-left">
-            <!-- <div class="d-inline-block">
+            <div class="d-inline-block">
               <v-row>
                 <v-col>
-                  <button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL</button>
-                      <a id="dlink"  href="" style="display: none"></a>
+                  <h4>Big report</h4>
                 </v-col>
               </v-row>
-          </div> -->
+          </div>
 		   	</div>
     	</v-col>
 	  </v-row>
