@@ -86,7 +86,7 @@
             </div>
             <div class="card-footer clearfix">
               <ul class="pagination pagination-sm m-0 float-right">
-              {!! $products->links() !!}
+              {!! $products->appends(request()->query())->links() !!}
               </ul>
             </div>
           </div>
