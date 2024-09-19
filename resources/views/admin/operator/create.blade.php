@@ -34,6 +34,12 @@
                     </div>
                   </div>
                   <div class="form-group row">
+                    <label for="workly_id" class="col-sm-2 col-form-label">Workly ID</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" name="workly_id" id="workly_id" placeholder="Workly ID">
+                    </div>
+                  </div>
+                  <div class="form-group row">
                     <div class="offset-sm-2 col-sm-10">
                       <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="active" id="active">

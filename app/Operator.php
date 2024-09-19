@@ -8,6 +8,7 @@ class Operator extends Model
 {
     protected $fillable = [
         'id',
+        'workly_id',
         'name',
         'phone',
         'active',

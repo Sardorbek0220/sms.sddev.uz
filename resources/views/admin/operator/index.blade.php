@@ -33,6 +33,7 @@
                       <th style="width: 2%">#</th>
                       <th>{{__('Name')}}</th>
                       <th>{{__('Phone')}}</th>
+                      <th>{{__('Workly ID')}}</th>
                       <th>{{__('Condition')}}</th>
                       <th style="width: 10%;" class="text-center">{{__('Action')}}</th>
                     </tr>
@@ -43,6 +44,7 @@
                       <td>{{$data->id}}</td>
                       <td>{{$data->name}}</td>
                       <td>{{$data->phone}}</td>
+                      <td>{{$data->workly_id}}</td>
                       <td>@if($data->active == 'Y') active @else inactive @endif</td>
                       <td style="text-align: center;">
                         <a class="d-inline-block mr-2" href="{{ route('operators.edit', ['operator'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">

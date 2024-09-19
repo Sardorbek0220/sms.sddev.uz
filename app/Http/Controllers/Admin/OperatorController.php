@@ -49,6 +49,7 @@ class OperatorController extends Controller
             $operator = Operator::create([
                 'name' => $request->name,
                 'phone' => $request->phone,
+                'workly_id' => $request->workly_id,
                 'active' => $request->active ? 'Y' : 'N'
             ]);
         }else{
@@ -98,6 +99,7 @@ class OperatorController extends Controller
         $operator->update([
             'name' => $request->name,
             'phone' => $request->phone,
+            'workly_id' => $request->workly_id,
             'active' => $request->active ? 'Y' : 'N'
         ]);
 
