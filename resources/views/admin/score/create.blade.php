@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-sm-4">
                       <label for="">Значение</label>
-                      <input type="number" class="form-control setPlace" name="data[0][value]" value="" placeholder="1 Workly = Значение">
+                      <input type="number" class="form-control setPlace" name="data[0][value]" value="" placeholder="1 Workly (вовремя) = Значение">
                     </div>
                   </div>
                   <div class="row col-sm-6 forOthers" style="display: none">
@@ -85,7 +85,7 @@ $("#appendValues").click(function(){
 
 $("#key").change(function(){
   $(".setPlace").attr("placeholder", "1 "+$("#key option:selected").text()+" = Значение");
-  if (['missed', 'workly'].includes(this.value)) {
+  if (['missed', 'workly_ontime', 'workly_late'].includes(this.value)) {
     $(".forValues").show();
     $(".forOthers").hide();
     $("#appendValues").show();

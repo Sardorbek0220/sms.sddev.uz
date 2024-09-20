@@ -15,9 +15,10 @@ class Score extends Model
     ];
 
     const keys = [
-        'workly' => 'Workly',
+        'workly_ontime' => 'Workly (вовремя)',
+        'workly_late' => 'Workly (поздно)',
         'personal_missed' => 'Перс. пропущ. звон',
-        'missed' => 'Пропущенные',
+        'missed' => 'Пропущенные в раб. время %',
         'inbound' => 'Вход. звон',
         'total_feedback' => 'Total feedback %',
         'mark3_feedback' => 'Mark3 feedback %',
