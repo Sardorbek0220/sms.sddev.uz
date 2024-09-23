@@ -68,6 +68,8 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('monitoring/personalMissed', [ReportController::class, 'monitoringPersonalMissed']);
 
     Route::get('monitoring/worklyData', [ReportController::class, 'worklyData']);
+    Route::get('monitoring/worklySchedule', [ReportController::class, 'worklySchedule']);
+    Route::get('monitoring/worklyOperators', [ReportController::class, 'worklyOperators']);
 });
 
 Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
@@ -82,6 +84,10 @@ Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
     Route::get('monitoring/personalMissed', [ReportController::class, 'monitoringPersonalMissed']);
+
+    Route::get('monitoring/worklyData', [ReportController::class, 'worklyData']);
+    Route::get('monitoring/worklySchedule', [ReportController::class, 'worklySchedule']);
+    Route::get('monitoring/worklyOperators', [ReportController::class, 'worklyOperators']);
 
     // Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
 });

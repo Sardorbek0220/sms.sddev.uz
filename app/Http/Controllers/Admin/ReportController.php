@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Response;
 use App\All_call;
-use App\Operators;
+use App\Operator;
 use App\Feedback;
 use App\Operator_time;
 use App\Unknown_client;
@@ -19,6 +19,7 @@ class ReportController extends Controller
     const client_secret = "8988c625e95402bb7eba5cc622247d68662a17dfd3b99";
     const username = "oybek.mirkasimov@gmail.com";
     const password = "P@ssw0rd";
+    const workly_auth = 'configs/workly_auth.json';
 
     public function index(Request $request)
     {
@@ -299,13 +300,11 @@ class ReportController extends Controller
 
     // ------------ workly data ---------------
 
-    private function auth()
+    private function auth(): void
     {
-
         $data = "client_id=".self::client_id."&client_secret=".self::client_secret."&grant_type=password&username=".self::username."&password=".self::password;
 
         $ch = curl_init();
-
 		curl_setopt($ch, CURLOPT_URL, self::url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); 
@@ -319,12 +318,135 @@ class ReportController extends Controller
 		$output = curl_exec($ch);
         curl_close($ch);
 
-        return $output;
+        file_put_contents(self::workly_auth, $output);
     }
 
-    public function worklyData()
+    private function getData($url, $token)
     {
-        $auth = self::auth();
-        dd(json_decode($auth));
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-type: application/x-www-form-urlencoded",
+            "Authorization: Bearer $token",
+        ]);
+
+        $results = curl_exec($ch);
+        curl_close($ch);
+
+        return (array) json_decode($results);
+    }
+
+    public function worklyData(Request $request)
+    {
+        $auth = (array) json_decode(file_get_contents(self::workly_auth));
+
+        $allData = [];
+
+        if ($auth['access_token']) {
+            $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081", $auth['access_token']);
+
+            if (!$data['items'] && $data['code']) {
+                info($data);
+                self::auth();
+                $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554", $auth['access_token']);
+            }
+            
+            foreach ($data['items'] as $datum) {
+                $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
+            }
+
+            $pages = $data['_meta']->pageCount;
+            if ($pages > 1) {
+                $next = $data['_links']->next->href;
+                $ch = curl_init();
+                for ($i=2; $i <= $pages; $i++) { 
+                    
+                    curl_setopt($ch, CURLOPT_URL, $next);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        "Content-type: application/x-www-form-urlencoded",
+                        "Authorization: Bearer ".$auth['access_token'],
+                    ]);
+                    $output = curl_exec($ch);
+                    $data = (array) json_decode($output);
+
+                    if ($i != $pages) {
+                        $next = $data['_links']->next->href;
+                    }
+
+                    foreach ($data['items'] as $datum) {
+                        $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
+                    }                    
+                }
+                curl_close($ch);
+            }
+        }
+
+        return Response::json($allData);
+
     } 
+
+    public function worklySchedule()
+    {
+        $auth = (array) json_decode(file_get_contents(self::workly_auth));
+
+        $allData = [];
+
+        if ($auth['access_token']) {
+            $data = self::getData("https://api.workly.uz/v1/employees", $auth['access_token']);
+
+            if (!$data['items'] && $data['code']) {
+                info($data);
+                self::auth();
+                $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                $data = self::getData("https://api.workly.uz/v1/employees", $auth['access_token']);
+            }
+            
+            foreach ($data['items'] as $datum) {
+                $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
+            }
+
+            $pages = $data['_meta']->pageCount;
+            if ($pages > 1) {
+                $next = $data['_links']->next->href;
+                $ch = curl_init();
+                for ($i=2; $i <= $pages; $i++) { 
+                    
+                    curl_setopt($ch, CURLOPT_URL, $next);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        "Content-type: application/x-www-form-urlencoded",
+                        "Authorization: Bearer ".$auth['access_token'],
+                    ]);
+                    $output = curl_exec($ch);
+                    $data = (array) json_decode($output);
+
+                    if ($i != $pages) {
+                        $next = $data['_links']->next->href;
+                    }
+
+                    foreach ($data['items'] as $datum) {
+                        $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
+                    }                    
+                }
+                curl_close($ch);
+            }
+        }
+
+        return Response::json($allData);
+
+    } 
+
+    public function worklyOperators()
+    {
+        $opers = Operator::where('workly_id', '!=', '')->get();
+        $worklyOpers = [];
+        foreach ($opers as $oper) {
+            $worklyOpers[$oper['phone']] = $oper['workly_id'];
+        }
+        return Response::json($worklyOpers);
+    }
 }

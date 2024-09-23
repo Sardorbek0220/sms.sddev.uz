@@ -7,8 +7,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 	<script src="https://test17.salesdoc.io/js/axios.min.js"></script>
 	<meta charset="UTF-8">
 	<link rel="icon" href="../assets/logo.png">
@@ -151,78 +151,82 @@
             </template>
             <v-row class="mb-6 mt-4" no-gutters>
             <v-col cols="12">
-                <v-simple-table>
-                    <template v-slot:default>
-                        <thead style="border: solid 1px grey;">
-                            <tr>
-                                <th class="text-left" width="220px">Имя</th>
-                                <th class="text-left">Workly</th>
-                                <th class="text-left">Перс. пропущ. звон</th>
-                                <th class="text-left">Пропущенные</th>
-                                <th class="text-left">Вход. звон</th>
-                                <th class="text-left">Total feedback %</th>
-                                <th class="text-left">Feedback 👍 %</th>
-                                <th class="text-left">Незарег. вход. клиенты</th>
-                                <th class="text-left">👍</th>
-                                <th class="text-left">☹️</th>
-                                <th class="text-left" width="160px"><span>онлайн-время</span></th>
-                            </tr>
-                        </thead>
-                        <tbody style="border: solid 1px grey;">
-                            <tr v-for="report in users_5995">
-                                <td>{{ report.name }}</td>
-                                <td>workly</td>
-                                <td>{{ oper_misseds[report.num] ?? 0 }}</td>
-                                <td>{{ bigDataPeriod.missed }}</td>
-                                <td>{{ report.vxod_count }}</td>
-                                <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-                                <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
-                                <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
-                                <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
-                            </tr>
-                        </tbody>
-                    </template>
-                </v-simple-table>
+              <v-simple-table>
+                <template v-slot:default>
+                  <thead style="border: solid 1px grey;">
+                    <tr>
+                      <th class="text-left" width="220px">Имя</th>
+                      <th class="text-center">Workly <br><span v-show="period" style="color:gainsboro">(вовремя) (поздно)</span></th>
+                      <th class="text-left">Перс. пропущ. звон</th>
+                      <th class="text-left">Все входящие</th>
+                      <th class="text-left">Пропущенные в раб. время</th>
+                      <th class="text-left">Вход. звон</th>
+                      <th class="text-left">Total feedback %</th>
+                      <th class="text-left">Feedback 👍 %</th>
+                      <th class="text-left">Незарег. вход. клиенты</th>
+                      <th class="text-left">👍</th>
+                      <th class="text-left">☹️</th>
+                      <th class="text-left" width="160px"><span>онлайн-время</span></th>
+                    </tr>
+                  </thead>
+                  <tbody style="border: solid 1px grey;">
+                    <tr v-for="report in users_5995">
+                      <td>{{ report.name }}</td>
+                      <td class="text-center" v-html="calcWorkly(report.num)"></td>
+                      <td>{{ oper_misseds[report.num] ?? 0 }}</td>
+                      <td>{{ bigDataPeriod.missed+bigDataPeriod.answered }}</td>
+                      <td>{{ bigDataPeriod.missed_in }}</td>
+                      <td>{{ report.vxod_count }}</td>
+                      <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
+                      <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
+                      <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
+                      <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
+                      <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+                      <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
             </v-col>
 
-                <!-- export excel -->
+            <!-- export excel -->
             <v-col style="display: none">
-                <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
+              <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
                 <template v-slot:default>
-                        <thead style="border: solid 1px grey;">
-                            <tr>
-                                <th class="text-left" width="220px">Имя</th>
-                                <th class="text-left">Workly</th>
-                                <th class="text-left">Перс. пропущ. звон</th>
-                                <th class="text-left">Пропущенные</th>
-                                <th class="text-left">Вход. звон</th>
-                                <th class="text-left">Total feedback %</th>
-                                <th class="text-left">Feedback 👍 %</th>
-                                <th class="text-left">Незарег. вход. клиенты</th>
-                                <th class="text-left">👍</th>
-                                <th class="text-left">☹️</th>
-                                <th class="text-left" width="160px"><span>онлайн-время</span></th>
-                            </tr>
-                        </thead>
-                        <tbody style="border: solid 1px grey;">
-                            <tr v-for="report in users_5995">
-                                <td>{{ report.name }}</td>
-                                <td>workly</td>
-                                <td>{{ oper_misseds[report.num] ?? 0 }}</td>
-                                <td>{{ bigDataPeriod.missed }}</td>
-                                <td>{{ report.vxod_count }}</td>
-                                <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-                                <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-                                <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
-                                <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
-                                <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
-                            </tr>
-                        </tbody>
-                    </template>
-                </v-simple-table>
+                  <thead style="border: solid 1px grey;">
+                    <tr>
+                      <th class="text-left" width="220px">Имя</th>
+                      <th class="text-center">Workly <br><span v-show="period" style="color:gainsboro">(вовремя) (поздно)</span></th>
+                      <th class="text-left">Перс. пропущ. звон</th>
+                      <th class="text-left">Все входящие</th>
+                      <th class="text-left">Пропущенные в раб. время</th>
+                      <th class="text-left">Вход. звон</th>
+                      <th class="text-left">Total feedback %</th>
+                      <th class="text-left">Feedback 👍 %</th>
+                      <th class="text-left">Незарег. вход. клиенты</th>
+                      <th class="text-left">👍</th>
+                      <th class="text-left">☹️</th>
+                      <th class="text-left" width="160px"><span>онлайн-время</span></th>
+                    </tr>
+                  </thead>
+                  <tbody style="border: solid 1px grey;">
+                    <tr v-for="report in users_5995">
+                      <td>{{ report.name }}</td>
+                      <td class="text-center" v-html="calcWorkly(report.num)"></td>
+                      <td>{{ oper_misseds[report.num] ?? 0 }}</td>
+                      <td>{{ bigDataPeriod.missed+bigDataPeriod.answered }}</td>
+                      <td>{{ bigDataPeriod.missed_in }}</td>
+                      <td>{{ report.vxod_count }}</td>
+                      <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
+                      <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
+                      <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
+                      <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
+                      <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+                      <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
             </v-col>
             <!-- ------------ -->
             </v-row>
@@ -266,8 +270,10 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      period: false,
       loading: false,
       today: new Date(),
+      day: '',
       interval:null,
       calls: [],
       users: [],
@@ -292,12 +298,6 @@ new Vue({
       },
       bigData: [],
       bigDataPeriod: [],
-      todayData: {},
-      weekData: {},
-      monthData: {},
-      out_todayData: {},
-      out_weekData: {},
-      out_monthData: {},
       oper_times: {},
       availableOperators: [],
       oper_misseds: {},
@@ -306,12 +306,16 @@ new Vue({
       unknownClients: {
         inbound: {},
         outbound: {}
-      }
+      },
+      worklyData: {},
+      worklySchedule: {},
+      worklyOperators: {}
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
       var month = ("0" + (this.today.getMonth() + 1)).slice(-2);
       var today = this.today.getFullYear()+"-"+(month)+"-"+(day);
+      this.day = today 
 
       this.from_date = today
       this.to_date = today
@@ -320,8 +324,11 @@ new Vue({
       $('#start_date').val(today);
 
       await this.get_date();
-
+      
       this.loading = true; 
+
+      await this.getWorklyOperators();
+      await this.getWorklySchedule();
 
       await this.getUsers();
       await this.get_users_feedbacks();
@@ -333,6 +340,9 @@ new Vue({
       await this.getBigDataPeriod();
 
       this.loading = false;
+
+      await this.getWorklyData();
+
     },
     created(){	
 
@@ -359,6 +369,43 @@ new Vue({
       clearInterval(this.interval)
     },
     methods: {
+      async getWorklyOperators(){
+        await axios.get('monitoring/worklyOperators').then(response => {
+          if (response.status == 200) {
+            this.worklyOperators = response.data;
+          }
+        });	
+      }, 
+      async getWorklySchedule(){
+        await axios.get('monitoring/worklySchedule').then(response => {
+          if (response.status == 200) {
+            for (const datum of response.data) {
+              if (Object.values(this.worklyOperators).includes(datum.id) > 0) {
+                this.worklySchedule[datum.id] = datum.schedule
+              }
+            }
+          }          
+        });	
+      }, 
+      async getWorklyData(){
+        this.loading = true;
+        await axios.get('monitoring/worklyData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+          if (response.status == 200) {
+            this.loading = false;
+            this.worklyData = {}
+            for (const datum of response.data) {
+              let day = datum.date.slice(0,10)
+              if (!this.worklyData[datum.id]) {
+                this.worklyData[datum.id] = []
+              }
+              if (!this.worklyData[datum.id][day]) {
+                this.worklyData[datum.id][day] = []
+              }
+              this.worklyData[datum.id][day].push(datum.date.slice(11, -3))
+            }
+          }
+        });	
+      }, 
       async personalMissed(){	
         await axios.get('monitoring/personalMissed', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
           if (response.status == 200) {	
@@ -415,7 +462,6 @@ new Vue({
         await this.get_date();
 
         this.loading = true;
-
         await this.get_users_feedbacks();
         await this.getOperatorTime();
         this.getInfos_5995();
@@ -424,6 +470,8 @@ new Vue({
         await this.getBigDataPeriod();
 
         this.loading = false;
+
+        await this.getWorklyData();
       },
       async getBigDataPeriod(){
         await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
@@ -485,7 +533,7 @@ new Vue({
           }
         });
       },
-      getInfos_5995: function(){
+      getInfos_5995(){
         let calls = this.calls;
 
         // -------------------------------- inbounds_5995 -----------------------------------------
@@ -611,7 +659,7 @@ new Vue({
         let outGetProg = ((this.outTalk_5995.length / this.outbounds_5995.length) * 100);
         this.outGetProg_5995 = outGetProg;
       },
-      getReport_5995: function(){
+      getReport_5995(){
         let vxods1 = this.inreports_5995;
         let isxods1 = this.outreports_5995;
 
@@ -674,7 +722,7 @@ new Vue({
         });
         this.real_reports_5995 = byVxod_count
       },
-      calcHMS: function(d, format = '0'){
+      calcHMS(d, format = '0'){
         if (d == 0) {
             return 0;
           }else {
@@ -693,7 +741,7 @@ new Vue({
           return hDisplay + mDisplay + sDisplay;
           }
       },
-      calcHMSexcel: function(d){
+      calcHMSexcel(d){
         if (d == 0) {
             return "00:00:00";
           }else {
@@ -794,6 +842,41 @@ new Vue({
             this.loading = false
           }
         });		
+      },
+      calcWorkly(oper_id){   
+        let workly_id = this.worklyOperators[oper_id]
+        let data = this.worklyData[workly_id]
+        let schedule = this.worklySchedule[workly_id].toString().split('-')
+        
+        if (data) {
+          
+          if (this.day != $('#get_date').val() || this.day != $('#start_date').val()) {
+            this.period = true;
+            let ontime = 0;
+            let outtime = 0;
+            for (const date in data) {
+              if (new Date('2002-04-23 '+data[date][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
+                ontime++;
+              }else{
+                outtime++;
+              }
+
+            }
+            return "<strong style='color:#2de12d'>"+ontime+"</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>"+outtime+"</strong>"
+
+          }else{
+
+            if (new Date('2002-04-23 '+data[this.day][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
+              return "<strong style='color:#2de12d'>"+data[this.day][0]+"</strong>"
+            }else{
+              return "<strong style='color:red'>"+data[this.day][0]+"</strong>"
+            }
+
+          }
+
+        }else{
+          return '-'
+        }        
       }
     }
 })
