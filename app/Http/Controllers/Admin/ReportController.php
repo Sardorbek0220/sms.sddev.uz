@@ -11,6 +11,7 @@ use App\Operator;
 use App\Feedback;
 use App\Operator_time;
 use App\Unknown_client;
+use App\Score;
 
 class ReportController extends Controller
 {
@@ -448,5 +449,17 @@ class ReportController extends Controller
             $worklyOpers[$oper['phone']] = $oper['workly_id'];
         }
         return Response::json($worklyOpers);
+    }
+
+    // ------------- scores ---------------
+
+    public function score()
+    {
+        $scores = Score::get();
+        $score = [];
+        foreach ($scores as $s) {
+            $score[$s['key_text']] = json_decode($s['value']);
+        }
+        return Response::json($score);
     }
 }

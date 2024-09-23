@@ -42,7 +42,7 @@ class ScoreController extends Controller
      */
     public function store(Request $request)
     {        
-        if (empty($request->value)) {
+        if ($request->data) {
             Score::create([
                 'key_text' => $request->key,
                 'value' => json_encode($request->data),
@@ -92,7 +92,7 @@ class ScoreController extends Controller
     public function update(Request $request, $id)
     {        
         $score = Score::find($id);
-        if (empty($request->value)) {
+        if ($request->data) {
             $score->update([
                 'value' => json_encode($request->data)
             ]);

@@ -23,7 +23,7 @@ class Score extends Model
         'total_feedback' => 'Total feedback %',
         'mark3_feedback' => 'Mark3 feedback %',
         'like' => 'Like',
-        'product' => 'Punishment',
+        'punishment' => 'Punishment',
         'unreg_client_inbound' => 'Незарег. вход. клиенты',
         'script' => 'Script',
         'product' => 'Product',

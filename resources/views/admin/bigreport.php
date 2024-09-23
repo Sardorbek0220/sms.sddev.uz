@@ -170,26 +170,30 @@
               <th class="text-left">Product</th>
               <!-- <th class="text-left">👍</th> -->
               <!-- <th class="text-left">☹️</th> -->
-              <th class="text-left" width="160px"><span>онлайн-время</span></th>
+              <th class="text-left" width="160px">Онлайн-время</th>
+              <th class="text-left">Total</th>
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="report in users_5995">
               <td>{{ report.name }}</td>
-              <td class="text-center" v-html="calcWorkly(report.num)"></td>
-              <td>{{ oper_misseds[report.num] ?? 0 }}</td>
-              <td>{{ bigDataPeriod.missed_in > 0 ? parseFloat(((bigDataPeriod.missed_in/(bigDataPeriod.missed+bigDataPeriod.answered))*100).toFixed(1)) : 0 }} %</td>
-              <td>{{ report.vxod_count }}</td>
-              <td>{{ report.vxod_count > 0 ? ( ((parseFloat(feedbacks.mark3[report.num] ?? 0) + parseFloat(feedbacks.mark0[report.num] ?? 0))/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-              <td>{{ report.vxod_count > 0 ? ( (parseFloat(feedbacks.mark3[report.num] ?? 0)/report.vxod_count) * 100 ).toFixed(1) : 0 }} %</td>
-              <td>{{ extra.likes[report.num] ? extra.likes[report.num].likes : 0 }}</td>
-              <td>{{ extra.likes[report.num] ? extra.likes[report.num].punishments : 0 }}</td>
-              <td>{{ unknownClients.inbound[report.num] ? unknownClients.inbound[report.num] : 0 }}</td>
-              <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_script).toFixed(1)) : 0 }}</td>
-              <td>{{ extra.products[report.num] ? parseFloat(parseFloat(extra.products[report.num].avg_product).toFixed(1)) : 0 }}</td>
+              <td class="text-center">
+                <strong style='color:#2de12d'>{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>{{ report.outtime }}</strong>
+              </td>
+              <td>{{ report.personal_missed }}</td>
+              <td>{{ report.missed }}</td>
+              <td>{{ report.inbound }}</td>
+              <td>{{ report.total_feedback }}</td>
+              <td>{{ report.mark3_feedback }}</td>
+              <td>{{ report.like }}</td>
+              <td>{{ report.punishment }}</td>
+              <td>{{ report.unregs }}</td>
+              <td>{{ report.script }}</td>
+              <td>{{ report.product }}</td>
               <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
               <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
-              <td><span v-show="oper_times[report.num] > 0">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
+              <td>{{ report.online_time }}</td>
+              <td>{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -280,7 +284,8 @@
       },
       worklyData: {},
       worklySchedule: {},
-      worklyOperators: {}
+      worklyOperators: {},
+      scores: {}
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
@@ -294,25 +299,29 @@
       $('#get_date').val(today);
       $('#start_date').val(today);
 
+      await this.getWorklyData();
       await this.get_date();
 
       this.loading = true; 
 
+      await this.getScores();
       await this.getWorklyOperators();
       await this.getWorklySchedule();
 
       await this.getUsers();
       await this.get_users_feedbacks();
       await this.getOperatorTime();
+      await this.getBigDataPeriod();
+      await this.personalMissed();
+      await this.getUnknownClients();
+      await this.getExtra();
+
       this.getInfos_5995();
       this.getReport_5995();
       await this.getFifo();
       await this.fifoToReport();
-      await this.getBigDataPeriod();
 
       this.loading = false;
-
-      await this.getWorklyData();
     },
     created(){	
 
@@ -339,6 +348,13 @@
       clearInterval(this.interval)
     },
     methods: {
+      async getScores(){
+        await axios.get('score').then(response => {
+          if (response.status == 200) {
+            this.scores = response.data;
+          }          
+        });	
+      }, 
       async getWorklyOperators(){
         await axios.get('monitoring/worklyOperators').then(response => {
           if (response.status == 200) {
@@ -443,20 +459,23 @@
         this.from_date = $('#start_date').val()
         this.to_date = $('#get_date').val()
         
+        await this.getWorklyData();
         await this.get_date();
 
         this.loading = true;
 
         await this.get_users_feedbacks();
         await this.getOperatorTime();
+        await this.getBigDataPeriod();
+        await this.personalMissed();
+        await this.getUnknownClients();
+        await this.getExtra();
+
         this.getInfos_5995();
         this.getReport_5995();
         this.fifoToReport();
-        await this.getBigDataPeriod();
 
         this.loading = false;
-
-        await this.getWorklyData();
       },
       async getBigDataPeriod(){
         await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
@@ -660,15 +679,15 @@
           for (var n = 0; n < vxods.length; n++) {
             if (num == vxods[n].num) {
               let infoss = {
-                  id: num,
-                  vxod_count: vxods[n].vxod_count,
-                  vxod_time: vxods[n].vxod_time,
-                  isxod_count: isxods[m].isxod_count,
-                  isxod_time: isxods[m].isxod_time,
-                  all_time: isxods[m].for_all_time+vxods[n].for_all_time,
-              all_time_s: isxods[m].for_all_time+vxods[n].for_all_time,
-                }
-                reports.push(infoss);
+                id: num,
+                vxod_count: vxods[n].vxod_count,
+                vxod_time: vxods[n].vxod_time,
+                isxod_count: isxods[m].isxod_count,
+                isxod_time: isxods[m].isxod_time,
+                all_time: isxods[m].for_all_time+vxods[n].for_all_time,
+                all_time_s: isxods[m].for_all_time+vxods[n].for_all_time,
+              }
+              reports.push(infoss);
             }
           }
         }
@@ -677,26 +696,26 @@
         for (var i = 0; i < users.length; i++) {
           let infoss = {
             num: users[i].num,
-              name: users[i].name,
-              vxod_count: 0,
-              vxod_time: 0,
-              isxod_count: 0,
-              isxod_time: 0,
-              all_time: 0,
-              all_time_s: 0
-            };
+            name: users[i].name,
+            vxod_count: 0,
+            vxod_time: 0,
+            isxod_count: 0,
+            isxod_time: 0,
+            all_time: 0,
+            all_time_s: 0
+          };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
               infoss = {
                 num: users[i].num,
-                  name: users[i].name,
-                  vxod_count: reports[j].vxod_count,
-                  vxod_time: reports[j].vxod_time,
-                  isxod_count: reports[j].isxod_count,
-                  isxod_time: reports[j].isxod_time,
-                  all_time: reports[j].all_time,
-                  all_time_s: reports[j].all_time_s
-                }	
+                name: users[i].name,
+                vxod_count: reports[j].vxod_count,
+                vxod_time: reports[j].vxod_time,
+                isxod_count: reports[j].isxod_count,
+                isxod_time: reports[j].isxod_time,
+                all_time: reports[j].all_time,
+                all_time_s: reports[j].all_time_s
+              }	
             }
           }
           reps.push(infoss)
@@ -704,7 +723,7 @@
         var byVxod_count = reps.slice(0);
         byVxod_count.sort(function(a,b) {
           return a.name.localeCompare(b.name)
-        });
+        });        
         this.real_reports_5995 = byVxod_count
       },
       calcHMS: function(d, format = '0'){
@@ -793,10 +812,6 @@
         
         var myArray_5995 = user_5995.split(";");	
         this.availableOperators = myArray_5995;
-
-        await this.personalMissed();
-        await this.getUnknownClients();
-        await this.getExtra();
               
         let reports_support = this.real_reports_5995;
         let set_support = [];
@@ -807,10 +822,32 @@
           }
           for (var b = 0; b < myArray_5995.length; b++) {
             if (reports_support[a].num == myArray_5995[b]) {
+              
+              reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[myArray_5995[b]] ?? 0, 'personal_missed')
+              reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in > 0 ? parseFloat(((this.bigDataPeriod.missed_in/(this.bigDataPeriod.missed+this.bigDataPeriod.answered))*100).toFixed(1)) : 0, 'missed')
+              reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
+              reports_support[a].total_feedback = this.calcPoints(reports_support[a].vxod_count > 0 ? ( ((parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0))/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0, 'total_feedback')
+              reports_support[a].mark3_feedback = this.calcPoints(reports_support[a].vxod_count > 0 ? ( (parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0)/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0, 'mark3_feedback')
+              reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
+              reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
+              reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
+              reports_support[a].script = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0, 'script')
+              reports_support[a].product = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0, 'product')
+              reports_support[a].online_time = this.calcPoints(this.oper_times[reports_support[a].num], 'online_time')
+
+              let times = this.calcWorkly(reports_support[a].num);
+              reports_support[a].ontime = this.calcPoints(times.ontime, 'workly_ontime')
+              reports_support[a].outtime = this.calcPoints(times.outtime, 'workly_late')
+
+              reports_support[a].total_point = 
+                reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].total_feedback 
+                + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
+                + reports_support[a].script + reports_support[a].product + reports_support[a].online_time;
+              
               set_support.push(reports_support[a])
             }
           }
-        }
+        }        
         this.users_5995 = set_support;
       },
       async get_date(){
@@ -833,24 +870,34 @@
         let workly_id = this.worklyOperators[oper_id]
         let data = this.worklyData[workly_id]
         let schedule = this.worklySchedule[workly_id].toString().split('-')
-        
-        if (data) {
 
-          let ontime = 0;
-          let outtime = 0;
+        let ontime = 0;
+        let outtime = 0;
+        if (data) {
           for (const date in data) {
             if (new Date('2002-04-23 '+data[date][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
               ontime++;
             }else{
               outtime++;
             }
-
           }
-          return "<strong style='color:#2de12d'>"+ontime+"</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>"+outtime+"</strong>"
-
+        }
+        return {ontime: ontime, outtime: outtime}       
+      },
+      calcPoints(value, key){
+        var scoress = this.scores[key]
+        if (scoress.value) {
+          return parseFloat((value * parseFloat(scoress.value)).toFixed(1));
         }else{
-          return '-'
-        }        
+          var point = 0
+          for (const score of scoress) {            
+            if (parseFloat(score.from) <= value && parseFloat(score.to) >= value) {
+              point = parseFloat((value * parseFloat(score.value)).toFixed(1))
+              break;
+            }
+          }
+          return point;
+        }
       }
     }
 	})

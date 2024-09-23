@@ -761,6 +761,9 @@
 								if (!this.oper_misseds[res.destination_number]) {
 									this.oper_misseds[res.destination_number] = 0;
 								}
+								if (res.destination_number == '116') {
+									console.log(res);
+								}
 								this.oper_misseds[res.destination_number] += 1;								
 							}
 						}			
