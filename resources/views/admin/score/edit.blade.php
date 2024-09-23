@@ -36,15 +36,15 @@
                       @foreach($score->value as $key => $val)
                       <div class="col-sm-4">
                         <label for="">От</label>
-                        <input type="number" class="form-control" name="data[{{$key}}][from]" value="{{$val->from}}">
+                        <input type="number" step="any" class="form-control" name="data[{{$key}}][from]" value="{{$val->from}}">
                       </div>
                       <div class="col-sm-4">
                         <label for="">До</label>
-                        <input type="number" class="form-control" name="data[{{$key}}][to]" value="{{$val->to}}">
+                        <input type="number" step="any" class="form-control" name="data[{{$key}}][to]" value="{{$val->to}}">
                       </div>
                       <div class="col-sm-4">
                         <label for="">Значение</label>
-                        <input type="number" class="form-control" name="data[{{$key}}][value]" value="{{$val->value}}">
+                        <input type="number" step="any" class="form-control" name="data[{{$key}}][value]" value="{{$val->value}}">
                       </div>
                       @endforeach
                     </div>
@@ -52,7 +52,7 @@
                     @else
                     <div class="row col-sm-6 forOthers">
                       <label for="">Значение</label>
-                      <input type="number" class="form-control" name="value" value="{{$score->value['value'] ?? ''}}">
+                      <input type="number" step="any" class="form-control" name="value" value="{{$score->value['value'] ?? ''}}">
                     </div>
                     @endif
                   </div>
@@ -76,15 +76,15 @@ $("#appendValues").click(function(){
   $(".forValues").append(`
     <div class="col-sm-4">
       <label for="">От</label>
-      <input type="number" class="form-control" name="data[`+n+`][from]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][from]" value="">
     </div>
     <div class="col-sm-4">
       <label for="">До</label>
-      <input type="number" class="form-control" name="data[`+n+`][to]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][to]" value="">
     </div>
     <div class="col-sm-4">
       <label for="">Значение</label>
-      <input type="number" class="form-control" name="data[`+n+`][value]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][value]" value="">
     </div>
   `);
 });

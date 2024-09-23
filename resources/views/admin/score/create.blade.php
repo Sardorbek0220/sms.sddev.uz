@@ -33,20 +33,20 @@
                   <div class="row col-sm-6 forValues">
                     <div class="col-sm-4">
                       <label for="">От</label>
-                      <input type="number" class="form-control" name="data[0][from]" value="">
+                      <input type="number" step="any" class="form-control" name="data[0][from]" value="">
                     </div>
                     <div class="col-sm-4">
                       <label for="">До</label>
-                      <input type="number" class="form-control" name="data[0][to]" value="">
+                      <input type="number" step="any" class="form-control" name="data[0][to]" value="">
                     </div>
                     <div class="col-sm-4">
                       <label for="">Значение</label>
-                      <input type="number" class="form-control setPlace" name="data[0][value]" value="" placeholder="1 Workly (вовремя) = Значение">
+                      <input type="number" step="any" class="form-control setPlace" name="data[0][value]" value="" placeholder="1 Workly (вовремя) = Значение">
                     </div>
                   </div>
                   <div class="row col-sm-6 forOthers" style="display: none">
                     <label for="">Значение</label>
-                    <input type="number" class="form-control setPlace" name="value" value="" placeholder="1 Workly = Значение">
+                    <input type="number" class="form-control setPlace" name="value" value="" step="any" placeholder="1 Workly = Значение">
                   </div>
                   <button type="button" class="btn btn-success float-right ml-2 mt-2" id="appendValues">+</button>
                 </div>
@@ -70,15 +70,15 @@ $("#appendValues").click(function(){
   $(".forValues").append(`
     <div class="col-sm-4">
       <label for="">От</label>
-      <input type="number" class="form-control" name="data[`+n+`][from]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][from]" value="">
     </div>
     <div class="col-sm-4">
       <label for="">До</label>
-      <input type="number" class="form-control" name="data[`+n+`][to]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][to]" value="">
     </div>
     <div class="col-sm-4">
       <label for="">Значение</label>
-      <input type="number" class="form-control" name="data[`+n+`][value]" value="">
+      <input type="number" step="any" class="form-control" name="data[`+n+`][value]" value="">
     </div>
   `);
 });
