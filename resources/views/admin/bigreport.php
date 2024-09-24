@@ -161,11 +161,11 @@
               <th class="text-left">Перс. пропущ. звон</th>
               <th class="text-left">Пропущенные в раб. время %</th>
               <th class="text-left">Вход. звон</th>
+              <th class="text-left">Незарег. вход. клиенты</th>
               <th class="text-left">Total feedback %</th>
               <th class="text-left">Feedback 👍 %</th>
               <th class="text-left">Like</th>
               <th class="text-left">Punishment</th>
-              <th class="text-left">Незарег. вход. клиенты</th>
               <th class="text-left">Script</th>
               <th class="text-left">Product</th>
               <!-- <th class="text-left">👍</th> -->
@@ -183,11 +183,11 @@
               <td>{{ report.personal_missed }}</td>
               <td>{{ report.missed }}</td>
               <td>{{ report.inbound }}</td>
+              <td>{{ report.unregs }}</td>
               <td>{{ report.total_feedback }}</td>
               <td>{{ report.mark3_feedback }}</td>
               <td>{{ report.like }}</td>
               <td>{{ report.punishment }}</td>
-              <td>{{ report.unregs }}</td>
               <td>{{ report.script }}</td>
               <td>{{ report.product }}</td>
               <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
@@ -319,7 +319,7 @@
       this.getInfos_5995();
       this.getReport_5995();
       await this.getFifo();
-      await this.fifoToReport();
+      this.fifoToReport();
 
       this.loading = false;
     },
@@ -801,7 +801,7 @@
         });
         this.fifos = response.data.data;		 		
       },
-      async fifoToReport(){
+      fifoToReport(){
         let user_5995;
 
         for (var i = 0; i < this.fifos.length; i++) {
@@ -833,7 +833,7 @@
               reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
               reports_support[a].script = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0, 'script')
               reports_support[a].product = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0, 'product')
-              reports_support[a].online_time = this.calcPoints(this.oper_times[reports_support[a].num], 'online_time')
+              reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
 
               let times = this.calcWorkly(reports_support[a].num);
               reports_support[a].ontime = this.calcPoints(times.ontime, 'workly_ontime')

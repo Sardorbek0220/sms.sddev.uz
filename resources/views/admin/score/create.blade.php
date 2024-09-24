@@ -84,7 +84,12 @@ $("#appendValues").click(function(){
 });
 
 $("#key").change(function(){
-  $(".setPlace").attr("placeholder", "1 "+$("#key option:selected").text()+" = Значение");
+  if (this.value == 'online_time') {
+    $(".setPlace").attr("placeholder", "1 Час = Значение");
+  }else{
+    $(".setPlace").attr("placeholder", "1 "+$("#key option:selected").text()+" = Значение");
+  }
+  
   if (['missed', 'workly_ontime', 'workly_late'].includes(this.value)) {
     $(".forValues").show();
     $(".forOthers").hide();
