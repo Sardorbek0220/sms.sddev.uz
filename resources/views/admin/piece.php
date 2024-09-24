@@ -171,7 +171,7 @@
                   </thead>
                   <tbody style="border: solid 1px grey;">
                     <tr v-for="report in users_5995">
-                      <td>{{ report.name }}</td>
+                      <td><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
                       <td class="text-center" v-html="calcWorkly(report.num)"></td>
                       <td>{{ report.personal_missed }}</td>
                       <td>{{ report.inbound }}</td>
@@ -211,7 +211,7 @@
                   </thead>
                   <tbody style="border: solid 1px grey;">
                     <tr v-for="report in users_5995">
-                      <td>{{ report.name }}</td>
+                      <td><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
                       <td class="text-center" v-html="calcWorkly(report.num)"></td>
                       <td>{{ report.personal_missed }}</td>
                       <td>{{ report.inbound }}</td>
@@ -691,16 +691,18 @@ new Vue({
         for (var i = 0; i < users.length; i++) {
           let infoss = {
             num: users[i].num,
-              name: users[i].name,
-              vxod_count: 0,
-            };
+            name: users[i].name,
+            vxod_count: 0,
+            field: users[i].field
+          };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
               infoss = {
                 num: users[i].num,
-                  name: users[i].name,
-                  vxod_count: reports[j].vxod_count,
-                }	
+                name: users[i].name,
+                vxod_count: reports[j].vxod_count,
+                field: users[i].field
+              }	
             }
           }
           reps.push(infoss)

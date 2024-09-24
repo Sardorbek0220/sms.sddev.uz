@@ -187,7 +187,7 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="report in users_5995">
-              <td class="link" @click="toStatistics">{{ report.name }}</td>
+              <td class="link" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
               <td class="text-center">
                 <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
               </td>
@@ -237,7 +237,7 @@
             </thead>
             <tbody style="border: solid 1px grey;">
               <tr v-for="report in users_5995">
-                <td class="link" @click="toStatistics">{{ report.name }}</td>
+                <td class="link" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
                 <td class="text-center">
                   <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
                 </td>
@@ -750,6 +750,7 @@
             num: users[i].num,
             name: users[i].name,
             vxod_count: 0,
+            field: users[i].field
           };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
@@ -757,6 +758,7 @@
                 num: users[i].num,
                 name: users[i].name,
                 vxod_count: reports[j].vxod_count,
+                field: users[i].field
               }	
             }
           }

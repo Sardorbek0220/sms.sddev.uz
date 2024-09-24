@@ -48,6 +48,14 @@
                       </div>
                     </div>
                   </div>
+                  <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="field" id="field" @if($operator->field == '1') checked @endif>
+                        <label class="form-check-label" for="field">Not operator</label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="card-footer">
                   <button type="submit" class="btn btn-success">Save</button>

@@ -12,6 +12,7 @@ class Operator extends Model
         'name',
         'phone',
         'active',
+        'field',
         'created_at',
         'updated_at'
     ];
