@@ -120,8 +120,8 @@
             <v-row>
                 <v-col>
                     <div class="float-right">
-                        <input class="form-control" type="date" id="start_date" name="start_date" style="display: inline;width: auto;">
-                        <input class="form-control" type="date" id="get_date" name="get_date" style="display: inline;width: auto;">
+                        <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+                        <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
                         <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
                     </div>
                     <div class="float-left">
@@ -284,11 +284,17 @@ new Vue({
       var today = this.today.getFullYear()+"-"+(month)+"-"+(day);
       this.day = today 
 
-      this.from_date = today
-      this.to_date = today
+      var url = new URL(window.location.href);
+      var from_date = url.searchParams.get("from_date");
+      var to_date = url.searchParams.get("to_date");
 
-      $('#get_date').val(today);
-      $('#start_date').val(today);
+      if (from_date && to_date) {
+        this.from_date = from_date
+        this.to_date = to_date
+      }else{
+        this.from_date = today
+        this.to_date = today
+      }
 
       await this.getWorklyData();
       await this.get_date();
@@ -357,7 +363,7 @@ new Vue({
       }, 
       async getWorklyData(){
         this.loading = true;
-        await axios.get('monitoring/worklyData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/worklyData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.loading = false;
             this.worklyData = {}
@@ -375,7 +381,7 @@ new Vue({
         });	
       }, 
       async personalMissed(){	
-        await axios.get('monitoring/personalMissed', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
+        await axios.get('monitoring/personalMissed', {params: {date: this.to_date}}).then(response => {
           if (response.status == 200) {	
             this.oper_misseds = []		
             for (const res of response.data) {
@@ -397,14 +403,14 @@ new Vue({
         });									
       },
       async getOperatorTime(){
-        await axios.get('monitoring/operatorTime', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/operatorTime', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.oper_times = response.data.oper_times			
           }
         });	
       }, 
       async getUnknownClients(){
-        await axios.get('monitoring/unknownClients', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/unknownClients', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             for (const datum of response.data) {
               if (datum.direction == 'inbound') {
@@ -424,8 +430,6 @@ new Vue({
         });	
       }, 
       async filter(){
-        this.from_date = $('#start_date').val()
-        this.to_date = $('#get_date').val()
         
         await this.getWorklyData();
         await this.get_date();
@@ -443,7 +447,7 @@ new Vue({
         this.loading = false;
       },
       async getBigDataPeriod(){
-        await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/bigData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.bigDataPeriod = {
               answered: 0,
@@ -482,7 +486,7 @@ new Vue({
           mark0: {},
           mark3: {}
         }
-        await axios.get('monitoring/usersFeedbacks', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/usersFeedbacks', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             for (const datum of response.data) {
               if (!this.feedbacks.mark0[datum.phone]) {
@@ -805,8 +809,8 @@ new Vue({
         this.users_5995 = set_support;
       },
       async get_date(){
-        let startDate = $('#start_date').val();
-        let endDate = $('#get_date').val();
+        let startDate = this.from_date;
+        let endDate = this.to_date;
 
         let fromDate = Math.floor(new Date(startDate).getTime() / 1000);
         let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
@@ -827,7 +831,7 @@ new Vue({
         
         if (data) {
           
-          if (this.day != $('#get_date').val() || this.day != $('#start_date').val()) {
+          if (this.day != this.to_date || this.day != this.from_date) {
             this.period = true;
             let ontime = 0;
             let outtime = 0;

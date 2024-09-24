@@ -20,6 +20,7 @@
 			border-radius: 10px;
 			color: black;
 		}
+
 		.dot {
 			height: 15px;
 			width: 15px;
@@ -27,78 +28,82 @@
 			border-radius: 50%;
 			display: inline-block;
 		}
+
 		.cl-red {
 		background-color: #b0160c;
 		font-size: 10px !important;
 		color: white;
 		}
+    
 		.cl-warn-red {
 			background-color: #EF7C24;
 			font-size: 10px !important;
 			color: white;
 		}
+
 		.v-data-table>.v-data-table__wrapper>table>thead>tr>th {
 			padding: 0 12px;
 		}
+
 		.switch {
-		position: relative;
-		display: inline-block;
-		width: 60px;
-		height: 34px;
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
 		}
 
 		.switch input { 
-		opacity: 0;
-		width: 0;
-		height: 0;
+      opacity: 0;
+      width: 0;
+      height: 0;
 		}
 
 		.slider {
-		position: absolute;
-		cursor: pointer;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: #ccc;
-		-webkit-transition: .4s;
-		transition: .4s;
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
 		}
 
 		.slider:before {
-		position: absolute;
-		content: "";
-		height: 26px;
-		width: 26px;
-		left: 4px;
-		bottom: 4px;
-		background-color: white;
-		-webkit-transition: .4s;
-		transition: .4s;
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
 		}
 
 		input:checked + .slider {
-		background-color: #2196F3;
+		  background-color: #2196F3;
 		}
 
 		input:focus + .slider {
-		box-shadow: 0 0 1px #2196F3;
+		  box-shadow: 0 0 1px #2196F3;
 		}
 
 		input:checked + .slider:before {
-		-webkit-transform: translateX(26px);
-		-ms-transform: translateX(26px);
-		transform: translateX(26px);
-		}
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
 
-		/* Rounded sliders */
 		.slider.round {
-		border-radius: 34px;
+		  border-radius: 34px;
 		}
 
 		.slider.round:before {
-		border-radius: 50%;
+		  border-radius: 50%;
 		}
+
 		.date_ymd{
 			font-size: 10px;
 			background-color: grey;
@@ -106,9 +111,15 @@
 			border-radius: 20px;
 			padding: 3px;
 		}
+
 		.date_none{
 			display: none;
 		}
+
+    .link:hover{
+      cursor: pointer;
+      text-decoration: underline;
+    }
 	</style>
 </head>
 <body>
@@ -121,8 +132,8 @@
     <v-row>
     	<v-col>
     		<div class="float-right">
-          <input class="form-control" type="date" id="start_date" name="start_date" style="display: inline;width: auto;">
-            <input class="form-control" type="date" id="get_date" name="get_date" style="display: inline;width: auto;">
+          <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+            <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
             <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
           </div>
           <div class="float-left">
@@ -176,23 +187,23 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="report in users_5995">
-              <td>{{ report.name }}</td>
+              <td class="link" @click="toStatistics">{{ report.name }}</td>
               <td class="text-center">
-                <strong style='color:#2de12d'>{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>{{ report.outtime }}</strong>
+                <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
               </td>
-              <td>{{ report.personal_missed }}</td>
-              <td>{{ report.missed }}</td>
-              <td>{{ report.inbound }}</td>
-              <td>{{ report.unregs }}</td>
-              <td>{{ report.total_feedback }}</td>
-              <td>{{ report.mark3_feedback }}</td>
-              <td>{{ report.like }}</td>
-              <td>{{ report.punishment }}</td>
-              <td>{{ report.script }}</td>
-              <td>{{ report.product }}</td>
+              <td class="link" @click="toStatistics">{{ report.personal_missed }}</td>
+              <td class="link" @click="toStatistics">{{ report.missed }}</td>
+              <td class="link" @click="toStatistics">{{ report.inbound }}</td>
+              <td class="link" @click="toStatistics">{{ report.unregs }}</td>
+              <td class="link" @click="toStatistics">{{ report.total_feedback }}</td>
+              <td class="link" @click="toStatistics">{{ report.mark3_feedback }}</td>
+              <td class="link" @click="toLikes">{{ report.like }}</td>
+              <td class="link" @click="toLikes">{{ report.punishment }}</td>
+              <td class="link" @click="toProducts">{{ report.script }}</td>
+              <td class="link" @click="toProducts">{{ report.product }}</td>
               <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
               <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
-              <td>{{ report.online_time }}</td>
+              <td class="link" @click="toStatistics">{{ report.online_time }}</td>
               <td>{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
@@ -296,9 +307,6 @@
       this.from_date = today
       this.to_date = today
 
-      $('#get_date').val(today);
-      $('#start_date').val(today);
-
       await this.getWorklyData();
       await this.get_date();
 
@@ -375,7 +383,7 @@
       }, 
       async getWorklyData(){
         this.loading = true;
-        await axios.get('monitoring/worklyData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/worklyData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.loading = false;
             this.worklyData = {}
@@ -393,7 +401,7 @@
         });	
       }, 
       async getExtra(){
-        await axios.get('bigreport/extra', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('bigreport/extra', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             if (response.data.likes.length > 0) {
               for (const like of response.data.likes) {
@@ -429,14 +437,14 @@
         });									
       },
       async getOperatorTime(){
-        await axios.get('monitoring/operatorTime', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/operatorTime', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.oper_times = response.data.oper_times			
           }
         });	
       }, 
       async getUnknownClients(){
-        await axios.get('monitoring/unknownClients', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/unknownClients', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             for (const datum of response.data) {
               if (datum.direction == 'inbound') {
@@ -456,8 +464,8 @@
         });	
       }, 
       async filter(){
-        this.from_date = $('#start_date').val()
-        this.to_date = $('#get_date').val()
+        this.from_date = this.from_date
+        this.to_date = this.to_date
         
         await this.getWorklyData();
         await this.get_date();
@@ -478,7 +486,7 @@
         this.loading = false;
       },
       async getBigDataPeriod(){
-        await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/bigData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.bigDataPeriod = {
               answered: 0,
@@ -517,7 +525,7 @@
           mark0: {},
           mark3: {}
         }
-        await axios.get('monitoring/usersFeedbacks', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+        await axios.get('monitoring/usersFeedbacks', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             for (const datum of response.data) {
               if (!this.feedbacks.mark0[datum.phone]) {
@@ -842,7 +850,7 @@
               reports_support[a].total_point = 
                 reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].total_feedback 
                 + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
-                + reports_support[a].script + reports_support[a].product + reports_support[a].online_time;
+                + reports_support[a].script + reports_support[a].product + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
               
               set_support.push(reports_support[a])
             }
@@ -851,8 +859,8 @@
         this.users_5995 = set_support;
       },
       async get_date(){
-        let startDate = $('#start_date').val();
-        let endDate = $('#get_date').val();
+        let startDate = this.from_date;
+        let endDate = this.to_date;
 
         let fromDate = Math.floor(new Date(startDate).getTime() / 1000);
         let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
@@ -898,6 +906,15 @@
           }
           return point;
         }
+      },
+      toStatistics(){
+        window.open('/admin/piece?from_date='+this.from_date+'&to_date='+this.to_date)
+      },
+      toLikes(){
+        window.open('/admin/likes?from_date='+this.from_date+'&to_date='+this.to_date)
+      },
+      toProducts(){
+        window.open('/admin/products?from_date='+this.from_date+'&to_date='+this.to_date)
       }
     }
 	})
