@@ -186,25 +186,25 @@
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
-            <tr v-for="report in users_5995">
-              <td class="link" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
-              <td class="text-center">
-                <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
+            <tr v-for="(report, index) in users_5995">
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
+              <td class="text-center" :style="{backgroundColor: colors[index]}">
+                <strong class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong class="link">{{ report.outtime }}</strong>
               </td>
-              <td class="link" @click="toStatistics">{{ report.personal_missed }}</td>
-              <td class="link" @click="toStatistics">{{ report.missed }}</td>
-              <td class="link" @click="toStatistics">{{ report.inbound }}</td>
-              <td class="link" @click="toStatistics">{{ report.unregs }}</td>
-              <td class="link" @click="toStatistics">{{ report.total_feedback }}</td>
-              <td class="link" @click="toStatistics">{{ report.mark3_feedback }}</td>
-              <td class="link" @click="toLikes">{{ report.like }}</td>
-              <td class="link" @click="toLikes">{{ report.punishment }}</td>
-              <td class="link" @click="toProducts">{{ report.script }}</td>
-              <td class="link" @click="toProducts">{{ report.product }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.personal_missed }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.unregs }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.total_feedback }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.mark3_feedback }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.like }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.script }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
               <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
               <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
-              <td class="link" @click="toStatistics">{{ report.online_time }}</td>
-              <td>{{ report.total_point.toFixed(1) }}</td>
+              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
+              <td :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -346,7 +346,25 @@
       worklyData: {},
       worklySchedule: {},
       worklyOperators: {},
-      scores: {}
+      scores: {},
+      colors: [
+        '#6add6a',
+        '#6add6a',
+        '#6add6a',
+        '#f1dc48',
+        '#f1dc48',
+        '#f1dc48',
+        '#f19648',
+        '#f19648',
+        '#f19648',
+        '#f14848',
+        '#f14848',
+        '#f14848',
+        '#f14848',
+        '#f14848',
+        '#f14848',
+        '#f14848',
+      ]
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
@@ -867,8 +885,8 @@
               reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[myArray_5995[b]] ?? 0, 'personal_missed')
               reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in > 0 ? parseFloat(((this.bigDataPeriod.missed_in/(this.bigDataPeriod.missed+this.bigDataPeriod.answered))*100).toFixed(1)) : 0, 'missed')
               reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
-              reports_support[a].total_feedback = this.calcPoints(reports_support[a].vxod_count > 0 ? ( ((parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0))/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0, 'total_feedback')
-              reports_support[a].mark3_feedback = this.calcPoints(reports_support[a].vxod_count > 0 ? ( (parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0)/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0, 'mark3_feedback')
+              reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
+              reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
               reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
               reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
               reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')

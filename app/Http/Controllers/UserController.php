@@ -25,7 +25,7 @@ class UserController extends Controller
 			if(Auth::user()->email=='admin@gmail.com'){
 			    return redirect()->route('feedback.all');
 			}else if(Auth::user()->email=='operator@gmail.com'){
-			    return redirect()->route('monitoring');
+			    return redirect()->route('operator.bigreport');
 			}else{
 				return redirect()->route('logout');
 			}
@@ -78,7 +78,7 @@ class UserController extends Controller
 		if (empty(Auth::user())) {
 			return redirect()->route('logout');
 		}else if(Auth::user()->email=='operator@gmail.com'){
-			return redirect()->route('monitoring');
+			return redirect()->route('operator.bigreport');
 		}else if(Auth::user()->email=='admin@gmail.com'){
 			return redirect()->route('feedback.all');
 		}

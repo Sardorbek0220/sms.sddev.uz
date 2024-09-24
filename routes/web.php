@@ -75,6 +75,10 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 });
 
 Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
+    Route::get('bigreport', [BigreportController::class, 'operator'])->name('operator.bigreport');
+    Route::get('bigreport/extra', [BigreportController::class, 'extra']);
+    Route::get('score', [ReportController::class, 'score']);
+
     Route::get('monitoring', [ReportController::class, 'monitoring'])->name('monitoring');
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
     Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
