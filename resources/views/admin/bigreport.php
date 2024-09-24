@@ -214,10 +214,60 @@
 		  <!-- export excel -->
       <v-col style="display: none">
         <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-          
+          <template v-slot:default>
+            <thead style="border: solid 1px grey;">
+              <tr>
+                <th class="text-left" width="220px">Имя</th>
+                <th class="text-center">Workly <br><span style="color:gainsboro">(вовремя) (поздно)</span></th>
+                <th class="text-left">Перс. пропущ. звон</th>
+                <th class="text-left">Пропущенные в раб. время %</th>
+                <th class="text-left">Вход. звон</th>
+                <th class="text-left">Незарег. вход. клиенты</th>
+                <th class="text-left">Total feedback %</th>
+                <th class="text-left">Feedback 👍 %</th>
+                <th class="text-left">Like</th>
+                <th class="text-left">Punishment</th>
+                <th class="text-left">Script</th>
+                <th class="text-left">Product</th>
+                <!-- <th class="text-left">👍</th> -->
+                <!-- <th class="text-left">☹️</th> -->
+                <th class="text-left" width="160px">Онлайн-время</th>
+                <th class="text-left">Total</th>
+              </tr>
+            </thead>
+            <tbody style="border: solid 1px grey;">
+              <tr v-for="report in users_5995">
+                <td class="link" @click="toStatistics">{{ report.name }}</td>
+                <td class="text-center">
+                  <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
+                </td>
+                <td class="link" @click="toStatistics">{{ report.personal_missed }}</td>
+                <td class="link" @click="toStatistics">{{ report.missed }}</td>
+                <td class="link" @click="toStatistics">{{ report.inbound }}</td>
+                <td class="link" @click="toStatistics">{{ report.unregs }}</td>
+                <td class="link" @click="toStatistics">{{ report.total_feedback }}</td>
+                <td class="link" @click="toStatistics">{{ report.mark3_feedback }}</td>
+                <td class="link" @click="toLikes">{{ report.like }}</td>
+                <td class="link" @click="toLikes">{{ report.punishment }}</td>
+                <td class="link" @click="toProducts">{{ report.script }}</td>
+                <td class="link" @click="toProducts">{{ report.product }}</td>
+                <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
+                <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
+                <td class="link" @click="toStatistics">{{ report.online_time }}</td>
+                <td>{{ report.total_point.toFixed(1) }}</td>
+              </tr>
+            </tbody>
+          </template>
         </v-simple-table>
       </v-col>
       <!-- ------------ -->
+    </v-row>
+    <v-row>
+      <v-col cols="11"></v-col>
+      <v-col cols="1">
+        <button class="float-right btn-primary" style="border-radius: 4px; padding: 8px; border: 1px solid white; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL</button>
+        <a id="dlink"  href="" style="display: none"></a>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -241,10 +291,10 @@
     };
     return function (table, name) {
         if (!table.nodeType) table = document.getElementById(table);
-        var ctx = {worksheet: 'Monitoring' || 'Worksheet', table: table.innerHTML};
+        var ctx = {worksheet: 'Big report' || 'Worksheet', table: table.innerHTML};
         document.getElementById("dlink").href = uri + base64(format(template, ctx));
         var filename = new Date().toLocaleDateString("en-GB");
-        document.getElementById("dlink").download = 'Monitoring (' + filename + ')';
+        document.getElementById("dlink").download = 'Big report (' + filename + ')';
         document.getElementById("dlink").click();
     }
   })();
@@ -320,7 +370,7 @@
       await this.get_users_feedbacks();
       await this.getOperatorTime();
       await this.getBigDataPeriod();
-      await this.personalMissed();
+      
       await this.getUnknownClients();
       await this.getExtra();
 
@@ -475,7 +525,6 @@
         await this.get_users_feedbacks();
         await this.getOperatorTime();
         await this.getBigDataPeriod();
-        await this.personalMissed();
         await this.getUnknownClients();
         await this.getExtra();
 
@@ -689,11 +738,6 @@
               let infoss = {
                 id: num,
                 vxod_count: vxods[n].vxod_count,
-                vxod_time: vxods[n].vxod_time,
-                isxod_count: isxods[m].isxod_count,
-                isxod_time: isxods[m].isxod_time,
-                all_time: isxods[m].for_all_time+vxods[n].for_all_time,
-                all_time_s: isxods[m].for_all_time+vxods[n].for_all_time,
               }
               reports.push(infoss);
             }
@@ -706,11 +750,6 @@
             num: users[i].num,
             name: users[i].name,
             vxod_count: 0,
-            vxod_time: 0,
-            isxod_count: 0,
-            isxod_time: 0,
-            all_time: 0,
-            all_time_s: 0
           };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
@@ -718,21 +757,12 @@
                 num: users[i].num,
                 name: users[i].name,
                 vxod_count: reports[j].vxod_count,
-                vxod_time: reports[j].vxod_time,
-                isxod_count: reports[j].isxod_count,
-                isxod_time: reports[j].isxod_time,
-                all_time: reports[j].all_time,
-                all_time_s: reports[j].all_time_s
               }	
             }
           }
           reps.push(infoss)
         }
-        var byVxod_count = reps.slice(0);
-        byVxod_count.sort(function(a,b) {
-          return a.name.localeCompare(b.name)
-        });        
-        this.real_reports_5995 = byVxod_count
+        this.real_reports_5995 = reps.slice(0)
       },
       calcHMS: function(d, format = '0'){
         if (d == 0) {
@@ -809,7 +839,7 @@
         });
         this.fifos = response.data.data;		 		
       },
-      fifoToReport(){
+      async fifoToReport(){
         let user_5995;
 
         for (var i = 0; i < this.fifos.length; i++) {
@@ -820,7 +850,8 @@
         
         var myArray_5995 = user_5995.split(";");	
         this.availableOperators = myArray_5995;
-              
+        await this.personalMissed();
+
         let reports_support = this.real_reports_5995;
         let set_support = [];
 
@@ -855,7 +886,10 @@
               set_support.push(reports_support[a])
             }
           }
-        }        
+        }     
+        set_support.sort(function(a,b) {
+          return b.total_point - a.total_point
+        });     
         this.users_5995 = set_support;
       },
       async get_date(){

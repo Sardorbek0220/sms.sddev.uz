@@ -118,22 +118,22 @@
     <template class="content">
         <v-container fluid class="grey lighten-5">
             <v-row>
-                <v-col>
-                    <div class="float-right">
-                        <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
-                        <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
-                        <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
-                    </div>
-                    <div class="float-left">
-                        <div class="d-inline-block">
-                            <v-row>
-                                <v-col>
-                                  <h4>Statistics</h4>
-                                </v-col>
-                            </v-row>
-                        </div>
-                    </div>
-                </v-col>
+              <v-col>
+                  <div class="float-right">
+                      <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+                      <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
+                      <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
+                  </div>
+                  <div class="float-left">
+                      <div class="d-inline-block">
+                          <v-row>
+                              <v-col>
+                                <h4>Statistics</h4>
+                              </v-col>
+                          </v-row>
+                      </div>
+                  </div>
+              </v-col>
             </v-row>
 
             <template>
@@ -192,7 +192,40 @@
             <!-- export excel -->
             <v-col style="display: none">
               <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-                
+                <template v-slot:default>
+                  <thead style="border: solid 1px grey;">
+                    <tr>
+                      <th class="text-left" width="220px">Имя</th>
+                      <th class="text-center">Workly <br><span v-show="period" style="color:gainsboro">(вовремя) (поздно)</span></th>
+                      <th class="text-left">Перс. пропущ. звон</th>
+                      <th class="text-left">Все входящие</th>
+                      <th class="text-left">Пропущенные в раб. время</th>
+                      <th class="text-left">Вход. звон</th>
+                      <th class="text-left">Незарег. вход. клиенты</th>
+                      <th class="text-left">Total feedback %</th>
+                      <th class="text-left">Feedback 👍 %</th>
+                      <th class="text-left">👍</th>
+                      <th class="text-left">☹️</th>
+                      <th class="text-left" width="160px"><span>онлайн-время</span></th>
+                    </tr>
+                  </thead>
+                  <tbody style="border: solid 1px grey;">
+                    <tr v-for="report in users_5995">
+                      <td>{{ report.name }}</td>
+                      <td class="text-center" v-html="calcWorkly(report.num)"></td>
+                      <td>{{ report.personal_missed }}</td>
+                      <td>{{ report.inbound }}</td>
+                      <td>{{ report.missed_in }}</td>
+                      <td>{{ report.vxod_count }}</td>
+                      <td>{{ report.unregs }}</td>
+                      <td>{{ report.total_feedback }} %</td>
+                      <td>{{ report.mark3_feedback }} %</td>
+                      <td>{{ report.mark3 }}</td>
+                      <td>{{ report.mark0 }}</td>
+                      <td>{{ report.online_time }}</td>
+                    </tr>
+                  </tbody>
+                </template>
               </v-simple-table>
             </v-col>
             <!-- ------------ -->
@@ -308,7 +341,6 @@ new Vue({
       await this.get_users_feedbacks();
       await this.getOperatorTime();
       await this.getBigDataPeriod();
-      await this.personalMissed();
       await this.getUnknownClients();
 
       this.getInfos_5995();
@@ -441,7 +473,6 @@ new Vue({
         this.getReport_5995();
         this.fifoToReport();
         await this.getBigDataPeriod();
-        await this.personalMissed();
         await this.getUnknownClients();
 
         this.loading = false;
@@ -650,11 +681,6 @@ new Vue({
               let infoss = {
                   id: num,
                   vxod_count: vxods[n].vxod_count,
-                  vxod_time: vxods[n].vxod_time,
-                  isxod_count: isxods[m].isxod_count,
-                  isxod_time: isxods[m].isxod_time,
-                  all_time: isxods[m].for_all_time+vxods[n].for_all_time,
-              all_time_s: isxods[m].for_all_time+vxods[n].for_all_time,
                 }
                 reports.push(infoss);
             }
@@ -667,11 +693,6 @@ new Vue({
             num: users[i].num,
               name: users[i].name,
               vxod_count: 0,
-              vxod_time: 0,
-              isxod_count: 0,
-              isxod_time: 0,
-              all_time: 0,
-              all_time_s: 0
             };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
@@ -679,11 +700,6 @@ new Vue({
                 num: users[i].num,
                   name: users[i].name,
                   vxod_count: reports[j].vxod_count,
-                  vxod_time: reports[j].vxod_time,
-                  isxod_count: reports[j].isxod_count,
-                  isxod_time: reports[j].isxod_time,
-                  all_time: reports[j].all_time,
-                  all_time_s: reports[j].all_time_s
                 }	
             }
           }
@@ -781,7 +797,8 @@ new Vue({
         
         var myArray_5995 = user_5995.split(";");	
         this.availableOperators = myArray_5995;
-              
+        await this.personalMissed();
+
         let reports_support = this.real_reports_5995;
         let set_support = [];
 
