@@ -45,6 +45,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('likes', 'LikeController');
     Route::resource('products', 'ProductController');
     Route::resource('scores', 'ScoreController');
+    Route::resource('exceptions', 'ExceptionController');
 
     Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');
     Route::get('piece', [BigreportController::class, 'piece'])->name('admin.piece');

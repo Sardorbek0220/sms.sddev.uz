@@ -91,6 +91,14 @@
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('exceptions.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-history"></i>
+                <p>
+                  {{__('Exceptions')}}
+                </p>
+              </a>
+            </li>
           </ul>
         </li>
         <li class="nav-item">
