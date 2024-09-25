@@ -120,6 +120,9 @@
       cursor: pointer;
       text-decoration: underline;
     }
+    table{
+      font-weight: 700;
+    }
 	</style>
 </head>
 <body>
@@ -167,44 +170,44 @@
           <template v-slot:default>
           <thead style="border: solid 1px grey;">
             <tr>
-              <th class="text-left" width="220px">Имя</th>
+              <th class="text-center" width="220px">Имя</th>
               <th class="text-center">Workly <br><span style="color:gainsboro">(вовремя) (поздно)</span></th>
-              <th class="text-left">Перс. пропущ. звон</th>
-              <th class="text-left">Пропущенные в раб. время %</th>
-              <th class="text-left">Вход. звон</th>
-              <th class="text-left">Незарег. вход. клиенты</th>
-              <th class="text-left">Total feedback %</th>
-              <th class="text-left">Feedback 👍 %</th>
-              <th class="text-left">Like</th>
-              <th class="text-left">Punishment</th>
-              <th class="text-left">Script</th>
-              <th class="text-left">Product</th>
+              <th class="text-center">Перс. пропущ. звон</th>
+              <th class="text-center">Пропущенные в раб. время</th>
+              <th class="text-center">Вход. звон</th>
+              <th class="text-center">Незарег. вход. клиенты</th>
+              <th class="text-center">Total feedback</th>
+              <th class="text-center">Feedback 👍</th>
+              <th class="text-center">Like</th>
+              <th class="text-center">Punishment</th>
+              <th class="text-center">Script</th>
+              <th class="text-center">Product</th>
               <!-- <th class="text-left">👍</th> -->
               <!-- <th class="text-left">☹️</th> -->
-              <th class="text-left" width="160px">Онлайн-время</th>
-              <th class="text-left">Total</th>
+              <th class="text-center" width="160px">Онлайн-время</th>
+              <th class="text-center">Total</th>
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995">
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
+              <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">
-                <strong class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong class="link">{{ report.outtime }}</strong>
+                <span class="link">{{ report.ontime }}</span>&nbsp&nbsp&nbsp&nbsp&nbsp<span class="link">{{ report.outtime }}</span>
               </td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.personal_missed }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.unregs }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.total_feedback }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.mark3_feedback }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.like }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.script }}</td>
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.personal_missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.unregs }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.total_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.mark3_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.like }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
               <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
               <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
-              <td class="link" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
-              <td :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
+              <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -214,50 +217,7 @@
 		  <!-- export excel -->
       <v-col style="display: none">
         <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-          <template v-slot:default>
-            <thead style="border: solid 1px grey;">
-              <tr>
-                <th class="text-left" width="220px">Имя</th>
-                <th class="text-center">Workly <br><span style="color:gainsboro">(вовремя) (поздно)</span></th>
-                <th class="text-left">Перс. пропущ. звон</th>
-                <th class="text-left">Пропущенные в раб. время %</th>
-                <th class="text-left">Вход. звон</th>
-                <th class="text-left">Незарег. вход. клиенты</th>
-                <th class="text-left">Total feedback %</th>
-                <th class="text-left">Feedback 👍 %</th>
-                <th class="text-left">Like</th>
-                <th class="text-left">Punishment</th>
-                <th class="text-left">Script</th>
-                <th class="text-left">Product</th>
-                <!-- <th class="text-left">👍</th> -->
-                <!-- <th class="text-left">☹️</th> -->
-                <th class="text-left" width="160px">Онлайн-время</th>
-                <th class="text-left">Total</th>
-              </tr>
-            </thead>
-            <tbody style="border: solid 1px grey;">
-              <tr v-for="report in users_5995">
-                <td class="link" @click="toStatistics"><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
-                <td class="text-center">
-                  <strong style='color:#2de12d' class="link">{{ report.ontime }}</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red' class="link">{{ report.outtime }}</strong>
-                </td>
-                <td class="link" @click="toStatistics">{{ report.personal_missed }}</td>
-                <td class="link" @click="toStatistics">{{ report.missed }}</td>
-                <td class="link" @click="toStatistics">{{ report.inbound }}</td>
-                <td class="link" @click="toStatistics">{{ report.unregs }}</td>
-                <td class="link" @click="toStatistics">{{ report.total_feedback }}</td>
-                <td class="link" @click="toStatistics">{{ report.mark3_feedback }}</td>
-                <td class="link" @click="toLikes">{{ report.like }}</td>
-                <td class="link" @click="toLikes">{{ report.punishment }}</td>
-                <td class="link" @click="toProducts">{{ report.script }}</td>
-                <td class="link" @click="toProducts">{{ report.product }}</td>
-                <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
-                <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
-                <td class="link" @click="toStatistics">{{ report.online_time }}</td>
-                <td>{{ report.total_point.toFixed(1) }}</td>
-              </tr>
-            </tbody>
-          </template>
+          
         </v-simple-table>
       </v-col>
       <!-- ------------ -->
@@ -357,13 +317,13 @@
         '#f19648',
         '#f19648',
         '#f19648',
-        '#f14848',
-        '#f14848',
-        '#f14848',
-        '#f14848',
-        '#f14848',
-        '#f14848',
-        '#f14848',
+        '#f16363',
+        '#f16363',
+        '#f16363',
+        '#f16363',
+        '#f16363',
+        '#f16363',
+        '#f16363',
       ]
     },
     async mounted () {
@@ -883,15 +843,15 @@
             if (reports_support[a].num == myArray_5995[b]) {
               
               reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[myArray_5995[b]] ?? 0, 'personal_missed')
-              reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in > 0 ? parseFloat(((this.bigDataPeriod.missed_in/(this.bigDataPeriod.missed+this.bigDataPeriod.answered))*100).toFixed(1)) : 0, 'missed')
+              reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
               reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
               reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
               reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
               reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
               reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
               reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
-              reports_support[a].script = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0, 'script')
-              reports_support[a].product = this.calcPoints(this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0, 'product')
+              reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
+              reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
               reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
 
               let times = this.calcWorkly(reports_support[a].num);

@@ -18,15 +18,13 @@ class Score extends Model
         'workly_ontime' => 'Workly (вовремя)',
         'workly_late' => 'Workly (поздно)',
         'personal_missed' => 'Перс. пропущ. звон',
-        'missed' => 'Пропущенные в раб. время %',
+        'missed' => 'Пропущенные в раб. время',
         'inbound' => 'Вход. звон',
-        'total_feedback' => 'Total feedback %',
-        'mark3_feedback' => 'Mark3 feedback %',
+        'total_feedback' => 'Total feedback',
+        'mark3_feedback' => 'Mark3 feedback',
         'like' => 'Like',
         'punishment' => 'Punishment',
         'unreg_client_inbound' => 'Незарег. вход. клиенты',
-        'script' => 'Script',
-        'product' => 'Product',
         'online_time' => 'Онлайн время'
     ];
 }
