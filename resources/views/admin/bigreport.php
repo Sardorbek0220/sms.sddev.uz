@@ -350,7 +350,7 @@
       this.getInfos_5995();
       this.getReport_5995();
       await this.getFifo();
-      this.fifoToReport();
+      await this.fifoToReport();
 
       this.loading = false;
     },
@@ -487,8 +487,6 @@
         });	
       }, 
       async filter(){
-        this.from_date = this.from_date
-        this.to_date = this.to_date
         
         await this.getWorklyData();
         await this.get_date();
@@ -502,7 +500,7 @@
 
         this.getInfos_5995();
         this.getReport_5995();
-        this.fifoToReport();
+        await this.fifoToReport();
 
         this.loading = false;
       },
