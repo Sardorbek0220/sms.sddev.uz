@@ -12,6 +12,7 @@ use App\Feedback;
 use App\Operator_time;
 use App\Unknown_client;
 use App\Score;
+use App\Exception;
 
 class ReportController extends Controller
 {
@@ -21,6 +22,21 @@ class ReportController extends Controller
     const username = "oybek.mirkasimov@gmail.com";
     const password = "P@ssw0rd";
     const workly_auth = 'configs/workly_auth.json';
+
+    public function timeExceptions($from_unix, $to_unix)
+    {
+        $from = gmdate("Y-m-d H:i:s", $from_unix);
+        $to = gmdate("Y-m-d H:i:s", $to_unix);        
+
+        $exceptions = Exception::whereBetween('day', [$from, $to])->get();
+        $excCondition = "";
+        foreach ($exceptions as $exc) {
+            $exc_from = strtotime(substr($exc->day, 0, -9) . " " . $exc->from_exc . ":00");
+            $exc_to = strtotime(substr($exc->day, 0, -9) . " " . $exc->to_exc . ":00");
+            $excCondition .= " AND start_stamp NOT BETWEEN $exc_from AND $exc_to";
+        }  
+        return $excCondition;      
+    }
 
     public function index(Request $request)
     {
@@ -147,7 +163,13 @@ class ReportController extends Controller
 
     public function monitoringData(Request $request)
     {
-        $calls = All_call::where('start_stamp', '>', $request['from'])->where('start_stamp', '<', $request['to'])->get();
+        $from = $request['from'];
+        $to = $request['to'];
+
+        $excCondition = $this->timeExceptions($from, $to);
+
+        $calls = DB::select("SELECT * FROM all_calls WHERE start_stamp BETWEEN $from AND $to $excCondition");
+        // $calls = All_call::where('start_stamp', '>', $request['from'])->where('start_stamp', '<', $request['to'])->get();
 
         return Response::json($calls);
     }
@@ -186,8 +208,11 @@ class ReportController extends Controller
             $from = strtotime($request['from'] . " 00:00:00");
             $to = strtotime($request['to'] . " 23:59:59");
         }
+
+        $excCondition = $this->timeExceptions($from, $to);
         
-        $calls = All_call::whereBetween('start_stamp', [$from, $to])->cursor();
+        $calls = DB::select("SELECT * FROM all_calls WHERE start_stamp BETWEEN $from AND $to $excCondition");
+        // $calls = All_call::whereBetween('start_stamp', [$from, $to])->cursor();
 
         return Response::json($calls);
     }

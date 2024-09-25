@@ -171,19 +171,18 @@
           <thead style="border: solid 1px grey;">
             <tr>
               <th class="text-center" width="220px">Имя</th>
-              <th class="text-center">Workly <br><span style="color:gainsboro">(вовремя) (поздно)</span></th>
+              <th class="text-center">⏰ (вовремя)</th>
+              <th class="text-center">⏰ (поздно)</th>
               <th class="text-center">Перс. пропущ. звон</th>
-              <th class="text-center">Пропущенные в раб. время</th>
+              <th class="text-center">Пропущ. в раб. время</th>
               <th class="text-center">Вход. звон</th>
               <th class="text-center">Незарег. вход. клиенты</th>
               <th class="text-center">Total feedback</th>
-              <th class="text-center">Feedback 👍</th>
+              <th class="text-center">👍 feedback</th>
               <th class="text-center">Like</th>
               <th class="text-center">Punishment</th>
               <th class="text-center">Script</th>
               <th class="text-center">Product</th>
-              <!-- <th class="text-left">👍</th> -->
-              <!-- <th class="text-left">☹️</th> -->
               <th class="text-center" width="160px">Онлайн-время</th>
               <th class="text-center">Total</th>
             </tr>
@@ -191,9 +190,8 @@
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995">
               <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
-              <td class="text-center" :style="{backgroundColor: colors[index]}">
-                <span class="link">{{ report.ontime }}</span>&nbsp&nbsp&nbsp&nbsp&nbsp<span class="link">{{ report.outtime }}</span>
-              </td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.personal_missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
@@ -204,8 +202,6 @@
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.script }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
-              <!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
-              <!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
@@ -347,7 +343,6 @@
       await this.getUsers();
       await this.get_users_feedbacks();
       await this.getOperatorTime();
-      await this.getBigDataPeriod();
       
       await this.getUnknownClients();
       await this.getExtra();
@@ -502,7 +497,6 @@
 
         await this.get_users_feedbacks();
         await this.getOperatorTime();
-        await this.getBigDataPeriod();
         await this.getUnknownClients();
         await this.getExtra();
 
@@ -511,32 +505,6 @@
         this.fifoToReport();
 
         this.loading = false;
-      },
-      async getBigDataPeriod(){
-        await axios.get('monitoring/bigData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
-          if (response.status == 200) {
-            this.bigDataPeriod = {
-              answered: 0,
-              missed: 0,
-              missed_in: 0,
-              talking_time: 0
-            }
-
-            for (const datum of response.data) {
-              if (datum.accountcode == 'inbound') {
-
-                this.bigDataPeriod.talking_time += datum.user_talk_time
-                if (datum.user_talk_time > 0) {
-                  this.bigDataPeriod.answered += 1;
-                }else{
-                  this.bigDataPeriod.missed += 1;
-                  this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
-                }
-
-              }
-            }
-          }
-        });	
       },
       checkDateHours(timestamp){
         let date = new Date(timestamp * 1000),
@@ -883,6 +851,27 @@
         await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
           if (response.status == 200) {
             this.calls = response.data
+
+            this.bigDataPeriod = {
+              answered: 0,
+              missed: 0,
+              missed_in: 0,
+              talking_time: 0
+            }
+
+            for (const datum of response.data) {
+              if (datum.accountcode == 'inbound') {
+
+                this.bigDataPeriod.talking_time += datum.user_talk_time
+                if (datum.user_talk_time > 0) {
+                  this.bigDataPeriod.answered += 1;
+                }else{
+                  this.bigDataPeriod.missed += 1;
+                  this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
+                }
+
+              }
+            }
             this.today = new Date()
             this.loading = false
           }

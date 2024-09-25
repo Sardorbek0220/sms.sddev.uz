@@ -37,7 +37,7 @@
                       <td>{{$data->id}}</td>
                       <td>{{$data->from_exc}}</td>
                       <td>{{$data->to_exc}}</td>
-                      <td>{{$data->day}}</td>
+                      <td>{{substr($data->day, 0, -9)}}</td>
                       <td style="text-align: center;">
                         <a class="d-inline-block mr-2" href="{{ route('exceptions.edit', ['exception'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">
                           <i class="fa fa-edit"></i>

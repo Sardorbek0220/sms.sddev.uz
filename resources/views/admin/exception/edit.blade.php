@@ -33,7 +33,7 @@
                         </div>
                         <div class="col-sm-4">
                             <label for="day">Day</label>
-                            <input type="date" required class="form-control" name="day" id="day" value="{{$exception->day}}">
+                            <input type="date" required class="form-control" name="day" id="day" value="{{substr($exception->day, 0, -9)}}">
                         </div>
                     </div>
                 </div>
