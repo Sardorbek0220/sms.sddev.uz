@@ -357,23 +357,16 @@ new Vue({
     },
     created(){	
 
-      this.interval = setInterval(() =>{
-        this.get_date()},30000)
-
-      this.interval = setInterval(() =>{
-        this.get_users_feedbacks()},600000)
-
-      this.interval = setInterval(() =>{
-        this.getOperatorTime()},30000)
-
-      this.interval = setInterval(() =>{
-        this.getInfos_5995()},30000)
-
-      this.interval = setInterval(() =>{
-        this.getReport_5995()},30000)
-
-      this.interval = setInterval(() =>{
-        this.fifoToReport()},30000)
+        this.interval = setInterval(() =>{
+            if (this.from_date == this.day && this.to_date == this.day) {
+                this.get_date();
+                this.getOperatorTime();
+                this.getInfos_5995();
+                this.getReport_5995();
+                this.fifoToReport();
+                this.get_users_feedbacks();
+            }
+        },30000)
 
     },
     destroyed(){
@@ -443,20 +436,24 @@ new Vue({
             if (response.status == 200) {	
                 this.oper_misseds = []		
                 for (const res of response.data) {
-                var create = new Date(res.create_timestamp);
-                var destroy = new Date(res.destroy_timestamp);
-                if ( 
-                    this.availableOperators.includes(res.destination_number) && 
-                    !this.availableOperators.includes(res.caller_number) && 
-                    res.caller_number.search(".onpbx.ru") < 0 && 
-                    Math.abs(destroy - create) > 4000
-                ) {		
-                    if (!this.oper_misseds[res.destination_number]) {
-                    this.oper_misseds[res.destination_number] = 0;
+                    var create = new Date(res.create_timestamp);
+                    var destroy = new Date(res.destroy_timestamp);
+                    if ( 
+                        this.availableOperators.includes(res.destination_number) && 
+                        !this.availableOperators.includes(res.caller_number) && 
+                        res.caller_number.search(".onpbx.ru") < 0 && 
+                        Math.abs(destroy - create) > 4000
+                    ) {		
+                        if (!this.oper_misseds[res.destination_number]) {
+                        this.oper_misseds[res.destination_number] = 0;
+                        }
+                        console.log(res);
+                        
+                        this.oper_misseds[res.destination_number] += 1;								
                     }
-                    this.oper_misseds[res.destination_number] += 1;								
-                }
-                }			
+                }	
+                console.log('end');
+                		
             }
             });									
         },

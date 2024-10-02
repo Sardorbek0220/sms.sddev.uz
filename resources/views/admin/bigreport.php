@@ -357,22 +357,15 @@
     created(){	
 
       this.interval = setInterval(() =>{
-        this.get_date()},30000)
-
-      this.interval = setInterval(() =>{
-        this.get_users_feedbacks()},600000)
-
-      this.interval = setInterval(() =>{
-        this.getOperatorTime()},30000)
-
-      this.interval = setInterval(() =>{
-        this.getInfos_5995()},30000)
-
-      this.interval = setInterval(() =>{
-        this.getReport_5995()},30000)
-
-      this.interval = setInterval(() =>{
-        this.fifoToReport()},30000)
+        if (this.from_date == this.day && this.to_date == this.day) {
+          this.get_date();
+          this.getOperatorTime();
+          this.getInfos_5995();
+          this.getReport_5995();
+          this.fifoToReport();
+          this.get_users_feedbacks();
+        }
+      },30000)
 
     },
     destroyed(){
