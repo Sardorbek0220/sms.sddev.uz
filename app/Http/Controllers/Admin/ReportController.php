@@ -262,7 +262,7 @@ class ReportController extends Controller
         
 		$ch = curl_init();
 
-		curl_setopt($ch, CURLOPT_URL, "https://161.97.137.120:8441/download/v2");
+		curl_setopt($ch, CURLOPT_URL, "https://161.97.137.120:8441/download/v3");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); // Disable SSL verification
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // Disable host verification
@@ -271,7 +271,8 @@ class ReportController extends Controller
 		]);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-			'date' => $request->date
+			'date_start' => $request->from,
+            'date_end' => $request->to
 		]));
 
 		$output = curl_exec($ch);
