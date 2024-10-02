@@ -419,14 +419,21 @@
       async getExtra(){
         await axios.get('bigreport/extra', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
+            this.extra = {
+              likes: {},
+              products: {}
+            }
+            
             if (response.data.likes.length > 0) {
               for (const like of response.data.likes) {
                 this.extra.likes[like.operator] = like
               }
+            } 
+            if (response.data.products.length > 0) {
               for (const product of response.data.products) {
                 this.extra.products[product.operator] = product
               }
-            }            
+            }           
           }
         });	
       }, 
