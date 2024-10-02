@@ -413,7 +413,7 @@ new Vue({
         });	
       }, 
       async personalMissed(){	
-        await axios.get('monitoring/personalMissed', {params: {date: this.to_date}}).then(response => {
+        await axios.get('monitoring/personalMissed', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {	
             this.oper_misseds = []		
             for (const res of response.data) {
