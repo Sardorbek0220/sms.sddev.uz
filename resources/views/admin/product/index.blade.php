@@ -22,7 +22,15 @@
               <form action="{{ route('products.index') }}" method="get" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
-                  <div class="col-12 col-md-7 form-group">
+                  <div class="col-12 col-md-5 form-group"></div>
+                  <div class="col-12 col-md-2 form-group">
+                    <label for=""></label>
+                    <select class="form-control mt-2" name="operator">
+                      <option value="">Все операторы</option>
+                      @foreach($operators as $id => $name)
+                      <option <?if(isset($_GET['operator']) && $_GET['operator'] == $id)echo "selected";?> value="{{ $id }}">{{ $name }}</option>
+                      @endforeach
+                    </select>
                   </div>
                   <div class="col-12 col-md-2 form-group">
                     <label for="from_date">От</label>

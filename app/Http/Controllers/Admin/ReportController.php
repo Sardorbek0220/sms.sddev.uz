@@ -176,7 +176,7 @@ class ReportController extends Controller
 
     public function monitoringUsers(Request $request)
     {
-        $users = DB::table('operators')->select('name', 'phone as num', 'field')->get();
+        $users = DB::table('operators')->select('name', 'phone as num', 'field')->where('workly_id', '!=', 'NULL')->get();
 
         return Response::json($users);
     }

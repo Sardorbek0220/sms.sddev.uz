@@ -27,7 +27,11 @@ class ProductController extends Controller
             $to_date = $request->to_date;
         } 
 
-        $products = Product::whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        if (empty($request->operator)) {
+            $products = Product::whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        }else{
+            $products = Product::where('operator', $request->operator)->whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        }
 
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;

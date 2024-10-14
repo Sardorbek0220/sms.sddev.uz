@@ -115,6 +115,10 @@
             <v-row>
               <v-col>
                   <div class="float-right">
+                      <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
+                        <option selected value="">Все операторы</option>
+                        <option v-for="item in users" :value="item.num">{{item.name}}</option>
+                      </select>
                       <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
                       <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
                       <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
@@ -165,7 +169,7 @@
                     </tr>
                   </thead>
                   <tbody style="border: solid 1px grey;">
-                    <tr v-for="report in users_5995">
+                    <tr v-for="report in users_5995" v-show="operator_id == '' || operator_id == report.num">
                       <td><strong v-if="report.field == '1'">{{ report.name }}</strong><span v-else>{{ report.name }}</span></td>
                       <td class="text-center" v-html="calcWorkly(report.num)"></td>
                       <td>{{ report.personal_missed }}</td>
@@ -267,6 +271,7 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      operator_id: '',
       period: false,
       loading: false,
       today: new Date(),

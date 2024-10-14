@@ -130,7 +130,11 @@
     <v-row>
     	<v-col>
     		<div class="float-right">
-          <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+            <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
+              <option selected value="">Все операторы</option>
+              <option v-for="item in users" :value="item.num">{{item.name}}</option>
+            </select>
+            <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
             <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
             <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
           </div>
@@ -183,7 +187,7 @@
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
-            <tr v-for="(report, index) in users_5995">
+            <tr v-for="(report, index) in users_5995" v-show="operator_id == '' || operator_id == report.num">
               <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
@@ -256,6 +260,7 @@
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      operator_id: '',
       day: '',
       loading: false,
       today: new Date(),

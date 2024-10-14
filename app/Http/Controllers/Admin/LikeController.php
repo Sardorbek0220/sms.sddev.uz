@@ -27,7 +27,11 @@ class LikeController extends Controller
             $to_date = $request->to_date;
         } 
 
-        $likes = Like::whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        if (empty($request->operator)) {
+            $likes = Like::whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        }else{
+            $likes = Like::where('operator', $request->operator)->whereBetween('date', [$from_date." 00:00:00", $to_date." 23:59:59"])->paginate(20);
+        }
 
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;
