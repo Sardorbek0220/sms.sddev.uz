@@ -199,7 +199,7 @@
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.mark3_feedback }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.like }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toScripts">{{ report.script }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
@@ -917,7 +917,10 @@
         window.open('/admin/likes?from_date='+this.from_date+'&to_date='+this.to_date)
       },
       toProducts(){
-        window.open('/admin/products?from_date='+this.from_date+'&to_date='+this.to_date)
+        window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date)
+      },
+      toScripts(){
+        window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#script")
       }
     }
 	})
