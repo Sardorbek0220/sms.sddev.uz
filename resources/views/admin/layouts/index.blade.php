@@ -240,10 +240,12 @@
 
     $("#example_product").DataTable({
       "stateSave": true,
-      "paging": false,
+      "paging": true,
+      "lengthMenu": [ [10, 20, 50, -1], [10, 20, 50, "All"] ],
+      "pageLength": 20,
       "responsive": true, 
-      "autoWidth": false,
-      "lengthChange": false, 
+      "autoWidth": true,
+      "lengthChange": true, 
       "buttons": [
         { extend: 'excel', footer: true, customize: (xlsx, config, dataTable) => {
           let sheet = xlsx.xl.worksheets['sheet1.xml'];
