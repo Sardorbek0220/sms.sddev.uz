@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BigreportController;
 use App\Http\Controllers\PbxBot\PbxBotController;
+use App\Http\Controllers\Admin\TablereportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +47,9 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('products', 'ProductController');
     Route::resource('scores', 'ScoreController');
     Route::resource('exceptions', 'ExceptionController');
+    Route::resource('requestTypes', 'RequestTypeController');
 
+    Route::get('tablereport', [TablereportController::class, 'index'])->name('admin.tablereport');
     Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');
     Route::get('piece', [BigreportController::class, 'piece'])->name('admin.piece');
     Route::get('bigreport/extra', [BigreportController::class, 'extra']);

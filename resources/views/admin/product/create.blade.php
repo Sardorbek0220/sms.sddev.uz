@@ -35,8 +35,16 @@
                     <div class="col-sm-1">
                         <input type="text" class="form-control" name="data[0][audio_url]" placeholder="URL-адрес аудио">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                         <input type="text" class="form-control" name="data[0][requestt]" placeholder="Запрос">
+                    </div>
+                    <div class="col-sm-1">
+                      <select class="form-control" name="data[0][request_type_id]">
+                        <option value="">Типы запросов</option>
+                        @foreach($request_types as $type)
+                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                        @endforeach
+                      </select>
                     </div>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="data[0][response]" placeholder="Ответ">
@@ -92,8 +100,16 @@ $("#appendValues").click(function(){
     <div class="col-sm-1 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][audio_url]" placeholder="URL-адрес аудио">
     </div>
-    <div class="col-sm-2 mt-2">
+    <div class="col-sm-1 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][requestt]" placeholder="Запрос">
+    </div>
+    <div class="col-sm-1 mt-2">
+      <select class="form-control" name="data[`+n+`][request_type_id]">
+        <option value="">Типы запросов</option>
+        <?foreach($request_types as $type){?>
+        <option value="<?=$type->id?>"><?=$type->name?></option>
+        <?}?>
+      </select>
     </div>
     <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][response]" placeholder="Ответ">

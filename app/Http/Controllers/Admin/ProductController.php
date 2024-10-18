@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Product;
+use App\Request_type;
 
 class ProductController extends Controller
 {
@@ -48,7 +49,10 @@ class ProductController extends Controller
     {
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;
-        return view('admin.product.create', compact('operators'));
+
+        $request_types = Request_type::get();
+
+        return view('admin.product.create', compact('operators', 'request_types'));
     }
 
     /**
@@ -68,6 +72,7 @@ class ProductController extends Controller
                 'comment' => $datum['comment'],
                 'client_phone' => $datum['client_phone'],
                 'audio_url' => $datum['audio_url'],
+                'request_type_id' => $datum['request_type_id'],
                 'request' => $datum['requestt'],
                 'response' => $datum['response'],
                 'date' => $datum['date'],
@@ -102,7 +107,10 @@ class ProductController extends Controller
 
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;
-        return view('admin.product.edit', compact('product', 'operators'));
+
+        $request_types = Request_type::get();
+
+        return view('admin.product.edit', compact('product', 'operators', 'request_types'));
     }
 
     /**
@@ -119,6 +127,7 @@ class ProductController extends Controller
             'comment' => $request->comment,
             'client_phone' => $request->client_phone,
             'audio_url' => $request->audio_url,
+            'request_type_id' => $request->request_type_id,
             'request' => $request->requestt,
             'response' => $request->response,
             'date' => $request->date,

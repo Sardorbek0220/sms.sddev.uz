@@ -35,9 +35,18 @@
                             <label for="">URL-адрес аудио</label>
                             <input type="text" class="form-control" name="audio_url" placeholder="Audio url" value="<?=$product->audio_url?>">
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <label for="">Запрос</label>
                             <input type="text" class="form-control" name="requestt" placeholder="Request" value="<?=$product->request?>">
+                        </div>
+                        <div class="col-sm-1">
+                          <label for="">Типы запросов</label>
+                          <select class="form-control" name="request_type_id">
+                            <option value="">Типы запросов</option>
+                              @foreach($request_types as $type)
+                              <option @if($type->id == $product->request_type_id) selected @endif value="{{ $type->id }}">{{ $type->name }}</option>
+                              @endforeach
+                          </select>
                         </div>
                         <div class="col-sm-2">
                             <label for="">Ответ</label>

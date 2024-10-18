@@ -19,6 +19,7 @@
           <div class="card">
             <div class="card-header">
               <h3 class="card-title mt-2"><a href="{{ route('products.create') }}" class="btn btn-primary">{{__('Создать')}}</a></h3>
+              <h3 class="card-title mt-2"><a href="{{ route('requestTypes.index') }}" class="btn btn-dark ml-2">{{__('Типы запросов')}}</a></h3>
               <form action="{{ route('products.index') }}" method="get" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
@@ -56,12 +57,13 @@
                     <th>{{__('Телефон клиента')}}</th>
                     <th>{{__('URL-адрес аудио')}}</th>
                     <th>{{__('Запрос')}}</th>
+                    <th>Тип запроса</th>
                     <th>{{__('Ответ')}}</th>
                     <th>{{__('Комментарий')}}</th>
                     <th>{{__('Дата')}}</th>
                     <th style="width: 2%">{{__('Скрипт')}}</th>
                     <th style="width: 2%">{{__('Продукт')}}</th>
-                    <th style="width: 10%;" class="text-center">{{__('Действие')}}</th>
+                    <th style="width: 5%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -72,6 +74,7 @@
                     <td>{{$data->client_phone}}</td>
                     <td>{{$data->audio_url}}</td>
                     <td>{{$data->request}}</td>
+                    <td>{{$data->request_type->name ?? ''}}</td>
                     <td>{{$data->response}}</td>
                     <td>{{$data->comment}}</td>
                     <td>{{date_format(date_create($data->date), 'd.m.Y')}}</td>
