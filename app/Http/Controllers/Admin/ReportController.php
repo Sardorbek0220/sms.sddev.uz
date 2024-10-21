@@ -373,8 +373,7 @@ class ReportController extends Controller
 
         if ($auth['access_token']) {
             $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081", $auth['access_token']);
-
-            if (!$data['items'] && $data['code']) {
+            if (!isset($data['items']) && $data['code']) {
                 info($data);
                 self::auth();
                 $auth = (array) json_decode(file_get_contents(self::workly_auth));
