@@ -22,13 +22,21 @@
               @csrf
               <div class="card-body">
                 <div class="form-group row">
-                  <div class="col-sm-6">
+                  <div class="col-sm-2">
                     <label for="">Тип оценки</label>
                     <select id="key" class="form-control" name="key">
                       @foreach($keys as $id => $name)
                       <option value="{{ $id }}">{{ $name }}</option>
                       @endforeach
                     </select>
+                  </div>
+                  <div class="col-sm-2">
+                    <label for="">Дата начала</label>
+                    <input class="form-control" required type="date" name="from" value="<?php echo date("Y-m-d");?>">
+                  </div>
+                  <div class="col-sm-2">
+                    <label for="">Дата окончания</label>
+                    <input class="form-control" required type="date" name="to" value="<?php echo date("Y-m-d");?>">
                   </div>
                   <div class="row col-sm-6 forValues">
                     <div class="col-sm-4">

@@ -46,11 +46,15 @@ class ScoreController extends Controller
             Score::create([
                 'key_text' => $request->key,
                 'value' => json_encode($request->data),
+                'from_date' => $request->from." 00:00:00",
+                'to_date' => $request->to." 23:59:59",
             ]);
         }else{
             Score::create([
                 'key_text' => $request->key,
                 'value' => json_encode(['value' => $request->value]),
+                'from_date' => $request->from." 00:00:00",
+                'to_date' => $request->to." 23:59:59",
             ]);
         }
         
@@ -94,11 +98,15 @@ class ScoreController extends Controller
         $score = Score::find($id);
         if ($request->data) {
             $score->update([
-                'value' => json_encode($request->data)
+                'value' => json_encode($request->data),
+                'from_date' => $request->from." 00:00:00",
+                'to_date' => $request->to." 23:59:59",
             ]);
         }else{
             $score->update([
-                'value' => json_encode(['value' => $request->value])
+                'value' => json_encode(['value' => $request->value]),
+                'from_date' => $request->from." 00:00:00",
+                'to_date' => $request->to." 23:59:59",
             ]);
         }
 

@@ -23,13 +23,21 @@
                 @method('PUT')
                 <div class="card-body">
                   <div class="form-group row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-2">
                       <label for="">Тип оценки</label>
                       <select id="key" class="form-control" name="key" required disabled>
                           @foreach($keys as $id => $name)
                           <option @if($id == $score->key_text) selected @endif value="{{ $id }}">{{ $name }}</option>
                           @endforeach
                       </select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label for="">Дата начала</label>
+                      <input class="form-control" type="date" required name="from" value="<?= $score->from_date == "0000-00-00 00:00:00" ? "" : date_format(date_create($score->from_date), 'Y-m-d');?>">
+                    </div>
+                    <div class="col-sm-2">
+                      <label for="">Дата окончания</label>
+                      <input class="form-control" type="date" required name="to" value="<?= $score->to_date == "0000-00-00 00:00:00" ? "" : date_format(date_create($score->to_date), 'Y-m-d');?>">
                     </div>
                     @if(!isset($score->value['value']))
                     <div class="row col-sm-6 forValues">

@@ -10,6 +10,8 @@ class Score extends Model
         'id',
         'key_text',
         'value',
+        'from_date',
+        'to_date',
         'created_at',
         'updated_at',
     ];

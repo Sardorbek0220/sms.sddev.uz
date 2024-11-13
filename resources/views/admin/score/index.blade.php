@@ -27,6 +27,8 @@
                     <th style="width: 2%">#</th>
                     <th>{{__('Тип оценки')}}</th>
                     <th>{{__('Значение')}}</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
                     <th>{{__('Дата')}}</th>
                     <th style="width: 10%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
@@ -45,6 +47,8 @@
                         @endforeach
                       @endif
                     </td>
+                    <td>{{$data->from_date}}</td>
+                    <td>{{$data->to_date}}</td>
                     <td>{{date_format(date_create($data->created_at), 'd.m.Y')}}</td>
                     <td style="text-align: center;">
                       <a class="d-inline-block mr-2" href="{{ route('scores.edit', ['score'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">
