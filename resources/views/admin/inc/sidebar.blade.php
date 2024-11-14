@@ -99,6 +99,14 @@
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('admin.tablereport') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-table"></i>
+                <p>
+                  {{__('Table Report')}}
+                </p>
+              </a>
+            </li>
           </ul>
         </li>
         <li class="nav-item">

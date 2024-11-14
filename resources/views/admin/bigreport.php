@@ -189,19 +189,19 @@
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995" v-show="operator_id == '' || operator_id == report.num">
               <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.personal_missed }}</td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.ontime }}</td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.outtime }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.unregs }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.total_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.mark3_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.like }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toLikes">{{ report.punishment }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toScripts">{{ report.script }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toProducts">{{ report.product }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.online_time }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('like')">{{ report.like }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
@@ -921,6 +921,9 @@
       },
       toScripts(){
         window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#script")
+      },
+      toReportTable(script){
+        window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#"+script)
       }
     }
 	})
