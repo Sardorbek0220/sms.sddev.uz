@@ -368,6 +368,10 @@ class ReportController extends Controller
     public function worklyData(Request $request)
     {
         $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        if (empty($auth)) {
+            self::auth();
+            $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        }
 
         $allData = [];
 
@@ -414,7 +418,84 @@ class ReportController extends Controller
         return Response::json($allData);
 
     } 
-
+    public function worklyDataX($request) {
+        $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        if (empty($auth)) {
+            self::auth();
+            $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        }
+        $allData = [];
+    
+        if (isset($auth['access_token'])) { // Check if access_token is set
+            $currentPage = 1;
+            $totalPages = 1;
+    
+            do {
+                // Fetch data for the current page
+                $data = self::getData("https://api.workly.io/v1/reports/at-work?start_date=" . $request->from . "&end_date=" . $request->to . "&page=" . $currentPage, $auth['access_token']);
+                dump($data);
+                dump($request->from);
+                // Check if the data is valid
+                if (!isset($data['items'])) {
+                    info($data);
+    
+                    // Refresh auth token if necessary
+                    if (!isset($data->code)) {
+                        self::auth();
+                        $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                        continue; // Retry fetching data with new auth token
+                    } else {
+                        break; // Exit if there's an error code
+                    }
+                }
+    
+                // Process items in the response
+                foreach ($data['items'] as $datum) {
+                    if (!isset($datum->scheduled->start_time) || !isset($datum->actual->first_in)) {
+                        continue; // Skip if data is missing
+                    }
+    
+                    $scheduledTime = new \DateTime($datum->scheduled->start_time);
+                    $realTime = new \DateTime($scheduledTime->format('Y-m-d') . ' ' . $datum->actual->first_in);
+    
+                    // Calculate the difference in minutes
+                    $interval = $scheduledTime->diff($realTime);
+                    $late_for = ($interval->h * 60) + $interval->i;
+    
+                    // Adjust if early (realTime < scheduledTime)
+                    if ($realTime < $scheduledTime) {
+                        $late_for = -$late_for;
+                    }
+    
+                    // Determine status
+                    $status = ($datum->scheduled->start_time == null) ? "qo'shimcha" :
+                              (($late_for > 0) ? "late" : "on_time");
+    
+                    $allData[] = [
+                        'id' => $datum->employee->id,
+                        'fullname' => $datum->employee->full_name,
+                        'department_id' => $datum->employee->department_id,
+                        'date' => $datum->scheduled->report_date,
+                        'scheduled' => $datum->scheduled->start_time,
+                        'real' => $datum->actual->first_in,
+                        'time_diff' => $late_for,
+                        'status' => $status
+                    ];
+                }
+    
+                // Check pagination: Increment currentPage for the next loop
+                $currentPage++;
+                $totalPages = isset($data['_meta']) && is_object($data['_meta']) && property_exists($data['_meta'], 'pageCount') 
+                    ? $data['_meta']->pageCount 
+                    : 1; // Set totalPages to 1 as a fallback if it's null
+            } while ($currentPage <= $totalPages);
+        }
+    
+        return response()->json($allData);
+    }
+    
+    
+    
     public function worklySchedule()
     {
         $auth = (array) json_decode(file_get_contents(self::workly_auth));
