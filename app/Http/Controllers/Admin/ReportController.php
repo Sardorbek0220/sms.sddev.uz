@@ -432,9 +432,9 @@ class ReportController extends Controller
     
             do {
                 // Fetch data for the current page
-                $data = self::getData("https://api.workly.io/v1/reports/at-work?start_date=" . $request->from . "&end_date=" . $request->to . "&page=" . $currentPage, $auth['access_token']);
-                dump($data);
-                dump($request->from);
+                $data = self::getData("https://api.workly.uz/v1/reports/at-work?start_date=" . $request->from . "&end_date=" . $request->to . "&page=" . $currentPage, $auth['access_token']);
+                //dump($data);
+                //dump($request->from);
                 // Check if the data is valid
                 if (!isset($data['items'])) {
                     info($data);
@@ -443,6 +443,8 @@ class ReportController extends Controller
                     if (!isset($data->code)) {
                         self::auth();
                         $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                        //dump($auth);
+
                         continue; // Retry fetching data with new auth token
                     } else {
                         break; // Exit if there's an error code

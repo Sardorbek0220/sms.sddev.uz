@@ -282,7 +282,7 @@ class TablereportController extends Controller
         //dump($from_date."");
         $req = new Request([
             'from' => date('Y-m-d', strtotime($from_date."")),
-            'to' => date('Y-m-d', strtotime($to_date.""))
+            'to' => date('Y-m-d', strtotime($to_date . "") + 86400),
         ]);
         
 
@@ -559,7 +559,7 @@ class TablereportController extends Controller
                 'mark3' => $report->mark3,
             ];
         }
-        dump($marks);
+        // dump($marks);
 
         uasort($marks, function ($a, $b) {
             return $b['TotalCount'] <=> $a['TotalCount'];
