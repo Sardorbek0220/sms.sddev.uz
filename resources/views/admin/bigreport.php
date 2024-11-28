@@ -913,15 +913,6 @@
       toStatistics(){
         window.open('/admin/piece?from_date='+this.from_date+'&to_date='+this.to_date)
       },
-      toLikes(){
-        window.open('/admin/likes?from_date='+this.from_date+'&to_date='+this.to_date)
-      },
-      toProducts(){
-        window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date)
-      },
-      toScripts(){
-        window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#script")
-      },
       toReportTable(script){
         window.open('/admin/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#"+script)
       }

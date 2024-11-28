@@ -376,12 +376,12 @@ class ReportController extends Controller
         $allData = [];
 
         if ($auth['access_token']) {
-            $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081", $auth['access_token']);
+            $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081,29206", $auth['access_token']);
             if (!isset($data['items']) && $data['code']) {
                 info($data);
                 self::auth();
                 $auth = (array) json_decode(file_get_contents(self::workly_auth));
-                $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554", $auth['access_token']);
+                $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081,29206", $auth['access_token']);
             }
             
             foreach ($data['items'] as $datum) {
@@ -453,6 +453,9 @@ class ReportController extends Controller
     
                 // Process items in the response
                 foreach ($data['items'] as $datum) {
+                    if ($datum->employee->department_id != '17554') {
+                        continue;
+                    }
                     if (!isset($datum->scheduled->start_time) || !isset($datum->actual->first_in)) {
                         continue; // Skip if data is missing
                     }
