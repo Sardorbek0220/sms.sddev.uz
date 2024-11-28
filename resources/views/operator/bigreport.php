@@ -823,8 +823,8 @@ new Vue({
                         reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
 
                         let times = this.calcWorkly(reports_support[a].num);
-                        reports_support[a].ontime = this.calcPoints(times.ontime, 'workly_ontime')
-                        reports_support[a].outtime = this.calcPoints(times.outtime, 'workly_late')
+                        reports_support[a].ontime = times.ontime
+                        reports_support[a].outtime = times.outtime
 
                         reports_support[a].total_point = 
                             reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].total_feedback 
@@ -881,17 +881,34 @@ new Vue({
             let workly_id = this.worklyOperators[oper_id]
             let data = this.worklyData[workly_id]
             let schedule = this.worklySchedule[workly_id].toString().split('-')
+            var scoress = this.scores        
 
             let ontime = 0;
             let outtime = 0;
             if (data) {
-            for (const date in data) {
-                if (new Date('2002-04-23 '+data[date][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
-                ontime++;
-                }else{
-                outtime++;
+                for (const date in data) {
+
+                    var came_date = new Date('2002-04-23 '+data[date][0]+':00')
+                    var sched_date = new Date('2002-04-23 '+schedule[0]+':00')
+                    var diff = (came_date.getTime() - sched_date.getTime()) / 60000;
+
+                    if (diff > 0) {
+                    for (const score of scoress['workly_late']) {            
+                        if (parseFloat(score.from) <= diff && (score.to == null || parseFloat(score.to) >= diff)) {
+                        outtime += parseFloat(score.value) 
+                        break;
+                        }
+                    }
+                    }else{
+                    for (const score of scoress['workly_ontime']) {            
+                        if (parseFloat(score.from) <= Math.abs(diff) && (score.to == null || parseFloat(score.to) >= Math.abs(diff))) {
+                        ontime += parseFloat(score.value) 
+                        break;
+                        }
+                    }
+                    }
+
                 }
-            }
             }
             return {ontime: ontime, outtime: outtime}       
         },
