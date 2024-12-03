@@ -878,39 +878,44 @@ new Vue({
             });		
         },
         calcWorkly(oper_id){   
-            let workly_id = this.worklyOperators[oper_id]
-            let data = this.worklyData[workly_id]
-            let schedule = this.worklySchedule[workly_id].toString().split('-')
-            var scoress = this.scores        
+            try {
+                let workly_id = this.worklyOperators[oper_id]
+                let data = this.worklyData[workly_id]
+                let schedule = this.worklySchedule[workly_id].toString().split('-')
+                var scoress = this.scores        
 
-            let ontime = 0;
-            let outtime = 0;
-            if (data) {
-                for (const date in data) {
+                let ontime = 0;
+                let outtime = 0;
+                if (data) {
+                    for (const date in data) {
 
-                    var came_date = new Date('2002-04-23 '+data[date][0]+':00')
-                    var sched_date = new Date('2002-04-23 '+schedule[0]+':00')
-                    var diff = (came_date.getTime() - sched_date.getTime()) / 60000;
+                        var came_date = new Date('2002-04-23 '+data[date][0]+':00')
+                        var sched_date = new Date('2002-04-23 '+schedule[0]+':00')
+                        var diff = (came_date.getTime() - sched_date.getTime()) / 60000;
 
-                    if (diff > 0) {
-                    for (const score of scoress['workly_late']) {            
-                        if (parseFloat(score.from) <= diff && (score.to == null || parseFloat(score.to) >= diff)) {
-                        outtime += parseFloat(score.value) 
-                        break;
+                        if (diff > 0) {
+                            for (const score of scoress['workly_late']) {            
+                                if (parseFloat(score.from) <= diff && (score.to == null || parseFloat(score.to) >= diff)) {
+                                    outtime += parseFloat(score.value) 
+                                    break;
+                                }
+                            }
+                        }else{
+                            for (const score of scoress['workly_ontime']) {            
+                                if (parseFloat(score.from) <= Math.abs(diff) && (score.to == null || parseFloat(score.to) >= Math.abs(diff))) {
+                                    ontime += parseFloat(score.value) 
+                                    break;
+                                }
+                            }
                         }
-                    }
-                    }else{
-                    for (const score of scoress['workly_ontime']) {            
-                        if (parseFloat(score.from) <= Math.abs(diff) && (score.to == null || parseFloat(score.to) >= Math.abs(diff))) {
-                        ontime += parseFloat(score.value) 
-                        break;
-                        }
-                    }
-                    }
 
+                    }
                 }
+                return {ontime: ontime, outtime: outtime}       
             }
-            return {ontime: ontime, outtime: outtime}       
+            catch(err) {
+                return {ontime: 0, outtime: 0}   
+            }      
         },
         calcPoints(value, key){
             var scoress = this.scores[key]
