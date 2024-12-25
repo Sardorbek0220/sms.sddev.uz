@@ -418,64 +418,66 @@ class ReportController extends Controller
         return Response::json($allData);
 
     } 
+    
     public function worklyDataX($request) {
+        $startTime = microtime(true); // Start timing
         $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        dump('Auth loading time: ' . (microtime(true) - $startTime) . ' seconds');
+        
         if (empty($auth)) {
+            $startAuthTime = microtime(true);
             self::auth();
+            dump('Auth refresh time: ' . (microtime(true) - $startAuthTime) . ' seconds');
             $auth = (array) json_decode(file_get_contents(self::workly_auth));
         }
         $allData = [];
-    
-        if (isset($auth['access_token'])) { // Check if access_token is set
+        
+        if (isset($auth['access_token'])) {
             $currentPage = 1;
             $totalPages = 1;
-    
+        
             do {
+                $pageStartTime = microtime(true); // Start timing page fetch
+                
                 // Fetch data for the current page
                 $data = self::getData("https://api.workly.uz/v1/reports/at-work?start_date=" . $request->from . "&end_date=" . $request->to . "&page=" . $currentPage, $auth['access_token']);
-                //dump($data);
-                //dump($request->from);
-                // Check if the data is valid
+                dump('Page ' . $currentPage . ' fetch time: ' . (microtime(true) - $pageStartTime) . ' seconds');
+                
                 if (!isset($data['items'])) {
                     info($data);
-    
-                    // Refresh auth token if necessary
                     if (!isset($data->code)) {
+                        $refreshAuthTime = microtime(true);
                         self::auth();
+                        dump('Auth refresh time during loop: ' . (microtime(true) - $refreshAuthTime) . ' seconds');
                         $auth = (array) json_decode(file_get_contents(self::workly_auth));
-                        //dump($auth);
-
-                        continue; // Retry fetching data with new auth token
+                        continue;
                     } else {
-                        break; // Exit if there's an error code
+                        break;
                     }
                 }
-    
-                // Process items in the response
+        
+                $processingStartTime = microtime(true); // Start timing data processing
                 foreach ($data['items'] as $datum) {
                     if ($datum->employee->department_id != '17554') {
                         continue;
                     }
                     if (!isset($datum->scheduled->start_time) || !isset($datum->actual->first_in)) {
-                        continue; // Skip if data is missing
+                        continue;
                     }
-    
+        
                     $scheduledTime = new \DateTime($datum->scheduled->start_time);
                     $realTime = new \DateTime($scheduledTime->format('Y-m-d') . ' ' . $datum->actual->first_in);
-    
-                    // Calculate the difference in minutes
+        
                     $interval = $scheduledTime->diff($realTime);
                     $late_for = ($interval->h * 60) + $interval->i;
-    
-                    // Adjust if early (realTime < scheduledTime)
+        
                     if ($realTime < $scheduledTime) {
                         $late_for = -$late_for;
                     }
-    
-                    // Determine status
+        
                     $status = ($datum->scheduled->start_time == null) ? "qo'shimcha" :
                               (($late_for > 0) ? "late" : "on_time");
-    
+        
                     $allData[] = [
                         'id' => $datum->employee->id,
                         'fullname' => $datum->employee->full_name,
@@ -487,15 +489,16 @@ class ReportController extends Controller
                         'status' => $status
                     ];
                 }
-    
-                // Check pagination: Increment currentPage for the next loop
+                dump('Data processing time for page ' . $currentPage . ': ' . (microtime(true) - $processingStartTime) . ' seconds');
+        
                 $currentPage++;
                 $totalPages = isset($data['_meta']) && is_object($data['_meta']) && property_exists($data['_meta'], 'pageCount') 
                     ? $data['_meta']->pageCount 
-                    : 1; // Set totalPages to 1 as a fallback if it's null
+                    : 1;
             } while ($currentPage <= $totalPages);
         }
-    
+        
+        dump('Total execution time: ' . (microtime(true) - $startTime) . ' seconds');
         return response()->json($allData);
     }
     

@@ -55,6 +55,8 @@ class TablereportController extends Controller
 
     public function index(Request $request)
     {
+        $startTime = microtime(true); // Start timing
+
         // Set default date range
         $from_date = Carbon::parse($request->from_date ?? date('Y-m-d'));
         $to_date = Carbon::parse($request->to_date ?? date('Y-m-d'));
@@ -96,31 +98,32 @@ class TablereportController extends Controller
         }
         //dump($averages);
         
+        
         // Calculate the final averages
         foreach ($averages as $operator => $dates) {
             $totalScore = 0; // Initialize total score for the operator
             $totalCount = 0; // Initialize total count for the operator
-
+            
             foreach ($dates as $date => $data) {
                 // Calculate daily average
                 $averages[$operator][$date] = $data['count'] > 0 ? $data['total'] / $data['count'] : 0; // Avoid division by zero
-
+                
                 // Accumulate totals for overall average
                 $totalScore += $data['total'];
                 $totalCount += $data['count'];
             }
-
+            
             // Calculate overall average and store it
             $averages[$operator]['Total'] = $totalCount > 0 ? $totalScore / $totalCount : 0; // Avoid division by zero
         }
-
+        
         // Sort the averages by the "Total" column in descending order
         uasort($averages, function ($a, $b) {
             return $b['Total'] <=> $a['Total']; // Compare Total values
         });
         // Get the sorted operator IDs
         $sortedOperatorIds = array_keys($averages);
-
+        
         // Rebuild the $operators array in the same order
         $sortedOperators = [];
         foreach ($sortedOperatorIds as $id) {
@@ -131,6 +134,7 @@ class TablereportController extends Controller
         }
         // Calculate averages per operator per day
         $averages_script = [];
+        dump('averages: ' . (microtime(true) - $startTime) . ' seconds');
         
         foreach ($products as $item) {
             $date = Carbon::parse($item->date)->format('Y-m-d'); // Extract date
