@@ -46,7 +46,7 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                         <input type="text" class="form-control" name="data[0][response]" placeholder="Ответ">
                     </div>
                     <div class="col-sm-1">
@@ -60,6 +60,9 @@
                     </div>
                     <div class="col-sm-1">
                         <input type="number" class="form-control" name="data[0][product]" placeholder="Продукт" min="0" max="10">
+                    </div>
+                    <div class="col-sm-1">
+                        <input type="number" class="form-control" name="data[0][solution]" placeholder="Оценка решения" min="0" max="10">
                     </div>
                   </div>
                   <button type="button" class="btn btn-success float-left mt-2" id="appendValues">+</button>
@@ -111,7 +114,7 @@ $("#appendValues").click(function(){
         <?}?>
       </select>
     </div>
-    <div class="col-sm-2 mt-2">
+    <div class="col-sm-1 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][response]" placeholder="Ответ">
     </div>
     <div class="col-sm-1 mt-2">
@@ -125,6 +128,9 @@ $("#appendValues").click(function(){
     </div>
     <div class="col-sm-1 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][product]" placeholder="Продукт" min="0" max="10">
+    </div>
+    <div class="col-sm-1 mt-2">
+        <input type="number" class="form-control" name="data[`+n+`][solution]" placeholder="Оценка решения" min="0" max="10">
     </div>
   `);
 });

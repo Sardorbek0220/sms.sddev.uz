@@ -77,7 +77,8 @@ class ProductController extends Controller
                 'response' => $datum['response'],
                 'date' => $datum['date'],
                 'script' => $datum['script'],
-                'product' => $datum['product']
+                'product' => $datum['product'],
+                'solution' => $datum['solution']
             ]);
         }
         
@@ -132,7 +133,8 @@ class ProductController extends Controller
             'response' => $request->response,
             'date' => $request->date,
             'script' => $request->script,
-            'product' => $request->product
+            'product' => $request->product,
+            'solution' => $request->solution
         ]);
 
         return redirect()->route('products.index');

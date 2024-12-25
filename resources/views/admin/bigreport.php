@@ -182,6 +182,7 @@
               <th class="text-center">Punishment</th>
               <th class="text-center">Script</th>
               <th class="text-center">Product</th>
+              <th class="text-center">Решения</th>
               <th class="text-center" width="160px">Онлайн-время</th>
               <th class="text-center">Total</th>
             </tr>
@@ -201,6 +202,7 @@
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.solution }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
@@ -820,6 +822,7 @@
               reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
               reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
               reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
+              reports_support[a].solution = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_solution).toFixed(1)) : 0
               reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
 
               let times = this.calcWorkly(reports_support[a].num);
@@ -829,7 +832,7 @@
               reports_support[a].total_point = 
                 reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].total_feedback 
                 + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
-                + reports_support[a].script + reports_support[a].product + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
+                + reports_support[a].script + reports_support[a].product + reports_support[a].solution + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
               
               set_support.push(reports_support[a])
             }

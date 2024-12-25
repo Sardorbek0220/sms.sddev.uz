@@ -59,10 +59,11 @@
                     <th>{{__('Запрос')}}</th>
                     <th>Тип запроса</th>
                     <th>{{__('Ответ')}}</th>
-                    <th>{{__('Комментарий')}}</th>
+                    <th style="width: 2%">{{__('Комментарий')}}</th>
                     <th>{{__('Дата')}}</th>
                     <th style="width: 2%">{{__('Скрипт')}}</th>
                     <th style="width: 2%">{{__('Продукт')}}</th>
+                    <th style="width: 2%">{{__('Оценка решения')}}</th>
                     <th style="width: 5%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
                 </thead>
@@ -80,6 +81,7 @@
                     <td>{{date_format(date_create($data->date), 'd.m.Y')}}</td>
                     <td>{{$data->script}}</td>
                     <td>{{$data->product}}</td>
+                    <td>{{$data->solution}}</td>
                     <td style="text-align: center;">
                       <a class="d-inline-block mr-2" href="{{ route('products.edit', ['product'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">
                         <i class="fa fa-edit"></i>

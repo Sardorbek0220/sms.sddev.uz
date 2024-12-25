@@ -28,11 +28,11 @@
                             <input type="text" readonly class="form-control" name="operator" value="<?=$operators[$product->operator]?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Телефон клиента</label>
+                            <label for="">Тел. кл.</label>
                             <input type="text" class="form-control" name="client_phone" placeholder="Client phone" value="<?=$product->client_phone?>"> 
                         </div>
                         <div class="col-sm-1">
-                            <label for="">URL-адрес аудио</label>
+                            <label for="">URL ауд.</label>
                             <input type="text" class="form-control" name="audio_url" placeholder="Audio url" value="<?=$product->audio_url?>">
                         </div>
                         <div class="col-sm-1">
@@ -40,7 +40,7 @@
                             <input type="text" class="form-control" name="requestt" placeholder="Request" value="<?=$product->request?>">
                         </div>
                         <div class="col-sm-1">
-                          <label for="">Типы запросов</label>
+                          <label for="">Типы запр.</label>
                           <select class="form-control" name="request_type_id">
                             <option value="">Типы запросов</option>
                               @foreach($request_types as $type)
@@ -48,12 +48,12 @@
                               @endforeach
                           </select>
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-1">
                             <label for="">Ответ</label>
                             <input type="text" class="form-control" name="response" placeholder="Response" value="<?=$product->response?>">
                         </div>
                         <div class="col-sm-1">
-                            <label for="">Комментарий</label>
+                            <label for="">Коммент.</label>
                             <input type="text" class="form-control" name="comment" placeholder="Comment" value="<?=$product->comment?>">
                         </div>
                         <div class="col-sm-1">
@@ -67,6 +67,10 @@
                         <div class="col-sm-1">
                             <label for="">Продукт</label>
                             <input type="number" class="form-control" name="product" placeholder="Product" min="0" max="10" value="<?=$product->product?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Решения</label>
+                            <input type="number" class="form-control" name="solution" placeholder="Solution" min="0" max="10" value="<?=$product->solution?>">
                         </div>
                     </div>
                 </div>

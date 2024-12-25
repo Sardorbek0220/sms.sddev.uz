@@ -17,6 +17,7 @@ class Product extends Model
         'response',
         'script',
         'product',
+        'solution',
         'date',
         'created_at',
         'updated_at',
