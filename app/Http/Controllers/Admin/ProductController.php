@@ -64,7 +64,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         foreach ($request->data as $datum) {
-            if (empty($datum['script']) || empty($datum['product'])) {
+            if (empty($datum['script']) || empty($datum['product']) || empty($datum['solution'])) {
                 continue;
             }
             Product::create([
