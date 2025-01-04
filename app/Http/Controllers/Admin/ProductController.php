@@ -64,7 +64,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         foreach ($request->data as $datum) {
-            if (empty($datum['script']) || empty($datum['product']) || empty($datum['solution'])) {
+            if (empty($datum['script']) || empty($datum['product'])) {
                 continue;
             }
             Product::create([
@@ -78,7 +78,7 @@ class ProductController extends Controller
                 'date' => $datum['date'],
                 'script' => $datum['script'],
                 'product' => $datum['product'],
-                'solution' => $datum['solution']
+                'solution' => $datum['solution'] ?? 0
             ]);
         }
         
@@ -134,7 +134,7 @@ class ProductController extends Controller
             'date' => $request->date,
             'script' => $request->script,
             'product' => $request->product,
-            'solution' => $request->solution
+            'solution' => $request->solution ?? 0
         ]);
 
         return redirect()->route('products.index');
