@@ -367,55 +367,61 @@ class ReportController extends Controller
 
     public function worklyData(Request $request)
     {
-        $auth = (array) json_decode(file_get_contents(self::workly_auth));
-        if (empty($auth)) {
-            self::auth();
+        try {
+        
             $auth = (array) json_decode(file_get_contents(self::workly_auth));
-        }
-
-        $allData = [];
-
-        if ($auth['access_token']) {
-            $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081,29206", $auth['access_token']);
-            if (!isset($data['items']) && $data['code']) {
-                info($data);
+            if (empty($auth)) {
                 self::auth();
                 $auth = (array) json_decode(file_get_contents(self::workly_auth));
+            }
+
+            $allData = [];
+
+            if ($auth['access_token']) {
                 $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081,29206", $auth['access_token']);
-            }
-            
-            foreach ($data['items'] as $datum) {
-                $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
-            }
-
-            $pages = $data['_meta']->pageCount;
-            if ($pages > 1) {
-                $next = $data['_links']->next->href;
-                $ch = curl_init();
-                for ($i=2; $i <= $pages; $i++) { 
-                    
-                    curl_setopt($ch, CURLOPT_URL, $next);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Content-type: application/x-www-form-urlencoded",
-                        "Authorization: Bearer ".$auth['access_token'],
-                    ]);
-                    $output = curl_exec($ch);
-                    $data = (array) json_decode($output);
-
-                    if ($i != $pages) {
-                        $next = $data['_links']->next->href;
-                    }
-
-                    foreach ($data['items'] as $datum) {
-                        $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
-                    }                    
+                if (!isset($data['items']) && $data['code']) {
+                    info($data);
+                    self::auth();
+                    $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                    $data = self::getData("https://api.workly.uz/v1/reports/inouts?start_date=".$request->from."&end_date=".$request->to."&f=department&ids=17554,27081,29206", $auth['access_token']);
                 }
-                curl_close($ch);
-            }
-        }
+                
+                foreach ($data['items'] as $datum) {
+                    $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
+                }
 
-        return Response::json($allData);
+                $pages = $data['_meta']->pageCount;
+                if ($pages > 1) {
+                    $next = $data['_links']->next->href;
+                    $ch = curl_init();
+                    for ($i=2; $i <= $pages; $i++) { 
+                        
+                        curl_setopt($ch, CURLOPT_URL, $next);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Content-type: application/x-www-form-urlencoded",
+                            "Authorization: Bearer ".$auth['access_token'],
+                        ]);
+                        $output = curl_exec($ch);
+                        $data = (array) json_decode($output);
+
+                        if ($i != $pages) {
+                            $next = $data['_links']->next->href;
+                        }
+
+                        foreach ($data['items'] as $datum) {
+                            $allData[] = ['id' => $datum->employee_id, 'fullname' => $datum->full_name, 'date' => $datum->event_full_date];
+                        }                    
+                    }
+                    curl_close($ch);
+                }
+            }
+
+            return Response::json($allData);
+
+        } catch (\Throwable $th) {
+            return Response::json([]);
+        }
 
     } 
     
@@ -506,52 +512,58 @@ class ReportController extends Controller
     
     public function worklySchedule()
     {
-        $auth = (array) json_decode(file_get_contents(self::workly_auth));
+        try {
+        
+            $auth = (array) json_decode(file_get_contents(self::workly_auth));
 
-        $allData = [];
+            $allData = [];
 
-        if ($auth['access_token']) {
-            $data = self::getData("https://api.workly.uz/v1/employees", $auth['access_token']);
-
-            if (!$data['items'] && $data['code']) {
-                info($data);
-                self::auth();
-                $auth = (array) json_decode(file_get_contents(self::workly_auth));
+            if ($auth['access_token']) {
                 $data = self::getData("https://api.workly.uz/v1/employees", $auth['access_token']);
-            }
-            
-            foreach ($data['items'] as $datum) {
-                $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
-            }
 
-            $pages = $data['_meta']->pageCount;
-            if ($pages > 1) {
-                $next = $data['_links']->next->href;
-                $ch = curl_init();
-                for ($i=2; $i <= $pages; $i++) { 
-                    
-                    curl_setopt($ch, CURLOPT_URL, $next);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Content-type: application/x-www-form-urlencoded",
-                        "Authorization: Bearer ".$auth['access_token'],
-                    ]);
-                    $output = curl_exec($ch);
-                    $data = (array) json_decode($output);
-
-                    if ($i != $pages) {
-                        $next = $data['_links']->next->href;
-                    }
-
-                    foreach ($data['items'] as $datum) {
-                        $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
-                    }                    
+                if (!$data['items'] && $data['code']) {
+                    info($data);
+                    self::auth();
+                    $auth = (array) json_decode(file_get_contents(self::workly_auth));
+                    $data = self::getData("https://api.workly.uz/v1/employees", $auth['access_token']);
                 }
-                curl_close($ch);
-            }
-        }
+                
+                foreach ($data['items'] as $datum) {
+                    $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
+                }
 
-        return Response::json($allData);
+                $pages = $data['_meta']->pageCount;
+                if ($pages > 1) {
+                    $next = $data['_links']->next->href;
+                    $ch = curl_init();
+                    for ($i=2; $i <= $pages; $i++) { 
+                        
+                        curl_setopt($ch, CURLOPT_URL, $next);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            "Content-type: application/x-www-form-urlencoded",
+                            "Authorization: Bearer ".$auth['access_token'],
+                        ]);
+                        $output = curl_exec($ch);
+                        $data = (array) json_decode($output);
+
+                        if ($i != $pages) {
+                            $next = $data['_links']->next->href;
+                        }
+
+                        foreach ($data['items'] as $datum) {
+                            $allData[] = ['id' => $datum->id, 'fullname' => $datum->full_name, 'schedule' => $datum->schedule->title];
+                        }                    
+                    }
+                    curl_close($ch);
+                }
+            }
+
+            return Response::json($allData);
+
+        } catch (\Throwable $th) {
+            return Response::json([]);
+        }
 
     } 
 
