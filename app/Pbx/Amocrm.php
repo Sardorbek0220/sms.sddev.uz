@@ -138,6 +138,7 @@ class Amocrm {
 			}
 			else {
 				info("GET {$requestUrl}: status code = ".$code);
+				exit;
 			}
 		}
 		
