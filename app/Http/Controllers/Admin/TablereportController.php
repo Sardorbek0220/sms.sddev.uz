@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,7 +135,7 @@ class TablereportController extends Controller
         }
         // Calculate averages per operator per day
         $averages_script = [];
-        dump('averages: ' . (microtime(true) - $startTime) . ' seconds');
+        // dump('averages: ' . (microtime(true) - $startTime) . ' seconds');
         
         foreach ($products as $item) {
             $date = Carbon::parse($item->date)->format('Y-m-d'); // Extract date
@@ -292,7 +293,8 @@ class TablereportController extends Controller
 
 
         $reportController = new \App\Http\Controllers\Admin\ReportController();
-        $res = $reportController->worklyDataX($req);
+        // $res = $reportController->worklyDataX($req);
+        $res = (object) ["original" => []];
         $data = $res->original;
         
         $filteredData = array_filter($data, function($item) {
@@ -580,7 +582,7 @@ class TablereportController extends Controller
 
 
         // Pass data to the view
-        return view('admin.tablereport', compact(
+        return view(Auth::user()->name == 'operator' ? 'operator.tablereport' : 'admin.tablereport', compact(
             'sortedOperators', 'averages', 'from_date', 'to_date', 
             'scriptOperators', 'averages_script', 
             'table_likes', 'table_punishment', 

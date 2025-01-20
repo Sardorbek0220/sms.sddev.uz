@@ -99,6 +99,8 @@ Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
     Route::get('monitoring/worklySchedule', [ReportController::class, 'worklySchedule']);
     Route::get('monitoring/worklyOperators', [ReportController::class, 'worklyOperators']);
 
+    Route::get('tablereport', [TablereportController::class, 'index'])->name('operator.tablereport');
+
     // Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
 });
 
