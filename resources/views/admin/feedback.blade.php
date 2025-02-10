@@ -40,7 +40,8 @@
                         @if($data->solved == 0) <span style="color: red">Жавоб олмадим</span>
                         @elseif($data->solved == 1) <span style="color: yellow">Етарли жавоб олмадим</span>
                         @elseif($data->solved == 2) <span style="color: blue">Жавоб кутяпман</span>
-                        @elseif($data->solved == 3) <span style="color: green">Жавоб олдим</span> 
+                        @elseif($data->solved == 3) <span style="color: green">Жавоб олдим</span>
+                        @elseif($data->solved == 4) <span style="color: orange">Дастурда хатолик</span> 
                         @endif
                       </td>
                       <td>{{$data->created_at}}</td>
