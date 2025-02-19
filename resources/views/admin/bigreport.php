@@ -806,9 +806,9 @@
         let set_support = [];
 
         for (var a = 0; a < reports_support.length; a++) {
-          if (reports_support[a].num == '120') {
-            continue;
-          }
+          // if (reports_support[a].num == '120') {
+          //   continue;
+          // }
           for (var b = 0; b < myArray_5995.length; b++) {
             if (reports_support[a].num == myArray_5995[b]) {
               
