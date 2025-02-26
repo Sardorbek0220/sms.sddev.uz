@@ -189,6 +189,7 @@ class ReportController extends Controller
             ->select(
                 DB::raw('SUM(CASE WHEN feedback.solved != 3 THEN 1 ELSE 0 END) AS mark0'),
                 DB::raw('SUM(CASE WHEN feedback.solved = 3 THEN 1 ELSE 0 END) AS mark3'),
+                DB::raw('SUM(CASE WHEN feedback.solved = 4 THEN 1 ELSE 0 END) AS mark4'),
                 'operators.name',
                 'operators.phone'
             )

@@ -68,6 +68,7 @@ class FeedbackController extends Controller
                 $text->appendEntity("Telefon nomer: ", "bold")->appendText($infoCall->client_telephone)->endl();
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
+                $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."sendAudio");
@@ -119,6 +120,7 @@ class FeedbackController extends Controller
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$feedback->solved." ".STATUS[$feedback->solved])->endl();
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("Izoh: ", "bold")->appendText($feedback->complaint)->endl();
+                $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."editMessageCaption");
@@ -149,9 +151,28 @@ class FeedbackController extends Controller
         return view('success');
     }
 
-    public function all(){
-        $allFeedback = Feedback::orderByDesc('created_at')->paginate(10);
-        return view('admin.feedback', compact('allFeedback'));
+    public function all(Request $request){
+        if ($request->from_date == null) {
+            $from_date = date('Y-m-d');
+        }else{
+            $from_date = $request->from_date;
+        }
+
+        if ($request->to_date == null) {
+            $to_date = date('Y-m-d');
+        }else{
+            $to_date = $request->to_date;
+        } 
+        $status = STATUS;
+
+        $allFeedback = Feedback::
+            whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])
+            ->orderByDesc('created_at')
+            ->when(($request->type != "1111" && !empty($request->type)), function($query) use($request){
+                return $query->where('solved', $request->type);
+            })
+            ->paginate(10);
+        return view('admin.feedback', compact('allFeedback', 'from_date', 'to_date', 'status'));
     }
 
     public function getUrl($uuid){

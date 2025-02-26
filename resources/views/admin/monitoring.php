@@ -408,6 +408,7 @@
 						<th class="text-center">%</th>
 						<th class="text-center">👍</th>
 						<th class="text-center">☹️</th>
+						<th class="text-center">💻</th>
 						<th class="text-center">❌</th>
 					</tr>
 				</thead>
@@ -423,6 +424,7 @@
 						<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
 						<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
+						<td>{{ feedbacks.mark4[report.num] ?? 0 }}</td>
 						<td>{{ oper_misseds[report.num] ?? 0 }}</td>
 					</tr>
 				</tbody>
@@ -662,7 +664,8 @@
 	  		data_by_date: [],
 			feedbacks: {
 				mark0: {},
-				mark3: {}
+				mark3: {},
+				mark4: {}
 			},
 			bigData: [],
 			bigDataPeriod: [],
@@ -947,7 +950,8 @@
 			async get_users_feedbacks(){
 				this.feedbacks = {
 					mark0: {},
-					mark3: {}
+					mark3: {},
+					mark4: {}
 				}
 				await axios.get('monitoring/usersFeedbacks', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
 					if (response.status == 200) {
@@ -957,6 +961,9 @@
 							}
 							if (!this.feedbacks.mark3[datum.phone]) {
 								this.feedbacks.mark3[datum.phone] = datum.mark3
+							}
+							if (!this.feedbacks.mark4[datum.phone]) {
+								this.feedbacks.mark4[datum.phone] = datum.mark4
 							}
 						}
 					}

@@ -17,6 +17,36 @@
         <div class="row">
           <div class="col-md-12">
             <div class="card">
+              <div class="card-header">
+                <form action="{{ route('feedback.all') }}" method="get" enctype="multipart/form-data">
+                  @csrf
+                  <div class="row">
+                    <div class="col-12 col-md-5 form-group">
+                    </div>
+                    <div class="col-12 col-md-2 form-group">
+                      <label for="type">Types</label>
+                      <select class="form-control" name="type" id="type">
+                        <option value="1111">Все</option>
+                        @foreach($status as $id => $s)
+                        <option <?if(isset($_GET['type']) && $_GET['type'] == $id)echo "selected";?> value="{{ $id }}">{{ $s }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-2 form-group">
+                      <label for="from_date">From</label>
+                      <input type="date" class="form-control" id="from_date" name="from_date" value="{{$from_date}}">
+                    </div>
+                    <div class="col-12 col-md-2 form-group">
+                      <label for="to_date">To</label>
+                      <input type="date" class="form-control" id="to_date" name="to_date" value="{{$to_date}}">
+                    </div>
+                    <div class="col-12 col-md-1 form-group">
+                      <label for="filter">&nbsp;</label><br>
+                      <button type="submit" class="btn btn-success" id="filter" style="width: 100%;">Filter</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
               <div class="card-body">
                 <table class="table table-bordered">
                   <thead>
@@ -26,6 +56,7 @@
                       <th>{{__('Client')}}</th>
                       <th>{{__('Complaint')}}</th>
                       <th>{{__('Response')}}</th>
+                      <th>{{__('ID')}}</th>
                       <th>{{__('Date')}}</th>
                     </tr>
                   </thead>
@@ -44,6 +75,7 @@
                         @elseif($data->solved == 4) <span style="color: orange">Дастурда хатолик</span> 
                         @endif
                       </td>
+                      <td>id_{{ $data->call->id}}</td>
                       <td>{{$data->created_at}}</td>
                     </tr>
                     @endforeach
@@ -53,7 +85,7 @@
               <!-- /.card-body -->
               <div class="card-footer clearfix">
                 <ul class="pagination pagination-sm m-0 float-right">
-                {!! $allFeedback->links() !!}
+                {!! $allFeedback->appends(request()->query())->links() !!}
                   <!-- <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
                   <li class="page-item"><a class="page-link" href="#">1</a></li>
                   <li class="page-item"><a class="page-link" href="#">2</a></li>
