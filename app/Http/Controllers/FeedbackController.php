@@ -69,6 +69,9 @@ class FeedbackController extends Controller
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
+                if ($request->solved == '4') {
+                    $text->appendEntity("", "bold")->appendText("@silence1508")->endl();
+                }
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."sendAudio");
@@ -121,6 +124,9 @@ class FeedbackController extends Controller
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("Izoh: ", "bold")->appendText($feedback->complaint)->endl();
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
+                if ($request->solved == '4') {
+                    $text->appendEntity("", "bold")->appendText("@silence1508")->endl();
+                }
                 $text->endl();
 
                 $ch = curl_init(BOT_URL."editMessageCaption");
