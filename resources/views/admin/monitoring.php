@@ -776,11 +776,18 @@
 		  	},
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
-					if (response.status == 200) {						
-						for (const id in response.data.calls) {
-							let data = response.data.calls[id]							
-							let uid = "num_"+data.uid;
-							document.getElementById(uid).style.background=statusColors['register'];
+					if (response.status == 200) {		
+						console.log(response.data.calls);
+						console.log(this.users_5995);
+						
+						try {
+							for (const id in response.data.calls) {
+								let data = response.data.calls[id]							
+								let uid = "num_"+data.uid;							
+								document.getElementById(uid).style.background=statusColors['register'];
+							}
+						} catch (error) {
+							console.log(error);
 						}
 					}
 				});	
