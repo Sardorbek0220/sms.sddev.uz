@@ -188,7 +188,7 @@
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
-            <tr v-for="(report, index) in users_5995" v-show="operator_id == '' || operator_id == report.num">
+            <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')" v-show="operator_id == '' || operator_id == report.num">
               <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.ontime }}</td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.outtime }}</td>
@@ -798,7 +798,7 @@
           }
         }
         
-        var myArray_5995 = user_5995.split(";");	
+        var myArray_5995 = user_5995.split(":1;");	
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 

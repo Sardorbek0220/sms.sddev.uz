@@ -38,8 +38,9 @@ class WebSocketClient
 
                 $conn->on('message', function ($msg) {
                     $data = json_decode($msg);
+                    // info("Received: {$msg}\n");
                     if ($data->event == 'user_registration') {
-                        info("Received: {$msg}\n");
+                        // info("Received: {$msg}\n");
                         if ($data->data->ip == '178.218.201.191') {
                             if ($data->data->state == 'register') {
                                 $operator_time = Operator_time::create([

@@ -90,7 +90,7 @@ class FeedbackController extends Controller
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
                 $response = curl_exec($ch);
                 curl_close($ch);
-                info($response);
+                // info($response);
 
                 $response = json_decode($response);
                 if ($response->ok == true) {
@@ -145,7 +145,7 @@ class FeedbackController extends Controller
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
                 $response = curl_exec($ch);
                 curl_close($ch);
-                info($response);
+                // info($response);
             }
             return Response::json($feedback);
         }else{

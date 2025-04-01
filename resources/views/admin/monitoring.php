@@ -398,8 +398,8 @@
 				<template v-slot:default>
 				<thead style="border: solid 1px grey;">
 					<tr>
-						<th class="text-center" width="220px">Имя</th>
-						<th class="text-center" width="160px"><span class="online_text">онлайн-время</span></th>
+						<th class="text-center" width="250px">Имя</th>
+						<th class="text-center" width="120px"><span class="online_text">онлайн-время</span></th>
 						<th class="text-center" width="15px">Вход. звон</th>
 						<th class="text-center">Время</th>
 						<th class="text-center" width="15px">Исход. звон</th>
@@ -413,8 +413,8 @@
 					</tr>
 				</thead>
 				<tbody style="border: solid 1px grey;">
-					<tr v-for="report in users_5995">
-						<td><span :id="'num_'+report.num" class="dot mt-2"></span> {{report.name}}</td>
+					<tr v-for="report in users_5995.filter((u) => u.num != '')">
+						<td><span :id="'num_'+report.num" class="dot mt-2"></span> ({{ report.num }}) {{report.name}}</td>
 						<td><span v-show="oper_times[report.num] > 0" class="online_text">{{ calcHMS(oper_times[report.num], '1') }}</span></td>
 						<td>{{report.vxod_count}}</td>
 						<td>{{calcHMS(report.vxod_time)}}</td>
@@ -535,7 +535,7 @@
 				</template>
 			</v-simple-table>
 		</v-col>
-      <!-- ------------ -->
+      	<!-- ------------ -->
     </v-row>
 	<v-row>
 		<v-col cols="11"></v-col>
@@ -777,9 +777,6 @@
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {		
-						console.log(response.data.calls);
-						console.log(this.users_5995);
-						
 						try {
 							for (const id in response.data.calls) {
 								let data = response.data.calls[id]							
@@ -1256,7 +1253,7 @@
 					}
 				}
 				
-				var myArray_5995 = user_5995.split(";");	
+				var myArray_5995 = user_5995.split(":1;");	
 				this.availableOperators = myArray_5995;
 
 				await this.personalMissed();
