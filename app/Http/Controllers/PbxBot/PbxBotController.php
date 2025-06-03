@@ -15,10 +15,25 @@ use App\Pbx\Pbx;
 
 class PbxBotController extends Controller
 {
-    const TG_USER_CHANNEL = -1001467861516;
-    const TG_MISSED_CALLS_CHANNEL = -1001964582608;
+    const SALESDOC_TG_USER_CHANNEL = -1001467861516;
+    const SALESDOC_TG_MISSED_CALLS_CHANNEL = -1001964582608;
+    const IDOKON_TG_USER_CHANNEL =  -1002662562307;
+    const IDOKON_TG_MISSED_CALLS_CHANNEL = -1002586700948;
+    const IBOX_TG_USER_CHANNEL =  -1002445571260;
+    const IBOX_TG_MISSED_CALLS_CHANNEL = -1002639243146;
     const TG_USER_ME = 39672912;
     const BOT_URL = "https://api.telegram.org/bot5705052290:AAF5VkxlbjnEKzovZQW23mppKaOQIRc6sSQ/";
+
+    public function getUserChannel($phoneNumber, $missed = false) {
+        $phoneNumber = preg_replace ('/[^\d]/i', '', $phoneNumber);
+        if (in_array($phoneNumber, ['998781138585', '781138585'])) {
+            return $missed ? self::IBOX_TG_MISSED_CALLS_CHANNEL : self::IBOX_TG_USER_CHANNEL;
+        } else if (in_array($phoneNumber, ['998781136022', '781136022'])) {
+            return $missed ? self::IDOKON_TG_MISSED_CALLS_CHANNEL : self::IDOKON_TG_USER_CHANNEL;
+        } else {
+            return $missed ? self::SALESDOC_TG_MISSED_CALLS_CHANNEL : self::SALESDOC_TG_USER_CHANNEL;
+        }
+    }
 
     public function sendTextMessage($chat_id, $text, $entities = [], $queryStatus = false) {
         $ch = curl_init(self::BOT_URL."sendMessage");
@@ -266,18 +281,18 @@ class PbxBotController extends Controller
         else if ($event == "call_missed") {
             if ($_POST["direction"] == "inbound") {
                 $summary = $this->getCallSummary();
-                $this->sendTextMessage(self::TG_USER_CHANNEL, $summary->text, $summary->entities);
-                $this->sendTextMessage(self::TG_MISSED_CALLS_CHANNEL, $summary->text, $summary->entities);
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities);
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway'], true), $summary->text, $summary->entities);
             } 
         }
         else if ($event == "call_end") {
     
             $summary = $this->getCallSummary();
             if (isset($_POST["download_url"]) && !empty($_POST["download_url"])) {
-                $this->sendAudioMessage(self::TG_USER_CHANNEL, $summary->text, $summary->entities, $_POST["download_url"], true);
+                $this->sendAudioMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, $_POST["download_url"], true);
             }
             else {
-                $this->sendTextMessage(self::TG_USER_CHANNEL, $summary->text, $summary->entities, true);
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, true);
             }
     
         }
