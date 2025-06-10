@@ -5,6 +5,7 @@
 	<link href="/assets/other/materialdesignicons.css" rel="stylesheet">
     <link href="/assets/other/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/other/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
 	<meta charset="UTF-8">
 	<link rel="icon" href="../assets/logo.png">
 	<title>Big report | Sales Doctor</title>
@@ -123,7 +124,7 @@
 </head>
 <body>
 	
-<div id="app" class="content-wrapper">
+<div id="app" class="content-wrapper" data-app>
 <section class="content-header">
 </section>
 <template class="content">
@@ -138,8 +139,17 @@
           <div class="float-left">
             <div class="d-inline-block">
               <v-row>
-                <v-col>
+                <v-col class="col-md-12">
                   <h4>Дашборд</h4>
+                </v-col>
+                <v-col class="col-md-12">
+                    <v-select
+                    v-model="show_columns"
+                    :items="columns"
+                    label="Скрыть столбцы"
+                    style="max-width: 250px; min-width: 250px"
+                    multiple
+                    ></v-select>
                 </v-col>
               </v-row>
           </div>
@@ -166,44 +176,44 @@
           <template v-slot:default>
           <thead style="border: solid 1px grey;">
             <tr>
-                <th class="text-center" width="220px">Имя</th>
-                <th class="text-center">⏰ (вовремя)</th>
-                <th class="text-center">⏰ (поздно)</th>
-                <th class="text-center">Перс. пропущ. звон</th>
-                <th class="text-center">Пропущ. в раб. время</th>
-                <th class="text-center">Вход. звон</th>
-                <th class="text-center">Исход. звон</th>
-                <th class="text-center">Незарег. вход. клиенты</th>
-                <th class="text-center">Total feedback</th>
-                <th class="text-center">👍 feedback</th>
-                <th class="text-center">Like</th>
-                <th class="text-center">Punishment</th>
-                <th class="text-center">Script</th>
-                <th class="text-center">Product</th>
-                <th class="text-center">Решения</th>
-                <th class="text-center" width="160px">Онлайн-время</th>
-                <th class="text-center">Total</th>
+              <th v-show="!show_columns.includes('Имя')" class="text-center" width="220px">Имя</th>
+              <th v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center">⏰ (вовремя)</th>
+              <th v-show="!show_columns.includes('⏰ (поздно)')" class="text-center">⏰ (поздно)</th>
+              <th v-show="!show_columns.includes('Перс. пропущ. звон')" class="text-center">Перс. пропущ. звон</th>
+              <th v-show="!show_columns.includes('Пропущ. в раб. время')" class="text-center">Пропущ. в раб. время</th>
+              <th v-show="!show_columns.includes('Вход. звон')" class="text-center">Вход. звон</th>
+              <th v-show="!show_columns.includes('Исход. звон')" class="text-center">Исход. звон</th>
+              <th v-show="!show_columns.includes('Незарег. вход. клиенты')" class="text-center">Незарег. вход. клиенты</th>
+              <th v-show="!show_columns.includes('Total feedback')" class="text-center">Total feedback</th>
+              <th v-show="!show_columns.includes('👍 feedback')" class="text-center">👍 feedback</th>
+              <th v-show="!show_columns.includes('Like')" class="text-center">Like</th>
+              <th v-show="!show_columns.includes('Punishment')" class="text-center">Punishment</th>
+              <th v-show="!show_columns.includes('Script')" class="text-center">Script</th>
+              <th v-show="!show_columns.includes('Product')" class="text-center">Product</th>
+              <th v-show="!show_columns.includes('Решения')" class="text-center">Решения</th>
+              <th v-show="!show_columns.includes('Онлайн-время')" class="text-center" width="160px">Онлайн-время</th>
+              <th v-show="!show_columns.includes('Total')" class="text-center">Total</th>
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')">
-              <td class="link text-left" :style="{backgroundColor: colors[index]}"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.missed }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
-              <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
+              <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
+              <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
+              <td v-show="!show_columns.includes('Пропущ. в раб. время')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.missed }}</td>
+              <td v-show="!show_columns.includes('Вход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
+              <td v-show="!show_columns.includes('Исход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
+              <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
+              <td v-show="!show_columns.includes('Total feedback')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
+              <td v-show="!show_columns.includes('👍 feedback')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
+              <td v-show="!show_columns.includes('Like')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
+              <td v-show="!show_columns.includes('Punishment')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
+              <td v-show="!show_columns.includes('Script')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td v-show="!show_columns.includes('Product')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td>
+              <td v-show="!show_columns.includes('Онлайн-время')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
+              <td v-show="!show_columns.includes('Total')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -261,6 +271,8 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      show_columns: [],
+      columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Total feedback", "👍 feedback", "Like", "Punishment", "Script", "Product", "Решения", "Онлайн-время", "Total"],
       day: '',
       loading: false,
       today: new Date(),
