@@ -172,6 +172,7 @@
                 <th class="text-center">Перс. пропущ. звон</th>
                 <th class="text-center">Пропущ. в раб. время</th>
                 <th class="text-center">Вход. звон</th>
+                <th class="text-center">Исход. звон</th>
                 <th class="text-center">Незарег. вход. клиенты</th>
                 <th class="text-center">Total feedback</th>
                 <th class="text-center">👍 feedback</th>
@@ -192,6 +193,7 @@
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.missed }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
@@ -613,11 +615,14 @@ new Vue({
             for (var j = 0; j < calls.length; j++) {
             if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
                 outbounds_5995.push(calls[j]);
-                let infos = { 
-                num: calls[j].caller_id_number,
-                isxod_time: calls[j].user_talk_time
+                if (calls[j].user_talk_time > 0) {
+                    outreports_5995.push(
+                        { 
+                            num: calls[j].caller_id_number,
+                            isxod_time: calls[j].user_talk_time
+                        }
+                    );
                 }
-                outreports_5995.push(infos);
             }
             }
             this.outbounds_5995 = outbounds_5995
@@ -680,37 +685,40 @@ new Vue({
             let reports = [];
             
             for (var m = 0; m < isxods.length; m++) {
-            let num = isxods[m].num;
-            for (var n = 0; n < vxods.length; n++) {
-                if (num == vxods[n].num) {
-                let infoss = {
-                    id: num,
-                    vxod_count: vxods[n].vxod_count,
+                let num = isxods[m].num;
+                for (var n = 0; n < vxods.length; n++) {
+                    if (num == vxods[n].num) {
+                        let infoss = {
+                            id: num,
+                            vxod_count: vxods[n].vxod_count,
+                            isxod_count: isxods[m].isxod_count
+                        }
+                        reports.push(infoss);
+                    }
                 }
-                reports.push(infoss);
-                }
-            }
             }
             
             let reps = [];
             for (var i = 0; i < users.length; i++) {
-            let infoss = {
-                num: users[i].num,
-                name: users[i].name,
-                vxod_count: 0,
-                field: users[i].field
-            };
-            for (var j = 0; j < reports.length; j++) {
-                if (users[i].num === reports[j].id) {
-                infoss = {
+                let infoss = {
                     num: users[i].num,
                     name: users[i].name,
-                    vxod_count: reports[j].vxod_count,
+                    vxod_count: 0,
+                    isxod_count: 0,
                     field: users[i].field
-                }	
+                };
+                for (var j = 0; j < reports.length; j++) {
+                    if (users[i].num === reports[j].id) {
+                        infoss = {
+                            num: users[i].num,
+                            name: users[i].name,
+                            vxod_count: reports[j].vxod_count,
+                            isxod_count: reports[j].isxod_count,
+                            field: users[i].field
+                        }	
+                    }
                 }
-            }
-            reps.push(infoss)
+                reps.push(infoss)
             }
             this.real_reports_5995 = reps.slice(0)
         },
@@ -812,6 +820,7 @@ new Vue({
                         reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[reports_support[a].num] ?? 0, 'personal_missed')
                         reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
                         reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
+                        reports_support[a].outbound = this.calcPoints(reports_support[a].isxod_count, 'outbound')
                         reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
                         reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
                         reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
@@ -827,7 +836,7 @@ new Vue({
                         reports_support[a].outtime = times.outtime
 
                         reports_support[a].total_point = 
-                            reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].total_feedback 
+                            reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound + reports_support[a].total_feedback 
                             + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
                             + reports_support[a].script + reports_support[a].product + reports_support[a].solution + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
                         

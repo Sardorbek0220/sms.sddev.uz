@@ -22,10 +22,11 @@ class Score extends Model
         'personal_missed' => 'Перс. пропущ. звон',
         'missed' => 'Пропущенные в раб. время',
         'inbound' => 'Вход. звон',
-        'total_feedback' => 'Total feedback',
-        'mark3_feedback' => 'Mark3 feedback',
-        'like' => 'Like',
-        'punishment' => 'Punishment',
+        'outbound' => 'Исход. звон',
+        'total_feedback' => 'Все отзывы',
+        'mark3_feedback' => 'Mark3 отзыв',
+        'like' => 'Нравится',
+        'punishment' => 'Наказание',
         'unreg_client_inbound' => 'Незарег. вход. клиенты',
         'online_time' => 'Онлайн время'
     ];

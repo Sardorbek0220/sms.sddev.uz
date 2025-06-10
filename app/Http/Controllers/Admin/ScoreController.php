@@ -42,7 +42,7 @@ class ScoreController extends Controller
      */
     public function store(Request $request)
     {        
-        if ($request->data) {
+        if (in_array($request->key, ['missed', 'workly_ontime', 'workly_late'])) {
             Score::create([
                 'key_text' => $request->key,
                 'value' => json_encode($request->data),
