@@ -356,14 +356,14 @@ new Vue({
     },
     created(){	
 
-        this.interval = setInterval(() =>{
+        this.interval = setInterval(async () =>{
             if (this.from_date == this.day && this.to_date == this.day) {
-                this.get_date();
-                this.getOperatorTime();
+                await this.get_date();
+                await this.getOperatorTime();
+                await this.get_users_feedbacks();
                 this.getInfos_5995();
                 this.getReport_5995();
-                this.fifoToReport();
-                this.get_users_feedbacks();
+                await this.fifoToReport();
             }
         },30000)
 
@@ -806,13 +806,10 @@ new Vue({
             let set_support = [];
 
             for (var a = 0; a < reports_support.length; a++) {
-                // if (reports_support[a].num == '120') {
-                //     continue;
-                // }
-                for (var b = 0; b < myArray_5995.length; b++) {
-                    if (reports_support[a].num == myArray_5995[b]) {
+                // for (var b = 0; b < myArray_5995.length; b++) {
+                    if (myArray_5995.includes(reports_support[a].num)) {
                     
-                        reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[myArray_5995[b]] ?? 0, 'personal_missed')
+                        reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[reports_support[a].num] ?? 0, 'personal_missed')
                         reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
                         reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
                         reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
@@ -836,7 +833,7 @@ new Vue({
                         
                         set_support.push(reports_support[a])
                     }
-                }
+                // }
             }     
             set_support.sort(function(a,b) {
                 return b.total_point - a.total_point
