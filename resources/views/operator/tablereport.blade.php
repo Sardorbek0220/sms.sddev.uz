@@ -76,13 +76,13 @@
                                                 <td>{{ $operator }}</td>
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
-                                                        <a href="https://sms.sddev.uz/admin/products?operator={{ $id }}&from_date={{ $date }}&to_date={{ $date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
+                                                        <a href="https://sms.sddev.uz/operator/productoper?operator={{ $id }}&from_date={{ $date }}&to_date={{ $date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
                                                             {{ isset($averages[$id][$date->format('Y-m-d')]) ? number_format($averages[$id][$date->format('Y-m-d')], 1) : '-' }}
                                                         </a>
                                                     </td> <!-- Format to 1 decimal places -->
                                                     @endforeach
                                                     <td>
-                                                        <a href="https://sms.sddev.uz/admin/products?operator={{ $id }}&from_date={{ $from_date }}&to_date={{ $to_date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
+                                                        <a href="https://sms.sddev.uz/operator/productoper?operator={{ $id }}&from_date={{ $from_date }}&to_date={{ $to_date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
                                                             {{ isset($averages[$id]['Total']) ? number_format($averages[$id]['Total'], 1) : '-' }}
                                                         </a>
                                                     </td> <!-- Format total to 2 decimal places -->
@@ -115,13 +115,13 @@
                                                 <td>{{ $operator }}</td>
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
-                                                        <a href="https://sms.sddev.uz/admin/products?operator={{ $id }}&from_date={{ $date }}&to_date={{ $date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
+                                                        <a href="https://sms.sddev.uz/operator/productoper?operator={{ $id }}&from_date={{ $date }}&to_date={{ $date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
                                                             {{ isset($averages_script[$id][$date->format('Y-m-d')]) ? number_format($averages_script[$id][$date->format('Y-m-d')], 1) : '-' }}
                                                         </a>
                                                     </td> <!-- Format to 2 decimal places -->
                                                 @endforeach
                                                 <td>
-                                                    <a href="https://sms.sddev.uz/admin/products?operator={{ $id }}&from_date={{ $from_date }}&to_date={{ $to_date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
+                                                    <a href="https://sms.sddev.uz/operator/productoper?operator={{ $id }}&from_date={{ $from_date }}&to_date={{ $to_date }}&date={{ $date->format('Y-m-d') }}" style="text-decoration: none; color: inherit;">
                                                         {{ isset($averages_script[$id]['Total']) ? number_format($averages_script[$id]['Total'], 2) : '-' }}
                                                     </a>
                                                 </td> <!-- Format total to 2 decimal places -->
@@ -253,7 +253,8 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$id]['name'] }}</td>  
+                                                <td>{{ isset($userJsonArray[$id]['name']) ? $userJsonArray[$id]['name'] : 'noname' }}</td>
+ 
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 
@@ -296,7 +297,7 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$operator]['name'] }}</td>  
+                                                <td>{{ "name" }}</td>  
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 
@@ -350,7 +351,7 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$operator]['name'] }}</td>  
+                                                <td>{{ $userJsonArray[$id]['name'] ?? 'noname' }}</td>
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 

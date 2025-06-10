@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BigreportController;
 use App\Http\Controllers\PbxBot\PbxBotController;
 use App\Http\Controllers\Admin\TablereportController;
+use App\Http\Controllers\Admin\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,9 @@ Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
     Route::get('monitoring/worklyOperators', [ReportController::class, 'worklyOperators']);
 
     Route::get('tablereport', [TablereportController::class, 'index'])->name('operator.tablereport');
+    Route::get('productoper', [ProductController::class, 'index'])->name('operator.products');
+    
+    //Route::resource('products', 'ProductController')->name('operator.product');
 
     // Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
 });

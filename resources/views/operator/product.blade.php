@@ -1,4 +1,4 @@
-@extends('admin.layouts.index')
+@extends('operator.layouts.index')
 
 @section('content')
 <div class="content-wrapper">
@@ -18,8 +18,6 @@
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title mt-2"><a href="{{ route('products.create') }}" class="btn btn-primary">{{__('Создать')}}</a></h3>
-              <h3 class="card-title mt-2"><a href="{{ route('requestTypes.index') }}" class="btn btn-dark ml-2">{{__('Типы запросов')}}</a></h3>
               <form action="{{ route('products.index') }}" method="get" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
@@ -64,7 +62,6 @@
                     <th style="width: 2%">{{__('Скрипт')}}</th>
                     <th style="width: 2%">{{__('Продукт')}}</th>
                     <th style="width: 2%">{{__('Оценка решения')}}</th>
-                    <th style="width: 5%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -83,16 +80,6 @@
                           <td>{{$data->script}}</td>
                           <td>{{$data->product}}</td>
                           <td>{{$data->solution}}</td>
-                          <td style="text-align: center;">
-                              <a class="d-inline-block mr-2" href="{{ route('products.edit', ['product'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">
-                                  <i class="fa fa-edit"></i>
-                              </a>
-                              <form class="d-inline-block" action="{{ route('products.destroy', ['product'=>$data->id]) }}" method="post">
-                                  @csrf
-                                  @method('DELETE')   
-                                  <button class="btn btn-outline-danger" title="удалить" type="submit" onclick="return confirm('Подтвердите удаление')"><i class="fa fa-trash"></i></button>   
-                              </form>
-                          </td>
                       </tr>
                       @endif
                   @endforeach

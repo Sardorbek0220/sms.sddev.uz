@@ -214,7 +214,48 @@
 		  <!-- export excel -->
       <v-col style="display: none">
         <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-          
+        <template v-slot:default>
+          <thead style="border: solid 1px grey;">
+            <tr>
+              <th class="text-center" width="220px">Имя</th>
+              <th class="text-center">⏰ (вовремя)</th>
+              <th class="text-center">⏰ (поздно)</th>
+              <th class="text-center">Перс. пропущ. звон</th>
+              <th class="text-center">Пропущ. в раб. время</th>
+              <th class="text-center">Вход. звон</th>
+              <th class="text-center">Незарег. вход. клиенты</th>
+              <th class="text-center">Total feedback</th>
+              <th class="text-center">👍 feedback</th>
+              <th class="text-center">Like</th>
+              <th class="text-center">Punishment</th>
+              <th class="text-center">Script</th>
+              <th class="text-center">Product</th>
+              <th class="text-center">Решения</th>
+              <th class="text-center" width="160px">Онлайн-время</th>
+              <th class="text-center">Total</th>
+            </tr>
+          </thead>
+          <tbody style="border: solid 1px grey;">
+            <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')" v-show="operator_id == '' || operator_id == report.num">
+              <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.ontime }}</td>
+              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.outtime }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('like')">{{ report.like }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.solution }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
+              <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+            </tr>
+          </tbody>
+          </template>
         </v-simple-table>
       </v-col>
       <!-- ------------ -->
@@ -799,6 +840,9 @@
         }
         
         var myArray_5995 = user_5995.split(":1;");	
+        for (const el of ['115', '110', '114', '119', '117', '118', '122', '120', '112', '111', '123', '125']) {
+          myArray_5995.push(el)
+        }
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 

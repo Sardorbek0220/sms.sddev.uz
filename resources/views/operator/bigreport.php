@@ -185,7 +185,7 @@
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
-            <tr v-for="(report, index) in users_5995">
+            <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')">
               <td class="link text-left" :style="{backgroundColor: colors[index]}"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
               <td class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
@@ -197,8 +197,8 @@
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.script }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td>
               <td class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
               <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
@@ -208,13 +208,13 @@
         </v-simple-table>
       </v-col>
 
-		  <!-- export excel -->
-      <v-col style="display: none">
-        <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-          
-        </v-simple-table>
-      </v-col>
-      <!-- ------------ -->
+		<!-- export excel -->
+        <v-col style="display: none">
+            <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
+            
+            </v-simple-table>
+        </v-col>
+        <!-- ------------ -->
     </v-row>
     <v-row>
       <v-col cols="11"></v-col>
@@ -798,7 +798,7 @@ new Vue({
                 }
             }
             
-            var myArray_5995 = user_5995.split(";");	
+            var myArray_5995 = user_5995.split(":1;");	
             this.availableOperators = myArray_5995;
             await this.personalMissed();
 
@@ -806,9 +806,9 @@ new Vue({
             let set_support = [];
 
             for (var a = 0; a < reports_support.length; a++) {
-                if (reports_support[a].num == '120') {
-                    continue;
-                }
+                // if (reports_support[a].num == '120') {
+                //     continue;
+                // }
                 for (var b = 0; b < myArray_5995.length; b++) {
                     if (reports_support[a].num == myArray_5995[b]) {
                     
@@ -934,6 +934,9 @@ new Vue({
             }
             return point;
             }
+        },
+        toReportTable(script){
+            window.open('/operator/tablereport?from_date='+this.from_date+'&to_date='+this.to_date+"#"+script)
         }
     }
 })

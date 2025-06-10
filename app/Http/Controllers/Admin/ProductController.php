@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Product;
+use Carbon\Carbon; // Ensure this is included at the top of your controller
 use App\Request_type;
 
 class ProductController extends Controller
@@ -36,8 +37,9 @@ class ProductController extends Controller
 
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;
-
-        return view('admin.product.index', compact('operators', 'products', 'from_date', 'to_date'));
+        $routeName = $request->route()->getName();
+        // dump($routeName);
+        return view($routeName == 'products.index' ? 'admin.product.index' : 'operator.product', compact('operators', 'products', 'from_date', 'to_date'));
     }
 
     /**

@@ -346,7 +346,9 @@ class TablereportController extends Controller
             }
         }
         $data = $reportController->monitoringPersonalMissed($req);
-        $data = $data->original;
+        if (!empty($data->original)) {
+            $data = $data->original;
+        }
         
         $fifos = $this->GetOperators();
         $users =  $reportController->monitoringUsers($req);
@@ -463,6 +465,10 @@ class TablereportController extends Controller
                 // Code to execute if $operatorUn is in $userArray
                 if (!isset($unregData[$operatorUn]["Total"][$directionUn])) {
                     $unregData[$operatorUn]['Total'][$directionUn] = 0;
+                }
+                
+                if (!isset($unregData[$operatorUn]["Total"]['all'])) {
+                    $unregData[$operatorUn]['Total']['all'] = 0;
                 }
                 
                 // Organize data by date and direction under each operator

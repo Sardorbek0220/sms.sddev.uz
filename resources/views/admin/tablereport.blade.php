@@ -253,7 +253,7 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$id]['name'] }}</td>  
+                                                <td>{{ $userJsonArray[$id]['name'] ?? "noName" }}</td>  
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 
@@ -296,7 +296,7 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$operator]['name'] }}</td>  
+                                                <td>{{"name"}}</td>  
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 
@@ -350,7 +350,7 @@
                                                 $rowIndex = $loop->index; // or you can use a separate counter if needed
                                             @endphp
                                             <tr style="background-color: {{$rowIndex < 3 ? '#6add6a' : ($rowIndex < 6 ? '#f1dc48' : ($rowIndex < 9 ? '#f19648' : '#f16363')) }}">
-                                                <td>{{ $userJsonArray[$operator]['name'] }}</td>  
+                                                <td>{{ $userJsonArray[$operator]['name'] ?? "noName" }}</td>  
                                                 @foreach (Carbon\CarbonPeriod::create($from_date, $to_date) as $date)
                                                     <td style="border-width: 1px 0; padding: 10px 0; text-align: center; align-items: center;">
                                                         {{ 
