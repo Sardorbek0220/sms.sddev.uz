@@ -41,7 +41,7 @@ class WebSocketClient
                     // info("Received: {$msg}\n");
                     if ($data->event == 'user_registration') {
                         // info("Received: {$msg}\n");
-                        if ($data->data->ip == '178.218.201.191') {
+                        if (in_array($data->data->ip, ['84.54.117.196', '178.218.201.191'])) {
                             if ($data->data->state == 'register') {
                                 $operator_time = Operator_time::create([
                                     'uid' => $data->data->uid,
