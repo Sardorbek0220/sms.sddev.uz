@@ -17,7 +17,7 @@
           <a href="#" onclick="window.open('/admin/monitoring')" class="nav-link">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
-              {{__('Monitoring')}}
+              {{__('Мониторинг')}}
             </p>
           </a>
         </li>
@@ -25,7 +25,7 @@
           <a href="{{ route('admin.report') }}" class="nav-link">
             <i class="nav-icon fas fa-file-alt"></i>
             <p>
-              {{__('Reports')}}
+              {{__('Отчеты')}}
             </p>
           </a>
         </li>
@@ -33,7 +33,7 @@
           <a href="{{ route('feedback.all') }}" class="nav-link">
             <i class="nav-icon fas fa-mail-bulk"></i>
             <p>
-              {{__('Feedback from clients')}}
+              {{__('Отзывы клиентов')}}
             </p>
           </a>
         </li>
@@ -41,21 +41,21 @@
           <a href="{{ route('operators.index') }}" class="nav-link">
             <i class="nav-icon fas fa-users-cog"></i>
             <p>
-              {{__('Operators')}}
+              {{__('Операторы')}}
             </p>
           </a>
         </li>
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-chart-bar"></i>
-            <p>Automatization<i class="fas fa-angle-left right"></i></p>
+            <p>Автоматизация<i class="fas fa-angle-left right"></i></p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a href="{{ route('admin.bigreport') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-th-list"></i>
                 <p>
-                  {{__('Big report')}}
+                  {{__('Дашборд')}}
                 </p>
               </a>
             </li>
@@ -63,7 +63,7 @@
               <a href="{{ route('likes.index') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-user-plus"></i>
                 <p>
-                  {{__('Like / Punishment')}}
+                  {{__('Нравится / Наказание')}}
                 </p>
               </a>
             </li>
@@ -71,23 +71,23 @@
               <a href="{{ route('products.index') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-user-check"></i>
                 <p>
-                  {{__('Script / Product')}}
+                  {{__('Скрипт / Продукт')}}
                 </p>
               </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a href="{{ route('admin.piece') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-tasks"></i>
                 <p>
                   {{__('Statistics')}}
                 </p>
               </a>
-            </li>
+            </li> -->
             <li class="nav-item">
               <a href="{{ route('scores.index') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-tools"></i>
                 <p>
-                  {{__('Scores')}}
+                  {{__('Установить баллы')}}
                 </p>
               </a>
             </li>
@@ -95,7 +95,7 @@
               <a href="{{ route('exceptions.index') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-history"></i>
                 <p>
-                  {{__('Exceptions')}}
+                  {{__('Исключения')}}
                 </p>
               </a>
             </li>
@@ -103,7 +103,7 @@
               <a href="{{ route('admin.tablereport') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-table"></i>
                 <p>
-                  {{__('Table Report')}}
+                  {{__('Табличный отчет')}}
                 </p>
               </a>
             </li>
@@ -112,7 +112,7 @@
         <li class="nav-item">
           <a href="{{ route('logout') }}" class="nav-link">
             <i class="nav-icon fas fa-window-close"></i>
-            <p>{{__('Log out')}}</p>
+            <p>{{__('Выйти')}}</p>
           </a>
         </li>
       </ul>

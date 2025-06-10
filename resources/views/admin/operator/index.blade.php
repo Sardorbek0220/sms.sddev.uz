@@ -6,7 +6,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>{{__('Operators')}}</h1>
+            <h1>{{__('Операторы')}}</h1>
           </div>
         </div>
       </div>
@@ -23,16 +23,16 @@
               </div> 
             @endif
               <div class="card-header">
-                <h3 class="card-title"><a href="{{ route('operators.create') }}" class="btn btn-primary">{{__('Create')}}</a></h3>
-                <h3 class="card-title ml-1"><a href="{{ route('admin.profile', $operator_id) }}" class="btn btn-outline-success">{{__('Update for monitoring')}}</a></h3>
+                <h3 class="card-title"><a href="{{ route('operators.create') }}" class="btn btn-primary">{{__('Создать')}}</a></h3>
+                <h3 class="card-title ml-1"><a href="{{ route('admin.profile', $operator_id) }}" class="btn btn-outline-success">{{__('Обновление для мониторинга')}}</a></h3>
               </div>
               <div class="card-body">
                 <table class="table table-bordered">
                   <thead>
                     <tr>
                       <th style="width: 2%">#</th>
-                      <th>{{__('Name')}}</th>
-                      <th>{{__('Phone')}}</th>
+                      <th>{{__('Имя')}}</th>
+                      <th>{{__('Телефон')}}</th>
                       <th>{{__('Workly ID')}}</th>
                       <th>{{__('Condition')}}</th>
                       <th style="width: 10%;" class="text-center">{{__('Action')}}</th>

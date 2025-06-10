@@ -7,7 +7,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>{{__('Edit operator')}}</h1>
+            <h1>{{__('Редактировать оператор')}}</h1>
           </div>
         </div>
       </div>
@@ -23,13 +23,13 @@
                 @method('PUT')
                 <div class="card-body">
                   <div class="form-group row">
-                    <label for="name" class="col-sm-2 col-form-label">Name</label>
+                    <label for="name" class="col-sm-2 col-form-label">Имя</label>
                     <div class="col-sm-10">
                       <input type="text" class="form-control" name="name" id="name" value="{{$operator->name}}">
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+                    <label for="phone" class="col-sm-2 col-form-label">Телефон</label>
                     <div class="col-sm-10">
                       <input type="text" class="form-control" name="phone" id="phone" value="{{$operator->phone}}">
                     </div>
@@ -58,8 +58,8 @@
                   </div>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success">Save</button>
-                  <a href="{{ route('operators.index') }}" class="btn btn-default float-right">Cancel</a>
+                  <button type="submit" class="btn btn-success">Сохранить</button>
+                  <a href="{{ route('operators.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
             </div>

@@ -142,7 +142,7 @@
             <div class="d-inline-block">
               <v-row>
                 <v-col>
-                  <h4>Big report</h4>
+                  <h4>Дашборд</h4>
                 </v-col>
               </v-row>
           </div>

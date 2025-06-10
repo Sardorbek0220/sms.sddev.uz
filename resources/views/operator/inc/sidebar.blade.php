@@ -17,7 +17,7 @@
           <a href="#" onclick="window.open('/operator/monitoring')" class="nav-link">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
-              {{__('Monitoring')}}
+              {{__('Мониторинг')}}
             </p>
           </a>
         </li>
@@ -25,7 +25,7 @@
           <a href="{{ route('operator.bigreport') }}" class="nav-link">
             <i class="nav-icon fas fa-th-list"></i>
             <p>
-              {{__('Big report')}}
+              {{__('Дашборд')}}
             </p>
           </a>
         </li>
@@ -33,7 +33,7 @@
           <a href="{{ route('operator.tablereport') }}" class="nav-link">
             <i class="nav-icon fas fa-table"></i>
             <p>
-              {{__('Table report')}}
+              {{__('Табличный отчет')}}
             </p>
           </a>
         </li>
@@ -41,7 +41,7 @@
         <li class="nav-item">
           <a href="{{ route('logout') }}" class="nav-link">
             <i class="nav-icon fas fa-window-close"></i>
-            <p>{{__('Log out')}}</p>
+            <p>{{__('Выйти')}}</p>
           </a>
         </li>
       </ul>
