@@ -1,7 +1,11 @@
 /node_modules
 /public/hot
 /public/storage
-/public/configs
+/public/configs/amocrm_token.json
+/public/configs/auth.txt
+/public/configs/pbx_key.txt
+/public/configs/pbx_users.json
+/public/configs/workly_auth.json
 /storage/*.key
 /vendor
 .env
