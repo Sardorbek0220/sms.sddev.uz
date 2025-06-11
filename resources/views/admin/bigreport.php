@@ -200,23 +200,23 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')" v-show="operator_id == '' || operator_id == report.num">
-              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
-              <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.ontime }}</td>
-              <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.outtime }}</td>
-              <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
-              <td v-show="!show_columns.includes('Пропущ. в раб. время')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
-              <td v-show="!show_columns.includes('Вход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
-              <td v-show="!show_columns.includes('Исход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.outbound }}</td>
-              <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
-              <td v-show="!show_columns.includes('Total feedback')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
-              <td v-show="!show_columns.includes('👍 feedback')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
-              <td v-show="!show_columns.includes('Like')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('like')">{{ report.like }}</td>
-              <td v-show="!show_columns.includes('Punishment')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
-              <td v-show="!show_columns.includes('Script')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
-              <td v-show="!show_columns.includes('Product')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
-              <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.solution }}</td>
-              <td v-show="!show_columns.includes('Онлайн-время')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
-              <td v-show="!show_columns.includes('Total')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: report.color}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: report.color}" @click="toReportTable('workly')">{{ report.ontime }}</td>
+              <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: report.color}" @click="toReportTable('workly')">{{ report.outtime }}</td>
+              <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
+              <td v-show="!show_columns.includes('Пропущ. в раб. время')" class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.missed }}</td>
+              <td v-show="!show_columns.includes('Вход. звон')" class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.inbound }}</td>
+              <td v-show="!show_columns.includes('Исход. звон')" class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.outbound }}</td>
+              <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
+              <td v-show="!show_columns.includes('Total feedback')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
+              <td v-show="!show_columns.includes('👍 feedback')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
+              <td v-show="!show_columns.includes('Like')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('like')">{{ report.like }}</td>
+              <td v-show="!show_columns.includes('Punishment')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
+              <td v-show="!show_columns.includes('Script')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td v-show="!show_columns.includes('Product')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('product')">{{ report.solution }}</td>
+              <td v-show="!show_columns.includes('Онлайн-время')" class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
+              <td v-show="!show_columns.includes('Total')" class="text-center" :style="{backgroundColor: report.color}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -250,23 +250,23 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')" v-show="operator_id == '' || operator_id == report.num">
-              <td class="link text-left" :style="{backgroundColor: colors[index]}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.ontime }}</td>
-              <td class="text-center link" :style="{backgroundColor: colors[index]}" @click="toReportTable('workly')">{{ report.outtime }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.missed }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.inbound }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toStatistics">{{ report.outbound }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('like')">{{ report.like }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.solution }}</td>
-              <td class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
-              <td class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+              <td class="link text-left" :style="{backgroundColor: report.color}" @click="toStatistics"><span v-if="report.field == '1'" style="color: #646161">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td class="text-center link" :style="{backgroundColor: report.color}" @click="toReportTable('workly')">{{ report.ontime }}</td>
+              <td class="text-center link" :style="{backgroundColor: report.color}" @click="toReportTable('workly')">{{ report.outtime }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('personal_missed')">{{ report.personal_missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.missed }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.inbound }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toStatistics">{{ report.outbound }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('unreg_calls')">{{ report.unregs }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('marks_count')">{{ report.total_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('marks3')">{{ report.mark3_feedback }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('like')">{{ report.like }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('punishment')">{{ report.punishment }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('product')">{{ report.solution }}</td>
+              <td class="link text-center" :style="{backgroundColor: report.color}" @click="toReportTable('online_times')">{{ report.online_time }}</td>
+              <td class="text-center" :style="{backgroundColor: report.color}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -760,7 +760,8 @@
             name: users[i].name,
             vxod_count: 0,
             isxod_count: 0,
-            field: users[i].field
+            field: users[i].field,
+            color: users[i].color
           };
           for (var j = 0; j < reports.length; j++) {
             if (users[i].num === reports[j].id) {
@@ -769,7 +770,8 @@
                 name: users[i].name,
                 vxod_count: reports[j].vxod_count,
                 isxod_count: reports[j].isxod_count,
-                field: users[i].field
+                field: users[i].field,
+                color: users[i].color
               }	
             }
           }

@@ -51,7 +51,8 @@ class OperatorController extends Controller
                 'phone' => $request->phone,
                 'workly_id' => $request->workly_id,
                 'active' => $request->active ? 'Y' : 'N',
-                'field' => $request->field ? 1 : 0
+                'field' => $request->field ? 1 : 0,
+                'color' => $request->color ?? null
             ]);
         }else{
             $request->session()->flash('status', 'This phone number already created !!!');
@@ -102,7 +103,8 @@ class OperatorController extends Controller
             'phone' => $request->phone,
             'workly_id' => $request->workly_id,
             'active' => $request->active ? 'Y' : 'N',
-            'field' => $request->field ? 1 : 0
+            'field' => $request->field ? 1 : 0,
+            'color' => $request->color ?? null
         ]);
 
         return redirect()->route('operators.index');

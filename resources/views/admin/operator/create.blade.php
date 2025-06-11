@@ -43,7 +43,7 @@
                     <div class="offset-sm-2 col-sm-10">
                       <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="active" id="active">
-                        <label class="form-check-label" for="active">Active</label>
+                        <label class="form-check-label" for="active">Активный</label>
                       </div>
                     </div>
                   </div>
@@ -51,7 +51,15 @@
                     <div class="offset-sm-2 col-sm-10">
                       <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="field" id="field">
-                        <label class="form-check-label" for="field">Not operator</label>
+                        <label class="form-check-label" for="field">Не оператор</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <div class="offset-sm-2 col-sm-10">
+                      <div>
+                        <input type="color" name="color" id="color" style="height: 25px;width: 25px;">
+                        <label class="form-check-label" for="color">Цвет</label>
                       </div>
                     </div>
                   </div>
