@@ -1178,11 +1178,11 @@
 				    var m = Math.floor(d % 3600 / 60);
 				    var s = Math.floor(d % 3600 % 60);
 
-				    var hDisplay = h > 0 ? h + (h == 1 ? " час, " : " час, ") : "";
-				    var mDisplay = m > 0 ? m + (m == 1 ? " мин, " : " мин, ") : "";
+				    var hDisplay = h > 0 ? h + (h == 1 ? " ч, " : " ч, ") : "";
+				    var mDisplay = m > 0 ? m + (m == 1 ? " м, " : " м, ") : "";
 				    var sDisplay = s > 0 ? s + (s == 1 ? " с" : " с") : "";
 					if (format == '1') {
-						mDisplay = m > 0 ? m + (m == 1 ? " мин" : " мин") : "";
+						mDisplay = m > 0 ? m + (m == 1 ? " м" : " м") : "";
 						sDisplay = "";
 					}
 				    return hDisplay + mDisplay + sDisplay;
