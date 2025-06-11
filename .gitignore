@@ -1,8 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
-public/configs/*.txt
-public/configs/*.json
+/public/configs
 /storage/*.key
 /vendor
 .env
