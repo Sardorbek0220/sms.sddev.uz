@@ -431,9 +431,9 @@
 				</template>
 			</v-simple-table>
 			<div class="ml-2">
-				<span class="dot mt-2" style="background: blue"></span> - qo'ng'iroq qilinyapti, &nbsp
-				<span class="dot mt-4" style="background: yellow"></span> - qo'ng'iroq tugatildi, &nbsp
-				<span class="dot mt-4" style="background: green"></span> - javob berilyapti, &nbsp
+				<!-- <span class="dot mt-2" style="background: blue"></span> - qo'ng'iroq qilinyapti, &nbsp -->
+				<!-- <span class="dot mt-4" style="background: yellow"></span> - qo'ng'iroq tugatildi, &nbsp -->
+				<!-- <span class="dot mt-4" style="background: green"></span> - javob berilyapti, &nbsp -->
 				<span class="dot mt-2" style="background: red"></span> - offline, &nbsp
 				<span class="dot mt-4" style="background: chartreuse"></span> - online
 			</div>
@@ -558,9 +558,9 @@
 	const statusColors = {
 		registered: 'chartreuse',
 		unregistered: 'black',
-		ringing: 'blue',
-		hangup: 'yellow',
-		answered: 'green',
+		ringing: 'chartreuse',
+		hangup: 'chartreuse',
+		answered: 'chartreuse',
 		register: 'chartreuse',
 		unregister: 'red',
 		pre_register: 'brown',
@@ -719,31 +719,19 @@
 	  	},
 	  	created(){	
 
-			this.interval = setInterval(() =>{
-		      	this.get_date()},30000)
+			this.interval = setInterval(async () =>{
+		      	await this.get_date()
+				await this.get_users_feedbacks()
+				await this.getOperatorTime()
+				this.getInfos_5995() 
+				this.getReport_5995()
+				await this.fifoToReport()
+				this.set_data_from_date()
+				if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
+					this.get_by_filter()
+				}
+			},30000)
 
-			this.interval = setInterval(() =>{
-		      	this.get_users_feedbacks()},600000)
-
-			this.interval = setInterval(() =>{
-		      	this.getOperatorTime()},30000)
-
-		    this.interval = setInterval(() =>{
-		      	this.getInfos_5995()},30000)
-
-		    this.interval = setInterval(() =>{
-		      	this.getReport_5995()},30000)
-
-			this.interval = setInterval(() =>{
-		      	this.fifoToReport()},30000)
-
-			this.interval = setInterval(() =>{
-		      	this.set_data_from_date()},30000)
-			
-		    if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
-		    	this.interval = setInterval(() =>{
-		      		this.get_by_filter()},30000)
-		    }
 		},
 		destroyed(){
 		    clearInterval(this.interval)
