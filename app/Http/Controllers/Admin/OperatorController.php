@@ -17,7 +17,7 @@ class OperatorController extends Controller
     public function index()
     {
         $operator_id = User::where('email', 'operator@gmail.com')->first()['id'];
-        $operators = Operator::paginate(10);        
+        $operators = Operator::get();        
         return view('admin.operator.index', compact('operators', 'operator_id'));
     }
 
