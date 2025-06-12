@@ -43,15 +43,18 @@ class WebSocketClient
                         // info("Received: {$msg}\n");
                         if (in_array($data->data->ip, ['84.54.117.196', '178.218.201.191'])) {
                             if ($data->data->state == 'register') {
-                                $operator_time = Operator_time::create([
-                                    'uid' => $data->data->uid,
-                                    'register' => 1,
-                                    'unregister' => 0,
-                                    'ip' => $data->data->ip,
-                                    'port' => $data->data->port,
-                                    'timestamp_reg' => $data->data->date,
-                                ]);
-                                $operator_time->save();
+                                $exist = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->where('unregister', 0)->where('created_at', '>', date('Y-m-d'))->first();
+                                if ($exist == null) {
+                                    $operator_time = Operator_time::create([
+                                        'uid' => $data->data->uid,
+                                        'register' => 1,
+                                        'unregister' => 0,
+                                        'ip' => $data->data->ip,
+                                        'port' => $data->data->port,
+                                        'timestamp_reg' => $data->data->date,
+                                    ]);
+                                    $operator_time->save();
+                                }
                             }else{
                                 $operator_time = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->orderBy('timestamp_reg', 'desc')->first();
                                 if($operator_time != null){
