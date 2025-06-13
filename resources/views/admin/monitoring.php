@@ -790,8 +790,9 @@
 			async getOperatorCondition(){
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {		
-						try {
-							for (const data of response.data.calls) {
+						try {							
+							for (const id in response.data.calls) {
+								const data = response.data.calls[id]
 								const span = document.getElementById("num_"+data.uid);								
 								if (span != null) {
 									span.style.background=statusColors['register']

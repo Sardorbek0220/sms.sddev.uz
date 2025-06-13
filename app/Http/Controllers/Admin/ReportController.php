@@ -165,7 +165,7 @@ class ReportController extends Controller
     {
         $from = $request['from'];
         $to = $request['to'];
-        $gateway = $request['gateway'];
+        $gateway = $request['gateway'] ?? '712075995';
 
         $excCondition = $this->timeExceptions($from, $to);
 
@@ -209,7 +209,7 @@ class ReportController extends Controller
             $from = strtotime($request['from'] . " 00:00:00");
             $to = strtotime($request['to'] . " 23:59:59");
         }
-        $gateway = $request['gateway'];
+        $gateway = $request['gateway'] ?? '712075995';
         $excCondition = $this->timeExceptions($from, $to);
         
         $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
