@@ -40,8 +40,8 @@ class WebSocketClient
                     $data = json_decode($msg);
                     // info("Received: {$msg}\n");
                     if ($data->event == 'user_registration') {
-                        info("Received: {$msg}\n");
-                        if (in_array($data->data->ip, ['84.54.117.196', '178.218.201.191'])) {
+                        // info("Received: {$msg}\n");
+                        // if (in_array($data->data->ip, ['84.54.117.196', '178.218.201.191'])) {
                             if ($data->data->state == 'register') {
                                 $exist = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->where('unregister', 0)->where('created_at', '>', date('Y-m-d'))->first();
                                 if ($exist == null) {
@@ -55,7 +55,7 @@ class WebSocketClient
                                     ]);
                                     $operator_time->save();
                                 }
-                            }else{
+                            }else if($data->data->state == 'unregister'){
                                 $operator_time = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->orderBy('timestamp_reg', 'desc')->first();
                                 if($operator_time != null){
                                     $operator_time->unregister = 1;
@@ -64,7 +64,7 @@ class WebSocketClient
                                 }
                                 
                             }
-                        }
+                        // }
                     }
                     
                 });
