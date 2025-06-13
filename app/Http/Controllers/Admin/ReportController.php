@@ -165,11 +165,11 @@ class ReportController extends Controller
     {
         $from = $request['from'];
         $to = $request['to'];
+        $gateway = $request['gateway'];
 
         $excCondition = $this->timeExceptions($from, $to);
 
-        $calls = DB::select("SELECT * FROM all_calls WHERE start_stamp BETWEEN $from AND $to $excCondition");
-        // $calls = All_call::where('start_stamp', '>', $request['from'])->where('start_stamp', '<', $request['to'])->get();
+        $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
 
         return Response::json($calls);
     }
@@ -209,11 +209,10 @@ class ReportController extends Controller
             $from = strtotime($request['from'] . " 00:00:00");
             $to = strtotime($request['to'] . " 23:59:59");
         }
-
+        $gateway = $request['gateway'];
         $excCondition = $this->timeExceptions($from, $to);
         
-        $calls = DB::select("SELECT * FROM all_calls WHERE start_stamp BETWEEN $from AND $to $excCondition");
-        // $calls = All_call::whereBetween('start_stamp', [$from, $to])->cursor();
+        $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
 
         return Response::json($calls);
     }

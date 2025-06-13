@@ -108,6 +108,9 @@
 		.date_none{
 			display: none;
 		}
+		label{
+			margin-bottom: 2px !important
+		}
 	</style>
 </head>
 <body>
@@ -278,7 +281,11 @@
 				@change="!filters"
 				class="filtersCheckbox"
 			></v-checkbox>
-			<span style="display:inline-block;margin-left:60%;background:gainsboro;padding:1%;">Посл. обновление: {{today.toLocaleTimeString()}}</span>
+			<select style="margin-top: 2%; margin-left: 45%; width: 15%; display:inline-block" class="form-control" v-model="company" @change="set_company()">
+				<option value="1">Sales Doctor</option>
+				<option value="2">Ibox</option>
+			</select>
+			<span style="display:inline-block; margin-left:2%; background:gainsboro; padding:0.5%;">Посл. обновление: {{today.toLocaleTimeString()}}</span>
       	</v-col>
     </v-row>
     <v-row v-show="filters">
@@ -287,7 +294,7 @@
 				<div class="d-inline-block">
 					<label for="" class="mt-2 font-weight-bold">Фильтр:</label>
 					<label class="mr-5 ml-4 mb-2">
-						 <select class="form-control mt-4" name="propuw" id="propuw" @change="get_by_filter()">
+						<select class="form-control mt-4" name="propuw" id="propuw" @change="get_by_filter()">
 						 	<option value="0">По умолчанию</option>
 							<option value="1">Не дозвон.</option>
 							<option value="2">Не перезв.</option>
@@ -585,12 +592,12 @@
 
 	exampleSocket.onmessage = function (e) {
 		var data = JSON.parse(e.data)
-		var id = "num_"+data.data.uid;
-		if (data.event == 'user_blf') {
-			document.getElementById(id).style.background=statusColors[data.data.status];
+		var span = document.getElementById("num_"+data.data.uid);
+		if (data.event == 'user_blf' && span != null) {
+			span.style.background=statusColors[data.data.status];
 		}
-		if (data.event == 'user_registration') {
-			document.getElementById(id).style.background=statusColors[data.data.state];
+		if (data.event == 'user_registration' && span != null) {
+			span.style.background=statusColors[data.data.state];
 		}
 	}
 
@@ -623,6 +630,9 @@
 	  	el: '#app',
 	  	vuetify: new Vuetify(),
 	  	data: {
+			fifo_num: "5201",
+			tel_num: "712075995",
+			company: 1,
 			filters: false,
 	  		loading: false,
 	  		today: new Date(),
@@ -696,26 +706,7 @@
 			$('#get_date').val(today);
 			$('#start_date').val(today);
 
-			await this.get_date();
-
-			this.loading = true; 
-
-		    await this.getUsers();
-			await this.get_users_feedbacks();
-			await this.getOperatorTime();
-		    this.getInfos_5995();
-		    this.getReport_5995();
-		    await this.getFifo();
-			await this.fifoToReport();
-			this.set_data_from_date();
-			this.bigDataPeriod = this.todayData;
-
-			await this.getBigData();
-			this.setTable();
-
-			await this.getOperatorCondition();
-
-			this.loading = false;
+			await this.TRIGGER();
 	  	},
 	  	created(){	
 
@@ -737,6 +728,40 @@
 		    clearInterval(this.interval)
 		},
 	  	methods: {
+			async TRIGGER(){
+				await this.get_date();
+
+				this.loading = true; 
+
+				await this.getUsers();
+				await this.get_users_feedbacks();
+				await this.getOperatorTime();
+				this.getInfos_5995();
+				this.getReport_5995();
+				await this.getFifo();
+				await this.fifoToReport();
+				this.set_data_from_date();
+				this.bigDataPeriod = this.todayData;
+
+				await this.getBigData();
+				this.setTable();
+
+				await this.getOperatorCondition();
+
+				this.loading = false;
+			},
+			async set_company(){
+				if (this.company == 2) {
+					this.fifo_num = "5202";
+					this.tel_num = "781138585";
+				}else{
+					this.fifo_num = "5201";
+					this.tel_num = "712075995";
+				}
+
+				await this.TRIGGER();
+
+			},
 			async personalMissed(){	
 				await axios.get('monitoring/personalMissed', {params: {from: this.from_date, to: this.to_date}}).then(response => {
 					if (response.status == 200) {	
@@ -766,10 +791,11 @@
 				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {		
 						try {
-							for (const id in response.data.calls) {
-								let data = response.data.calls[id]							
-								let uid = "num_"+data.uid;							
-								document.getElementById(uid).style.background=statusColors['register'];
+							for (const data of response.data.calls) {
+								const span = document.getElementById("num_"+data.uid);								
+								if (span != null) {
+									span.style.background=statusColors['register']
+								}
 							}
 						} catch (error) {
 							console.log(error);
@@ -823,7 +849,7 @@
 				this.loading = false;
 			},
 			async getBigDataPeriod(){
-				await axios.get('monitoring/bigData', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+				await axios.get('monitoring/bigData', {params: {gateway: this.tel_num, from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
 					if (response.status == 200) {
 						this.bigDataPeriod = {
 							answered: 0,
@@ -849,7 +875,7 @@
 				});	
 			},
 			async getBigData(){
-				await axios.get('monitoring/bigData', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
+				await axios.get('monitoring/bigData', {params: {gateway: this.tel_num, date: this.today.toISOString().split('T')[0]}}).then(response => {
 					if (response.status == 200) {
 						this.bigData = response.data;
 					}
@@ -975,7 +1001,7 @@
 		  		let inbounds_5995 = [];
 		  		let inreports_5995 = [];
 				for (var j = 0; j < calls.length; j++) {
-					if (calls[j].gateway == '712075995' && calls[j].accountcode == 'inbound') {
+					if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'inbound') {
 						inbounds_5995.push(calls[j]);
 						let infos = { 
 							num: calls[j].destination_number,
@@ -1037,7 +1063,7 @@
 				let outbounds_5995 = [];
 				let outreports_5995 = [];
 				for (var j = 0; j < calls.length; j++) {
-					if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
+					if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'outbound') {
 						outbounds_5995.push(calls[j]);
 						let infos = { 
 							num: calls[j].caller_id_number,
@@ -1236,7 +1262,7 @@
 				let user_5995;
 
 				for (var i = 0; i < this.fifos.length; i++) {
-					if (this.fifos[i].num == "5201") {
+					if (this.fifos[i].num == this.fifo_num) {
 						user_5995 = this.fifos[i].users;
 					}
 				}
@@ -1270,7 +1296,7 @@
 				let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
 				this.loading = true;
-				await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
+				await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}}).then(response => {
 					if (response.status == 200) {
 						this.calls = response.data
 						this.today = new Date()
@@ -1284,9 +1310,9 @@
 				let inbounds_5995 = [];
 		  		let outbounds_5995 = [];
 		      	for (var j = 0; j < calls.length; j++) {
-		      		if (calls[j].gateway == '712075995' && calls[j].accountcode == 'inbound') {
+		      		if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'inbound') {
 		      			inbounds_5995.push(calls[j]);
-		      		}else if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
+		      		}else if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'outbound') {
 		      			outbounds_5995.push(calls[j]);
 		      		}
 		      	}
