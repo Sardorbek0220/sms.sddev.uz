@@ -40,7 +40,7 @@ class WebSocketClient
                     $data = json_decode($msg);
                     // info("Received: {$msg}\n");
                     if ($data->event == 'user_registration') {
-                        // info("Received: {$msg}\n");
+                        info("Received: {$msg}\n");
                         if (in_array($data->data->ip, ['84.54.117.196', '178.218.201.191'])) {
                             if ($data->data->state == 'register') {
                                 $exist = Operator_time::where('uid', $data->data->uid)->where('port', $data->data->port)->where('unregister', 0)->where('created_at', '>', date('Y-m-d'))->first();

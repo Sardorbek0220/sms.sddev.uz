@@ -130,7 +130,7 @@ class Amocrm {
 			curl_close($ch);
 
 			if ($code >= 200 && $code < 300) {
-				info("response: ".$response);
+				// info("response: ".$response);
 				return empty($response) ? [] : json_decode($response, true);
 			}
 			else if (($code == 401 || $code == 403) && (--$maxAttempt)> 0) {
