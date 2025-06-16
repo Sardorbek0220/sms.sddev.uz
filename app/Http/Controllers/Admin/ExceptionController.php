@@ -17,6 +17,7 @@ class ExceptionController extends Controller
     {
         $exceptions = Exception::paginate(10);        
         return view('admin.exception.index', compact('exceptions'));
+        // return view('admin.bitrix.index');
     }
 
     /**
