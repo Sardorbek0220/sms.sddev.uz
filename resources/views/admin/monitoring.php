@@ -281,7 +281,7 @@
 				@change="!filters"
 				class="filtersCheckbox"
 			></v-checkbox>
-			<select style="margin-top: 2%; margin-left: 45%; width: 15%; display:inline-block" class="form-control" v-model="company" @change="set_company()">
+			<select style="margin-top: 2%; margin-left: 40%; width: 17%; display:inline-block" class="form-control" v-model="company" @change="set_company()">
 				<option value="1">Sales Doctor</option>
 				<option value="2">Ibox</option>
 			</select>
