@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Call;
 use App\All_call;
 use AshAllenDesign\ShortURL\Classes\Builder;
+use App\Operator_time;
 
 class Kernel extends ConsoleKernel
 {
@@ -101,6 +102,11 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             self::getMonitoringCalls();
         })->everyMinute();
+
+		$schedule->call(function () {
+            $deleted = Operator_time::where('created_at', '<', date('Y-m-d'))->where('unregister', 0)->delete();
+			info("deleted times: ".$deleted);
+        })->dailyAt('10:20');
     }
 
 	public function getMonitoringCalls(): void
