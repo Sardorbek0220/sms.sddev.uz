@@ -630,9 +630,9 @@
 	  	el: '#app',
 	  	vuetify: new Vuetify(),
 	  	data: {
-			fifo_num: "5201",
-			tel_num: "712075995",
-			company: 1,
+			fifo_num: localStorage.getItem('fifo_num') ?? "5201",
+			tel_num: localStorage.getItem('tel_num') ?? "712075995",
+			company: localStorage.getItem('tel_num') == "781138585" ? 2 : 1,
 			filters: false,
 	  		loading: false,
 	  		today: new Date(),
@@ -758,8 +758,10 @@
 					this.fifo_num = "5201";
 					this.tel_num = "712075995";
 				}
+				localStorage.setItem('fifo_num', this.fifo_num);
+				localStorage.setItem('tel_num', this.tel_num);
 
-				await this.TRIGGER();
+				location.reload();
 
 			},
 			async personalMissed(){	
