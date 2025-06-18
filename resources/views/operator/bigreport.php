@@ -132,10 +132,14 @@
     <v-row>
     	<v-col>
     		<div class="float-right">
-          <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
-            <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
-            <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
-          </div>
+                <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
+                    <option value="1">Sales Doctor</option>
+                    <option value="2">Ibox</option>
+                </select>
+                <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+                <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
+                <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
+            </div>
           <div class="float-left">
             <div class="d-inline-block">
               <v-row>
@@ -219,21 +223,6 @@
           </template>
         </v-simple-table>
       </v-col>
-
-		<!-- export excel -->
-        <v-col style="display: none">
-            <v-simple-table style="border-top: solid 1px grey;" id="exportTable2">
-            
-            </v-simple-table>
-        </v-col>
-        <!-- ------------ -->
-    </v-row>
-    <v-row>
-      <v-col cols="11"></v-col>
-      <v-col cols="1">
-        <button class="float-right btn-primary" style="border-radius: 4px; padding: 8px; border: 1px solid white; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL</button>
-        <a id="dlink"  href="" style="display: none"></a>
-      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -271,6 +260,9 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      company: 1,
+      fifo_num: "5201",
+	  tel_num: "712075995",
       show_columns: [],
       columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Total feedback", "👍 feedback", "Like", "Punishment", "Script", "Product", "Решения", "Онлайн-время", "Total"],
       day: '',
@@ -345,28 +337,7 @@ new Vue({
       this.from_date = today
       this.to_date = today
 
-      await this.getWorklyData();
-      await this.get_date();
-
-      this.loading = true; 
-
-      await this.getScores();
-      await this.getWorklyOperators();
-      await this.getWorklySchedule();
-
-      await this.getUsers();
-      await this.get_users_feedbacks();
-      await this.getOperatorTime();
-      
-      await this.getUnknownClients();
-      await this.getExtra();
-
-      this.getInfos_5995();
-      this.getReport_5995();
-      await this.getFifo();
-      await this.fifoToReport();
-
-      this.loading = false;
+      await this.TRIGGER();
     },
     created(){	
 
@@ -386,6 +357,42 @@ new Vue({
       clearInterval(this.interval)
     },
     methods: {
+        async TRIGGER(){
+			await this.getWorklyData();
+            await this.get_date();
+
+            this.loading = true; 
+
+            await this.getScores();
+            await this.getWorklyOperators();
+            await this.getWorklySchedule();
+
+            await this.getUsers();
+            await this.get_users_feedbacks();
+            await this.getOperatorTime();
+            
+            await this.getUnknownClients();
+            await this.getExtra();
+
+            this.getInfos_5995();
+            this.getReport_5995();
+            await this.getFifo();
+            await this.fifoToReport();
+
+            this.loading = false;
+		},
+        async set_company(){
+            if (this.company == 2) {
+                this.fifo_num = "5202";
+                this.tel_num = "781138585";
+            }else{
+                this.fifo_num = "5201";
+                this.tel_num = "712075995";
+            }
+
+            await this.TRIGGER();
+
+        },
         async getScores(){
             await axios.get('score').then(response => {
                 if (response.status == 200) {
@@ -563,7 +570,7 @@ new Vue({
             let inbounds_5995 = [];
             let inreports_5995 = [];
             for (var j = 0; j < calls.length; j++) {
-            if (calls[j].gateway == '712075995' && calls[j].accountcode == 'inbound') {
+            if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'inbound') {
                 inbounds_5995.push(calls[j]);
                 let infos = { 
                 num: calls[j].destination_number,
@@ -625,7 +632,7 @@ new Vue({
             let outbounds_5995 = [];
             let outreports_5995 = [];
             for (var j = 0; j < calls.length; j++) {
-            if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
+            if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'outbound') {
                 outbounds_5995.push(calls[j]);
                 if (calls[j].user_talk_time > 0) {
                     outreports_5995.push(
@@ -815,7 +822,7 @@ new Vue({
             let user_5995;
 
             for (var i = 0; i < this.fifos.length; i++) {
-                if (this.fifos[i].num == "5201") {
+                if (this.fifos[i].num == this.fifo_num) {
                     user_5995 = this.fifos[i].users;
                 }
             }
@@ -871,33 +878,33 @@ new Vue({
             let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
             this.loading = true;
-            await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
-            if (response.status == 200) {
-                this.calls = response.data
-                
-                this.bigDataPeriod = {
-                    answered: 0,
-                    missed: 0,
-                    missed_in: 0,
-                    talking_time: 0
-                }
-
-                for (const datum of response.data) {
-                    if (datum.accountcode == 'inbound') {
-
-                        this.bigDataPeriod.talking_time += datum.user_talk_time
-                        if (datum.user_talk_time > 0) {
-                            this.bigDataPeriod.answered += 1;
-                        }else{
-                            this.bigDataPeriod.missed += 1;
-                            this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
-                        }
-
+            await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}}).then(response => {
+                if (response.status == 200) {
+                    this.calls = response.data
+                    
+                    this.bigDataPeriod = {
+                        answered: 0,
+                        missed: 0,
+                        missed_in: 0,
+                        talking_time: 0
                     }
+
+                    for (const datum of response.data) {
+                        if (datum.accountcode == 'inbound') {
+
+                            this.bigDataPeriod.talking_time += datum.user_talk_time
+                            if (datum.user_talk_time > 0) {
+                                this.bigDataPeriod.answered += 1;
+                            }else{
+                                this.bigDataPeriod.missed += 1;
+                                this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
+                            }
+
+                        }
+                    }
+                    this.today = new Date()
+                    this.loading = false
                 }
-                this.today = new Date()
-                this.loading = false
-            }
             });		
         },
         calcWorkly(oper_id){   

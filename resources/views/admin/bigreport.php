@@ -131,6 +131,10 @@
     <v-row>
     	<v-col>
         <div class="float-right">
+          <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
+            <option value="1">Sales Doctor</option>
+            <option value="2">Ibox</option>
+          </select>
           <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
             <option selected value="">Все операторы</option>
             <option v-for="item in users" :value="item.num">{{item.name}}</option>
@@ -317,6 +321,9 @@
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      company: 1,
+      fifo_num: "5201",
+			tel_num: "712075995",
       show_columns: [],
       columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Total feedback", "👍 feedback", "Like", "Punishment", "Script", "Product", "Решения", "Онлайн-время", "Total"],
       operator_id: '',
@@ -392,28 +399,7 @@
       this.from_date = today
       this.to_date = today
 
-      await this.getWorklyData();
-      await this.get_date();
-
-      this.loading = true; 
-
-      await this.getScores();
-      await this.getWorklyOperators();
-      await this.getWorklySchedule();
-
-      await this.getUsers();
-      await this.get_users_feedbacks();
-      await this.getOperatorTime();
-      
-      await this.getUnknownClients();
-      await this.getExtra();
-
-      this.getInfos_5995();
-      this.getReport_5995();
-      await this.getFifo();
-      await this.fifoToReport();
-
-      this.loading = false;
+      await this.TRIGGER();
     },
     created(){	
 
@@ -433,6 +419,42 @@
       clearInterval(this.interval)
     },
     methods: {
+      async TRIGGER(){
+				await this.getWorklyData();
+        await this.get_date();
+
+        this.loading = true; 
+
+        await this.getScores();
+        await this.getWorklyOperators();
+        await this.getWorklySchedule();
+
+        await this.getUsers();
+        await this.get_users_feedbacks();
+        await this.getOperatorTime();
+        
+        await this.getUnknownClients();
+        await this.getExtra();
+
+        this.getInfos_5995();
+        this.getReport_5995();
+        await this.getFifo();
+        await this.fifoToReport();
+
+        this.loading = false;
+			},
+      async set_company(){
+				if (this.company == 2) {
+					this.fifo_num = "5202";
+					this.tel_num = "781138585";
+				}else{
+					this.fifo_num = "5201";
+					this.tel_num = "712075995";
+				}
+
+				await this.TRIGGER();
+
+			},
       async getScores(){
         await axios.get('score').then(response => {
           if (response.status == 200) {
@@ -606,7 +628,7 @@
         let inbounds_5995 = [];
         let inreports_5995 = [];
         for (var j = 0; j < calls.length; j++) {
-          if (calls[j].gateway == '712075995' && calls[j].accountcode == 'inbound') {
+          if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'inbound') {
             inbounds_5995.push(calls[j]);
             let infos = { 
               num: calls[j].destination_number,
@@ -668,7 +690,7 @@
         let outbounds_5995 = [];
         let outreports_5995 = [];
         for (var j = 0; j < calls.length; j++) {
-          if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
+          if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'outbound') {
             outbounds_5995.push(calls[j]);
             if (calls[j].user_talk_time > 0) {
               outreports_5995.push(
@@ -858,7 +880,7 @@
         let user_5995;
 
         for (var i = 0; i < this.fifos.length; i++) {
-          if (this.fifos[i].num == "5201") {
+          if (this.fifos[i].num == this.fifo_num) {
             user_5995 = this.fifos[i].users;
           }
         }
@@ -916,7 +938,7 @@
         let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
         this.loading = true;
-        await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
+        await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}}).then(response => {
           if (response.status == 200) {
             this.calls = response.data
 
