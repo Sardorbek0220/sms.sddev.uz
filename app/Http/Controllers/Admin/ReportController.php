@@ -38,6 +38,25 @@ class ReportController extends Controller
         return $excCondition;      
     }
 
+    public function timeExceptionsTalk($from_unix, $to_unix)
+    {
+        $from = gmdate("Y-m-d H:i:s", $from_unix);
+        $to = gmdate("Y-m-d H:i:s", $to_unix);        
+
+        $exceptions = Exception::whereBetween('day', [$from, $to])->get();
+        if (!empty($exceptions)) {
+            $excConditions = [];
+            foreach ($exceptions as $exc) {
+                $exc_from = strtotime(substr($exc->day, 0, -9) . " " . $exc->from_exc . ":00");
+                $exc_to = strtotime(substr($exc->day, 0, -9) . " " . $exc->to_exc . ":00");
+                $excConditions[] = "(start_stamp BETWEEN $exc_from AND $exc_to)";
+            }  
+            return "user_talk_time > 0 AND (" . implode(" OR ", $excConditions) . ")";
+        }else{
+            return "";
+        }
+    }
+
     public function index(Request $request)
     {
         if ($request->from_date == null) {
@@ -171,6 +190,14 @@ class ReportController extends Controller
 
         $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
 
+        if (!empty($excCondition)) {
+            $excConditionTalk = $this->timeExceptionsTalk($from, $to);
+            $callsTalk = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND $excConditionTalk");
+            if (!empty($callsTalk)) {
+                $calls = array_merge($calls, $callsTalk);
+            }
+        }
+
         return Response::json($calls);
     }
 
@@ -213,6 +240,14 @@ class ReportController extends Controller
         $excCondition = $this->timeExceptions($from, $to);
         
         $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
+
+        if (!empty($excCondition)) {
+            $excConditionTalk = $this->timeExceptionsTalk($from, $to);
+            $callsTalk = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND $excConditionTalk");
+            if (!empty($callsTalk)) {
+                $calls = array_merge($calls, $callsTalk);
+            }
+        }
 
         return Response::json($calls);
     }
