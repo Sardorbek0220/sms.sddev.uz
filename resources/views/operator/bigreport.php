@@ -201,7 +201,7 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')">
-              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span v-if="report.field == '1'" :style="{color: report.color ?? '#646161'}">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span :style="{color: report.color ?? '#646161'}">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
               <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
               <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
               <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
