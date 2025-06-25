@@ -115,19 +115,23 @@
             <v-row>
               <v-col>
                   <div class="float-right">
-                      <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
-                        <option selected value="">Все операторы</option>
-                        <option v-for="item in users" :value="item.num">{{item.name}}</option>
-                      </select>
-                      <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
-                      <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
-                      <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
+                    <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
+                      <option value="1">Sales Doctor</option>
+                      <option value="2">Ibox</option>
+                    </select>
+                    <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
+                      <option selected value="">Все операторы</option>
+                      <option v-for="item in users" :value="item.num">{{item.name}}</option>
+                    </select>
+                    <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
+                    <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
+                    <button class="mb-1 btn btn-success text-white" :loading="loading" type="button" @click="filter()">Фильтр</button>
                   </div>
                   <div class="float-left">
                       <div class="d-inline-block">
                           <v-row>
                               <v-col>
-                                <h4>Statistics</h4>
+                                <h4>Статистика</h4>
                               </v-col>
                           </v-row>
                       </div>
@@ -271,6 +275,9 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
+      company: 1,
+      fifo_num: "5201",
+	    tel_num: "712075995",
       operator_id: '',
       period: false,
       loading: false,
@@ -331,37 +338,18 @@ new Vue({
         this.to_date = today
       }
 
-      await this.getWorklyData();
-      await this.get_date();
-      
-      this.loading = true; 
-
-      await this.getWorklyOperators();
-      await this.getWorklySchedule();
-
-      await this.getUsers();
-      await this.get_users_feedbacks();
-      await this.getOperatorTime();
-      await this.getBigDataPeriod();
-      await this.getUnknownClients();
-
-      this.getInfos_5995();
-      this.getReport_5995();
-      await this.getFifo();
-      this.fifoToReport();
-      
-      this.loading = false;
+      await this.TRIGGER();
     },
     created(){	
 
-      this.interval = setInterval(() =>{
+      this.interval = setInterval(async () =>{
         if (this.from_date == this.day && this.to_date == this.day) {
-          this.get_date();
-          this.getOperatorTime();
+          await this.get_date();
+          await this.getOperatorTime();
+          await this.get_users_feedbacks();
           this.getInfos_5995();
           this.getReport_5995();
-          this.fifoToReport();
-          this.get_users_feedbacks();
+          await this.fifoToReport();
         }
       },30000)
 
@@ -370,6 +358,38 @@ new Vue({
       clearInterval(this.interval)
     },
     methods: {
+      async TRIGGER(){
+        await this.getWorklyData();
+        await this.get_date();
+        
+        this.loading = true; 
+
+        await this.getWorklyOperators();
+        await this.getWorklySchedule();
+
+        await this.getUsers();
+        await this.get_users_feedbacks();
+        await this.getOperatorTime();
+        await this.getBigDataPeriod();
+        await this.getUnknownClients();
+
+        this.getInfos_5995();
+        this.getReport_5995();
+        await this.getFifo();
+        await this.fifoToReport();
+        
+        this.loading = false;
+      },
+      async set_company(){
+        if (this.company == 2) {
+            this.fifo_num = "5202";
+            this.tel_num = "781138585";
+        }else{
+            this.fifo_num = "5201";
+            this.tel_num = "712075995";
+        }
+        await this.TRIGGER();
+      },
       async getWorklyOperators(){
         await axios.get('monitoring/worklyOperators').then(response => {
           if (response.status == 200) {
@@ -464,16 +484,16 @@ new Vue({
         this.loading = true;
         await this.get_users_feedbacks();
         await this.getOperatorTime();
-        this.getInfos_5995();
-        this.getReport_5995();
-        this.fifoToReport();
         await this.getBigDataPeriod();
         await this.getUnknownClients();
+        this.getInfos_5995();
+        this.getReport_5995();
+        await this.fifoToReport();
 
         this.loading = false;
       },
       async getBigDataPeriod(){
-        await axios.get('monitoring/bigData', {params: {from: this.from_date, to: this.to_date}}).then(response => {
+        await axios.get('monitoring/bigData', {params: {gateway: this.tel_num, from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
             this.bigDataPeriod = {
               answered: 0,
@@ -539,7 +559,7 @@ new Vue({
         let inbounds_5995 = [];
         let inreports_5995 = [];
         for (var j = 0; j < calls.length; j++) {
-          if (calls[j].gateway == '712075995' && calls[j].accountcode == 'inbound') {
+          if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'inbound') {
             inbounds_5995.push(calls[j]);
             let infos = { 
               num: calls[j].destination_number,
@@ -601,7 +621,7 @@ new Vue({
         let outbounds_5995 = [];
         let outreports_5995 = [];
         for (var j = 0; j < calls.length; j++) {
-          if (calls[j].gateway == '712075995' && calls[j].accountcode == 'outbound') {
+          if (calls[j].gateway == this.tel_num && calls[j].accountcode == 'outbound') {
             outbounds_5995.push(calls[j]);
             let infos = { 
               num: calls[j].caller_id_number,
@@ -787,12 +807,12 @@ new Vue({
         let user_5995;
 
         for (var i = 0; i < this.fifos.length; i++) {
-          if (this.fifos[i].num == "5201") {
+          if (this.fifos[i].num == this.fifo_num) {
             user_5995 = this.fifos[i].users;
           }
         }
         
-        var myArray_5995 = user_5995.split(";");	
+        var myArray_5995 = user_5995.split(":1;");	
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 
@@ -830,7 +850,7 @@ new Vue({
         let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
         this.loading = true;
-        await axios.get('monitoring/data', {params: {from: fromDate, to: toDate}}).then(response => {
+        await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}}).then(response => {
           if (response.status == 200) {
             this.calls = response.data
             this.today = new Date()
@@ -839,39 +859,44 @@ new Vue({
         });		
       },
       calcWorkly(oper_id){   
-        let workly_id = this.worklyOperators[oper_id]
-        let data = this.worklyData[workly_id]
-        let schedule = this.worklySchedule[workly_id].toString().split('-')
-        
-        if (data) {
+        try {
+          let workly_id = this.worklyOperators[oper_id]
+          let data = this.worklyData[workly_id]
+          let schedule = this.worklySchedule[workly_id].toString().split('-')
           
-          if (this.day != this.to_date || this.day != this.from_date) {
-            this.period = true;
-            let ontime = 0;
-            let outtime = 0;
-            for (const date in data) {
-              if (new Date('2002-04-23 '+data[date][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
-                ontime++;
+          if (data) {
+            
+            if (this.day != this.to_date || this.day != this.from_date) {
+              this.period = true;
+              let ontime = 0;
+              let outtime = 0;
+              for (const date in data) {
+                if (new Date('2002-04-23 '+data[date][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
+                  ontime++;
+                }else{
+                  outtime++;
+                }
+
+              }
+              return "<strong style='color:#2de12d'>"+ontime+"</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>"+outtime+"</strong>"
+
+            }else{
+
+              if (new Date('2002-04-23 '+data[this.day][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
+                return "<strong style='color:#2de12d'>"+data[this.day][0]+"</strong>"
               }else{
-                outtime++;
+                return "<strong style='color:red'>"+data[this.day][0]+"</strong>"
               }
 
             }
-            return "<strong style='color:#2de12d'>"+ontime+"</strong>&nbsp&nbsp&nbsp&nbsp&nbsp<strong style='color:red'>"+outtime+"</strong>"
 
           }else{
-
-            if (new Date('2002-04-23 '+data[this.day][0]+':00') <= new Date('2002-04-23 '+schedule[0]+':00')) {
-              return "<strong style='color:#2de12d'>"+data[this.day][0]+"</strong>"
-            }else{
-              return "<strong style='color:red'>"+data[this.day][0]+"</strong>"
-            }
-
-          }
-
-        }else{
+            return '-'
+          }        
+        } catch (error) {
           return '-'
-        }        
+        }
+        
       }
     }
 })
