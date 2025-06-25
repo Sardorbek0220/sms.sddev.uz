@@ -135,7 +135,7 @@ class Onlinepbx {
 				"users" => $contents
 			], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 		}
-		return $contents[$localNumber];
+		return $contents[$localNumber] ?? '';
 	}
 
 	public function getQueueName($queueNum) {
