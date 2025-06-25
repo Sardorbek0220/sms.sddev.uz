@@ -75,6 +75,14 @@
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('trainings.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-book"></i>
+                <p>
+                  {{__('Обучение')}}
+                </p>
+              </a>
+            </li>
             <!-- <li class="nav-item">
               <a href="{{ route('admin.piece') }}" class="nav-link" style="background: dimgrey;">
                 <i class="nav-icon fas fa-tasks"></i>
