@@ -28,6 +28,7 @@ class Score extends Model
         'like' => 'Нравится',
         'punishment' => 'Наказание',
         'unreg_client_inbound' => 'Незарег. вход. клиенты',
-        'online_time' => 'Онлайн время'
+        'online_time' => 'Онлайн время',
+        'training' => 'Обучение'
     ];
 }

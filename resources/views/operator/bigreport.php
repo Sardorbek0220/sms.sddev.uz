@@ -188,20 +188,21 @@
               <th v-show="!show_columns.includes('Вход. звон')" class="text-center">Вход. звон</th>
               <th v-show="!show_columns.includes('Исход. звон')" class="text-center">Исход. звон</th>
               <th v-show="!show_columns.includes('Незарег. вход. клиенты')" class="text-center">Незарег. вход. клиенты</th>
-              <th v-show="!show_columns.includes('Total feedback')" class="text-center">Total feedback</th>
-              <th v-show="!show_columns.includes('👍 feedback')" class="text-center">👍 feedback</th>
-              <th v-show="!show_columns.includes('Like')" class="text-center">Like</th>
-              <th v-show="!show_columns.includes('Punishment')" class="text-center">Punishment</th>
-              <th v-show="!show_columns.includes('Script')" class="text-center">Script</th>
-              <th v-show="!show_columns.includes('Product')" class="text-center">Product</th>
+              <th v-show="!show_columns.includes('Всего отзывов')" class="text-center">Всего отзывов</th>
+              <th v-show="!show_columns.includes('👍 отзывы')" class="text-center">👍 отзывы</th>
+              <th v-show="!show_columns.includes('Нравится')" class="text-center">Нравится</th>
+              <th v-show="!show_columns.includes('Отток')" class="text-center">Отток</th>
+              <th v-show="!show_columns.includes('Скрипт')" class="text-center">Скрипт</th>
+              <th v-show="!show_columns.includes('Продукт')" class="text-center">Продукт</th>
               <th v-show="!show_columns.includes('Решения')" class="text-center">Решения</th>
+              <th v-show="!show_columns.includes('Обучение')" class="text-center">Обучение</th>
               <th v-show="!show_columns.includes('Онлайн-время')" class="text-center" width="160px">Онлайн-время</th>
-              <th v-show="!show_columns.includes('Total')" class="text-center">Total</th>
+              <th v-show="!show_columns.includes('Общий')" class="text-center">Общий</th>
             </tr>
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')">
-              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span :style="{color: report.color ?? '#646161'}">{{ report.name }}</span><span v-else>{{ report.name }}</span></td>
+              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span :style="{color: report.color ?? '#646161'}">{{ report.name }}</span></td>
               <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
               <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
               <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
@@ -209,15 +210,16 @@
               <td v-show="!show_columns.includes('Вход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
               <td v-show="!show_columns.includes('Исход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
               <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
-              <td v-show="!show_columns.includes('Total feedback')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
-              <td v-show="!show_columns.includes('👍 feedback')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
-              <td v-show="!show_columns.includes('Like')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
-              <td v-show="!show_columns.includes('Punishment')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
-              <td v-show="!show_columns.includes('Script')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
-              <td v-show="!show_columns.includes('Product')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
+              <td v-show="!show_columns.includes('Всего отзывов')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
+              <td v-show="!show_columns.includes('👍 отзывы')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
+              <td v-show="!show_columns.includes('Нравится')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
+              <td v-show="!show_columns.includes('Отток')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
+              <td v-show="!show_columns.includes('Скрипт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
+              <td v-show="!show_columns.includes('Продукт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
               <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td>
+              <td v-show="!show_columns.includes('Обучение')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.training }}</td>
               <td v-show="!show_columns.includes('Онлайн-время')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
-              <td v-show="!show_columns.includes('Total')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
+              <td v-show="!show_columns.includes('Общий')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
           </template>
@@ -264,7 +266,7 @@ new Vue({
       fifo_num: "5201",
 	  tel_num: "712075995",
       show_columns: [],
-      columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Total feedback", "👍 feedback", "Like", "Punishment", "Script", "Product", "Решения", "Онлайн-время", "Total"],
+      columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "Скрипт", "Продукт", "Решения", "Обучение", "Онлайн-время", "Общий"],
       day: '',
       loading: false,
       today: new Date(),
@@ -326,7 +328,8 @@ new Vue({
         '#f16363',
         '#f16363',
         '#f16363',
-      ]
+      ],
+      training: {}
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
@@ -346,6 +349,7 @@ new Vue({
                 await this.get_date();
                 await this.getOperatorTime();
                 await this.get_users_feedbacks();
+                await this.get_users_trainings();
                 this.getInfos_5995();
                 this.getReport_5995();
                 await this.fifoToReport();
@@ -369,6 +373,7 @@ new Vue({
 
             await this.getUsers();
             await this.get_users_feedbacks();
+            await this.get_users_trainings();
             await this.getOperatorTime();
             
             await this.getUnknownClients();
@@ -519,6 +524,7 @@ new Vue({
             this.loading = true;
 
             await this.get_users_feedbacks();
+            await this.get_users_trainings();
             await this.getOperatorTime();
             await this.getUnknownClients();
             await this.getExtra();
@@ -554,6 +560,18 @@ new Vue({
                 }
                 }
             }
+            });		
+        },
+        async get_users_trainings(){
+            this.training = {}
+            await axios.get('monitoring/usersTrainings', {params: {from: this.from_date, to: this.to_date}}).then(response => {
+                if (response.status == 200) {
+                    for (const datum of response.data) {
+                        if (!this.training[datum.operator]) {
+                            this.training[datum.operator] = datum.training
+                        }
+                    }
+                }
             });		
         },
         async getUsers(){
@@ -835,35 +853,34 @@ new Vue({
             let set_support = [];
 
             for (var a = 0; a < reports_support.length; a++) {
-                // for (var b = 0; b < myArray_5995.length; b++) {
-                    if (myArray_5995.includes(reports_support[a].num)) {
+                if (myArray_5995.includes(reports_support[a].num)) {
+                    reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[reports_support[a].num] ?? 0, 'personal_missed')
+                    reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
+                    reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
+                    reports_support[a].outbound = this.calcPoints(reports_support[a].isxod_count, 'outbound')
+                    reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
+                    reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
+                    reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
+                    reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
+                    reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
+                    reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
+                    reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
+                    reports_support[a].solution = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_solution).toFixed(1)) : 0
+                    reports_support[a].training = this.calcPoints(parseFloat(this.training[reports_support[a].num] ?? 0), 'training')
+                    reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
+
+                    let times = this.calcWorkly(reports_support[a].num);
+                    reports_support[a].ontime = times.ontime
+                    reports_support[a].outtime = times.outtime
+
+                    reports_support[a].total_point = 
+                        reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound + reports_support[a].total_feedback 
+                        + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
+                        + reports_support[a].script + reports_support[a].product + reports_support[a].solution + reports_support[a].training +
+                        + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
                     
-                        reports_support[a].personal_missed = this.calcPoints(this.oper_misseds[reports_support[a].num] ?? 0, 'personal_missed')
-                        reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
-                        reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
-                        reports_support[a].outbound = this.calcPoints(reports_support[a].isxod_count, 'outbound')
-                        reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
-                        reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
-                        reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
-                        reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
-                        reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
-                        reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
-                        reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
-                        reports_support[a].solution = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_solution).toFixed(1)) : 0
-                        reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
-
-                        let times = this.calcWorkly(reports_support[a].num);
-                        reports_support[a].ontime = times.ontime
-                        reports_support[a].outtime = times.outtime
-
-                        reports_support[a].total_point = 
-                            reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound + reports_support[a].total_feedback 
-                            + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
-                            + reports_support[a].script + reports_support[a].product + reports_support[a].solution + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
-                        
-                        set_support.push(reports_support[a])
-                    }
-                // }
+                    set_support.push(reports_support[a])
+                }
             }     
             set_support.sort(function(a,b) {
                 return b.total_point - a.total_point

@@ -227,6 +227,20 @@ class ReportController extends Controller
         return Response::json($reports);
     }
 
+    public function monitoringUsersTrainings(Request $request)
+    {
+        $reports = DB::table('trainings')
+            ->select(
+                DB::raw('SUM(training) AS training'),
+                'operator'
+            )
+            ->whereBetween('date', [$request->from." 00:00:00", $request->to." 23:59:59"])
+            ->groupBy('operator')
+            ->get();  
+
+        return Response::json($reports);
+    }
+
     public function monitoringBigData(Request $request)
     {
         if ($request['date']) {
