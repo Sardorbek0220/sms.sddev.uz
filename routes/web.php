@@ -55,6 +55,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');
     Route::get('piece', [BigreportController::class, 'piece'])->name('admin.piece');
     Route::get('bigreport/extra', [BigreportController::class, 'extra']);
+    Route::get('bigreport/live', [BigreportController::class, 'live'])->name('admin.live');;
 
     Route::get('feedback/all', [FeedbackController::class, 'all'])->name('feedback.all');
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');

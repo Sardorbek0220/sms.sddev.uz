@@ -19,6 +19,15 @@ class BigreportController extends Controller
         return view('admin.layouts.bigreport', compact('key_and_id', 'auth_key'));
     }
 
+    public function live(Request $request)
+    {
+        $auth = json_decode(file_get_contents("configs/auth.txt"));
+        $key_and_id = $auth->key_id.":".$auth->key;
+        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
+
+        return view('admin.layouts.live', compact('key_and_id', 'auth_key'));
+    }
+
     public function operator(Request $request)
     {
         $auth = json_decode(file_get_contents("configs/auth.txt"));

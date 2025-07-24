@@ -46,6 +46,14 @@
           </a>
         </li>
         <li class="nav-item">
+          <a href="{{ route('admin.live') }}" class="nav-link">
+            <i class="nav-icon fas fa-plane"></i>
+            <p>
+              {{__('Онлайн / Офлайн')}}
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-chart-bar"></i>
             <p>Автоматизация<i class="fas fa-angle-left right"></i></p>
