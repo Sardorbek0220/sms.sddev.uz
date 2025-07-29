@@ -28,7 +28,7 @@
                         </thead>
                         <tbody style="border: solid 1px grey;">
                             <tr v-for="user in users.filter((u) => availableOperators.includes(u.num) && u.num != '')">
-                                <td style="background: firebrick; color: white" :id="'num_' + user?.num">({{ user?.num }}) {{ user?.name }}</td>
+                                <td style="background: firebrick; color: white; font-size: 36px" :id="'num_' + user?.num">({{ user?.num }}) {{ user?.name }}</td>
                             </tr>
                         </tbody>    
                     </template>
@@ -44,7 +44,7 @@
                         </thead>
                         <tbody style="border: solid 1px grey;">
                             <tr v-for="user in users.filter((u) => availableOperatorsSD.includes(u.num) && u.num != '')">
-                                <td style="background: firebrick; color: white" :id="'num_' + user?.num">({{ user?.num }}) {{ user?.name }}</td>
+                                <td style="background: firebrick; color: white; font-size: 36px" :id="'num_' + user?.num">({{ user?.num }}) {{ user?.name }}</td>
                             </tr>
                         </tbody>    
                     </template>
@@ -103,8 +103,8 @@
 	  	el: '#app',
 	  	vuetify: new Vuetify(),
 	  	data: {
-            availableOperatorsSD: [],
-            availableOperators: [],
+            availableOperatorsSD: "",
+            availableOperators: "",
             users: []
         },
         async mounted (){
@@ -152,10 +152,10 @@
 
                 for (const datum of response.data.data) {
                     if (datum.num == '5201') {
-						this.availableOperatorsSD = datum.users.split(":1;");
+						this.availableOperatorsSD = datum.users;
 					}
                     if (datum.num == '5202') {
-						this.availableOperators = datum.users.split(":1;");
+						this.availableOperators = datum.users;
 					}
                 }
 		  	},

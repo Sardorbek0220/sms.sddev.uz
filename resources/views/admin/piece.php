@@ -812,7 +812,7 @@ new Vue({
           }
         }
         
-        var myArray_5995 = user_5995.split(":1;");	
+        var myArray_5995 = user_5995;	
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 
@@ -820,24 +820,17 @@ new Vue({
         let set_support = [];
 
         for (var a = 0; a < reports_support.length; a++) {
-          // if (reports_support[a].num == '120') {
-          //   continue;
-          // }
-          for (var b = 0; b < myArray_5995.length; b++) {
-            if (reports_support[a].num == myArray_5995[b]) {
-
-              reports_support[a].personal_missed = this.oper_misseds[reports_support[a].num] ?? 0
-              reports_support[a].inbound = this.bigDataPeriod.missed+this.bigDataPeriod.answered
-              reports_support[a].missed_in = this.bigDataPeriod.missed_in
-              reports_support[a].total_feedback = reports_support[a].vxod_count > 0 ? ( ((parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0))/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0
-              reports_support[a].mark3_feedback = reports_support[a].vxod_count > 0 ? ( (parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0)/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0
-              reports_support[a].unregs = this.unknownClients.inbound[reports_support[a].num] ?? 0
-              reports_support[a].mark3 = this.feedbacks.mark3[reports_support[a].num] ?? 0
-              reports_support[a].mark0 = this.feedbacks.mark0[reports_support[a].num] ?? 0
-              reports_support[a].online_time = this.calcHMS(this.oper_times[reports_support[a].num], '1')
-
-              set_support.push(reports_support[a])
-            }
+          if (myArray_5995.includes(reports_support[a].num)) {
+            reports_support[a].personal_missed = this.oper_misseds[reports_support[a].num] ?? 0
+            reports_support[a].inbound = this.bigDataPeriod.missed+this.bigDataPeriod.answered
+            reports_support[a].missed_in = this.bigDataPeriod.missed_in
+            reports_support[a].total_feedback = reports_support[a].vxod_count > 0 ? ( ((parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0))/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0
+            reports_support[a].mark3_feedback = reports_support[a].vxod_count > 0 ? ( (parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0)/reports_support[a].vxod_count) * 100 ).toFixed(1) : 0
+            reports_support[a].unregs = this.unknownClients.inbound[reports_support[a].num] ?? 0
+            reports_support[a].mark3 = this.feedbacks.mark3[reports_support[a].num] ?? 0
+            reports_support[a].mark0 = this.feedbacks.mark0[reports_support[a].num] ?? 0
+            reports_support[a].online_time = this.calcHMS(this.oper_times[reports_support[a].num], '1')
+            set_support.push(reports_support[a])
           }
         }
         this.users_5995 = set_support;

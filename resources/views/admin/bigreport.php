@@ -905,7 +905,7 @@
           }
         }
         
-        var myArray_5995 = user_5995.split(":1;");	
+        var myArray_5995 = user_5995;	
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 

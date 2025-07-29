@@ -1270,7 +1270,7 @@
 					}
 				}
 				
-				var myArray_5995 = user_5995.split(":1;");	
+				var myArray_5995 = user_5995;	
 				this.availableOperators = myArray_5995;
 
 				await this.personalMissed();
@@ -1280,14 +1280,9 @@
 		  		let set_support = [];
 
 		  		for (var a = 0; a < reports_support.length; a++) {
-					// if (reports_support[a].num == '120') {
-					// 	continue;
-					// }
-		  			for (var b = 0; b < myArray_5995.length; b++) {
-		  				if (reports_support[a].num == myArray_5995[b]) {
-		  					set_support.push(reports_support[a])
-		  				}
-		  			}
+					if (myArray_5995.includes(reports_support[a].num)){
+						set_support.push(reports_support[a])
+					}
 		  		}
 		  		this.users_5995 = set_support;
 			},
