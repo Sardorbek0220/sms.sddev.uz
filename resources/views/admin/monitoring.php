@@ -379,7 +379,7 @@
 							
 							<br>{{report.start_stamp}}
 						</td>
-						<td>{{report.number}}</td>
+						<td>{{report.number.replace('+998', '')}}</td>
 						<td>{{report.count_pro}}</td>
 						<td>{{report.count_nedoz}}</td>
 						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
