@@ -16,7 +16,7 @@ class AmocrmController extends Controller
 			parse_str(urldecode($wm_string), $contents);
 
 			$existCall = Call::where('uuid', $contents['uuid'])->first();
-			if (empty($existCall) && $contents['gateway'] == '712075995') {
+			if (empty($existCall) && in_array($contents['gateway'], ['712075995', '781138585', '781136022'])) {
 
 				if ($contents['direction'] === 'outbound') {
 					$clientTel = $contents['callee'];

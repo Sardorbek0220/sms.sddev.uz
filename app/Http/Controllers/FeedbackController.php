@@ -4,6 +4,13 @@ namespace App\Http\Controllers;
 
 const TG_USER_CHANNEL = -1002077092594;
 const BOT_URL = "https://api.telegram.org/bot6021707011:AAHXaS_dKTC5r2Jl-bwZueTs6Qb5zdXEZqk/";
+
+const IBOX_TG_USER_CHANNEL = -4850688661;
+const IBOX_BOT_URL = "https://api.telegram.org/bot8434467105:AAFOxMrVAUrnVdRXhy40CWUSGD7G7AXIYPI/";
+
+const IDOKON_TG_USER_CHANNEL = -4897748669;
+const IDOKON_BOT_URL= "https://api.telegram.org/bot8435561111:AAFZDQhJPAIGJ4iVUDEHmT9NSbMinuOtZAE/";
+
 const STATUS = [
     "Жавоб олмадим",
     "Етарли жавоб олмадим",
@@ -27,22 +34,22 @@ class FeedbackController extends Controller
     {
         try {
             //get rid of 'extra words'
-            $id = str_replace ('withoutslashes', '/', $id);
+            $id = str_replace('withoutslashes', '/', $id);
 
             $clientHash = explode("___", $id);
 
             $call_id = $clientHash[0];
             $hash = Hash::make($call_id);
+            $call = Call::find($call_id);
             
             if (Hash::check($call_id, $clientHash[1])) {
-                return view('feedback', compact('call_id'));
+                return view('feedback', compact('call_id', 'call'));
             }else{
                 abort(404);
             }
         } catch (\Throwable $th) {
             abort(404);
         }
-        
     }
 
     public function store(Request $request){
@@ -69,19 +76,19 @@ class FeedbackController extends Controller
                 $text->appendEntity("Baho: ", "bold")->appendText("#mark".$request->solved." ".STATUS[$request->solved])->endl();
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
-                if ($request->solved == '4') {
+                if ($request->solved == '4' && $infoCall->gateway == '712075995') {
                     $text->appendEntity("", "bold")->appendText("@silence1508")->endl();
                 }
                 $text->endl();
 
-                $ch = curl_init(BOT_URL."sendAudio");
+                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."sendAudio");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
                 ]);
 
                 $request = [
-                    "chat_id" => TG_USER_CHANNEL,
+                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
                     "audio" => $call_audio_url,
                     "caption" => $text->text,
                     "caption_entities" => $text->entities,
@@ -124,19 +131,19 @@ class FeedbackController extends Controller
                 $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
                 $text->appendEntity("Izoh: ", "bold")->appendText($feedback->complaint)->endl();
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
-                if ($request->solved == '4') {
+                if ($request->solved == '4' && $infoCall->gateway == '712075995') {
                     $text->appendEntity("", "bold")->appendText("@silence1508")->endl();
                 }
                 $text->endl();
 
-                $ch = curl_init(BOT_URL."editMessageCaption");
+                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."editMessageCaption");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
                 ]);
 
                 $request = [
-                    "chat_id" => TG_USER_CHANNEL,
+                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
                     "message_id" => intval($request->message_id),
                     "caption" => $text->text,
                     "caption_entities" => $text->entities,

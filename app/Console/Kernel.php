@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function () {
             
-            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 13)).gettimeofday()["dsttime"], 0, -1);
-		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 12)).gettimeofday()["dsttime"], 0, -1);
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 11)).gettimeofday()["dsttime"], 0, -1);
+		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 10)).gettimeofday()["dsttime"], 0, -1);
 
             $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
             $date4 = substr(date("Y-m-d H:i:s", (time() - 60 * 0)).gettimeofday()["dsttime"], 0, -1);
@@ -65,9 +65,17 @@ class Kernel extends ConsoleKernel
                     $shortURLObject = $builder->destinationUrl("https://sms.salesdoc.uz/feedback/".$call['id']."___".$hash)->make();
                     $shortURL = $shortURLObject->default_short_url;
 
+					if($call['gateway'] == '712075995'){
+						$mess = "Sales Doctor kompaniyasi sizning 712075995 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
+					}elseif($call['gateway'] == '781138585'){
+						$mess = "Ibox kompaniyasi sizning 781136565 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
+					}else{
+						$mess = "iDokon kompaniyasi sizning 781136022 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
+					}
+
                     array_push($messages, [
                         'phone' => $call['client_telephone'],
-                        'txt' => "Sales Doctor kompaniyasi sizning 712075995 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL.""
+                        'txt' => $mess
                     ]);
                 }
             }

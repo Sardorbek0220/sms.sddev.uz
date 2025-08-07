@@ -4,7 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ asset('assets/logo.png')}}">
-  <title>Sales Doctor</title>
+  <title>
+    @if($call->gateway == '712075995')
+      Sales Doctor 
+    @elseif($call->gateway == '781138585')
+      Ibox
+    @else
+      Ido'kon
+    @endif
+  </title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -25,7 +33,7 @@
                 <h4 class="alert-heading">Юборилди !</h4>
                 <p>Таклиф хамда мурожатингиз учун ташаккур.</p>
                 <hr>
-                <p class="mb-0">Sales Doctor</p>
+                <p class="mb-0">@if($call->gateway == '712075995') Sales Doctor @elseif($call->gateway == '781138585') Ibox @else Ido'kon @endif</p>
             </div>
         </div>
     </div>
@@ -35,7 +43,7 @@
       <div class="col-md-12 mt-5">
         <div class="card">
           <div class="card-header beforeCheck">
-            <h3 class="card-title">Sales Doctor компанияси сизнинг 712079559 номер орқали сўнгги мурожаатингизга кўрсатилган хизматни баҳолашингизни сўрайди.</h3>
+            <h3 class="card-title">@if($call->gateway == '712075995') Sales Doctor @elseif($call->gateway == '781138585') Ibox @else Ido'kon @endif компанияси сизнинг {{$call->gateway}} номер орқали сўнгги мурожаатингизга кўрсатилган хизматни баҳолашингизни сўрайди.</h3>
           </div>
           <div class="card-header afterCheck" style="display: none;">
             <h3 class="card-title">Изох колдириш</h3>
