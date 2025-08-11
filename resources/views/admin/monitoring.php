@@ -284,6 +284,7 @@
 			<select style="margin-top: 2%; margin-left: 40%; width: 17%; display:inline-block" class="form-control" v-model="company" @change="set_company()">
 				<option value="1">Sales Doctor</option>
 				<option value="2">Ibox</option>
+				<option value="3">Ido'kon</option>
 			</select>
 			<span style="display:inline-block; margin-left:2%; background:gainsboro; padding:0.5%;">Посл. обновление: {{today.toLocaleTimeString()}}</span>
       	</v-col>
@@ -632,7 +633,7 @@
 	  	data: {
 			fifo_num: localStorage.getItem('fifo_num') ?? "5201",
 			tel_num: localStorage.getItem('tel_num') ?? "712075995",
-			company: localStorage.getItem('tel_num') == "781138585" ? 2 : 1,
+			company: localStorage.getItem('tel_num') == "781138585" ? 2 : (localStorage.getItem('tel_num') == "781136022" ? 3 : 1),
 			filters: false,
 	  		loading: false,
 	  		today: new Date(),
@@ -754,6 +755,9 @@
 				if (this.company == 2) {
 					this.fifo_num = "5202";
 					this.tel_num = "781138585";
+				}else if (this.company == 3) {
+					this.fifo_num = "5200";
+					this.tel_num = "781136022";
 				}else{
 					this.fifo_num = "5201";
 					this.tel_num = "712075995";

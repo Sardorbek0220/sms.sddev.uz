@@ -134,6 +134,7 @@
           <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
             <option value="1">Sales Doctor</option>
             <option value="2">Ibox</option>
+            <option value="3">Ido'kon</option>
           </select>
           <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
             <option selected value="">Все операторы</option>
@@ -325,9 +326,9 @@
     el: '#app',
     vuetify: new Vuetify(),
     data: {
-      company: 1,
-      fifo_num: "5201",
-			tel_num: "712075995",
+      company: localStorage.getItem('tel_num') == "781138585" ? 2 : (localStorage.getItem('tel_num') == "781136022" ? 3 : 1),
+      fifo_num: localStorage.getItem('fifo_num') ?? "5201",
+			tel_num: localStorage.getItem('tel_num') ?? "712075995",
       show_columns: [],
       columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "Скрипт", "Продукт", "Решения", "Обучение", "Онлайн-время", "Общий"],
       operator_id: '',
@@ -454,13 +455,18 @@
 				if (this.company == 2) {
 					this.fifo_num = "5202";
 					this.tel_num = "781138585";
+				}else if (this.company == 3) {
+					this.fifo_num = "5200";
+					this.tel_num = "781136022";
 				}else{
 					this.fifo_num = "5201";
 					this.tel_num = "712075995";
 				}
 
-				await this.TRIGGER();
+        localStorage.setItem('fifo_num', this.fifo_num);
+				localStorage.setItem('tel_num', this.tel_num);
 
+				location.reload();
 			},
       async getScores(){
         await axios.get('score').then(response => {

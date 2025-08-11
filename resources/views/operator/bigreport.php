@@ -135,6 +135,7 @@
                 <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
                     <option value="1">Sales Doctor</option>
                     <option value="2">Ibox</option>
+                    <option value="3">Ido'kon</option>
                 </select>
                 <input class="form-control" type="date" v-model="from_date" style="display: inline;width: auto;">
                 <input class="form-control" type="date" v-model="to_date" style="display: inline;width: auto;">
@@ -262,74 +263,74 @@ new Vue({
     el: '#app',
     vuetify: new Vuetify(),
     data: {
-      company: 1,
-      fifo_num: "5201",
-	  tel_num: "712075995",
-      show_columns: [],
-      columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "Скрипт", "Продукт", "Решения", "Обучение", "Онлайн-время", "Общий"],
-      day: '',
-      loading: false,
-      today: new Date(),
-      interval:null,
-      calls: [],
-      users: [],
-      inbounds_5995: [],
-      inTalk_5995: [], 
-      inSumTalk_5995: null,
-      inGetProg_5995: null,
-      outbounds_5995: [],
-      outTalk_5995: [],
-      outSumTalk_5995:null,
-      outGetProg_5995: null,
-      inreports_5995: [],
-      outreports_5995: [],
-      real_reports_5995: [],
-      fifos: [],
-      users_5995: [],
-      notTalk_5995: [],
-      notAnswer_5995: [],
-      feedbacks: {
-        mark0: {},
-        mark3: {}
-      },
-      bigData: [],
-      bigDataPeriod: [],
-      oper_times: {},
-      availableOperators: [],
-      oper_misseds: {},
-      from_date: "",
-      to_date: "",
-      unknownClients: {
-        inbound: {},
-        outbound: {}
-      },
-      extra: {
-        likes: {},
-        products: {}
-      },
-      worklyData: {},
-      worklySchedule: {},
-      worklyOperators: {},
-      scores: {},
-      colors: [
-        '#6add6a',
-        '#6add6a',
-        '#6add6a',
-        '#f1dc48',
-        '#f1dc48',
-        '#f1dc48',
-        '#f19648',
-        '#f19648',
-        '#f19648',
-        '#f16363',
-        '#f16363',
-        '#f16363',
-        '#f16363',
-        '#f16363',
-        '#f16363',
-        '#f16363',
-      ],
-      training: {}
+        fifo_num: localStorage.getItem('fifo_num') ?? "5201",
+        tel_num: localStorage.getItem('tel_num') ?? "712075995",
+        company: localStorage.getItem('tel_num') == "781138585" ? 2 : (localStorage.getItem('tel_num') == "781136022" ? 3 : 1),
+        show_columns: [],
+        columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "Скрипт", "Продукт", "Решения", "Обучение", "Онлайн-время", "Общий"],
+        day: '',
+        loading: false,
+        today: new Date(),
+        interval:null,
+        calls: [],
+        users: [],
+        inbounds_5995: [],
+        inTalk_5995: [], 
+        inSumTalk_5995: null,
+        inGetProg_5995: null,
+        outbounds_5995: [],
+        outTalk_5995: [],
+        outSumTalk_5995:null,
+        outGetProg_5995: null,
+        inreports_5995: [],
+        outreports_5995: [],
+        real_reports_5995: [],
+        fifos: [],
+        users_5995: [],
+        notTalk_5995: [],
+        notAnswer_5995: [],
+        feedbacks: {
+            mark0: {},
+            mark3: {}
+        },
+        bigData: [],
+        bigDataPeriod: [],
+        oper_times: {},
+        availableOperators: [],
+        oper_misseds: {},
+        from_date: "",
+        to_date: "",
+        unknownClients: {
+            inbound: {},
+            outbound: {}
+        },
+        extra: {
+            likes: {},
+            products: {}
+        },
+        worklyData: {},
+        worklySchedule: {},
+        worklyOperators: {},
+        scores: {},
+        colors: [
+            '#6add6a',
+            '#6add6a',
+            '#6add6a',
+            '#f1dc48',
+            '#f1dc48',
+            '#f1dc48',
+            '#f19648',
+            '#f19648',
+            '#f19648',
+            '#f16363',
+            '#f16363',
+            '#f16363',
+            '#f16363',
+            '#f16363',
+            '#f16363',
+            '#f16363',
+        ],
+        training: {}
     },
     async mounted () {
       var day = ("0" + this.today.getDate()).slice(-2);
@@ -390,13 +391,18 @@ new Vue({
             if (this.company == 2) {
                 this.fifo_num = "5202";
                 this.tel_num = "781138585";
+            }else if (this.company == 3) {
+                this.fifo_num = "5200";
+                this.tel_num = "781136022";
             }else{
                 this.fifo_num = "5201";
                 this.tel_num = "712075995";
             }
 
-            await this.TRIGGER();
+            localStorage.setItem('fifo_num', this.fifo_num);
+            localStorage.setItem('tel_num', this.tel_num);
 
+            location.reload();
         },
         async getScores(){
             await axios.get('score').then(response => {
