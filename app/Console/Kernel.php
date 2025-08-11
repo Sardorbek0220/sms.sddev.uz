@@ -68,7 +68,7 @@ class Kernel extends ConsoleKernel
 					if($call['gateway'] == '712075995'){
 						$mess = "Sales Doctor kompaniyasi sizning 712075995 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
 					}elseif($call['gateway'] == '781138585'){
-						$mess = "Ibox kompaniyasi sizning 781136565 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
+						$mess = "Ibox kompaniyasi sizning 781138585 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
 					}else{
 						$mess = "iDokon kompaniyasi sizning 781136022 nomer orqali so'nggi murojaatingizni baholashingizni so'raydi. ".$shortURL."";
 					}
