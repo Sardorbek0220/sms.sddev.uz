@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::get('monitoring/keys', [ReportController::class, 'monitoringKeys']);
+Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
+Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
+Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
+Route::get('monitoring/operatorCondition', [ReportController::class, 'monitoringOperatorCondition']);
+Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);

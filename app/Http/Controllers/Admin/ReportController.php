@@ -170,6 +170,16 @@ class ReportController extends Controller
         return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'footReportsByPercent', 'Total', 'from_date', 'to_date'));
     }
 
+    public function monitoringKeys()
+    {
+        $auth = json_decode(file_get_contents("configs/auth.txt"));
+        $key_and_id = $auth->key_id.":".$auth->key;
+
+        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
+
+        return Response::json(['key_and_id' => $key_and_id, 'auth_key' => $auth_key]);
+    }
+
     public function monitoring()
     {
         $auth = json_decode(file_get_contents("configs/auth.txt"));
