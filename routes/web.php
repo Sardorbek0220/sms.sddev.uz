@@ -50,6 +50,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('scores', 'ScoreController');
     Route::resource('exceptions', 'ExceptionController');
     Route::resource('requestTypes', 'RequestTypeController');
+    Route::resource('holidays', 'HolidayController');
 
     Route::get('tablereport', [TablereportController::class, 'index'])->name('admin.tablereport');
     Route::get('bigreport', [BigreportController::class, 'index'])->name('admin.bigreport');

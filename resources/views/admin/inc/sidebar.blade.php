@@ -45,14 +45,14 @@
             </p>
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a href="{{ route('admin.live') }}" class="nav-link">
             <i class="nav-icon fas fa-plane"></i>
             <p>
               {{__('Онлайн / Офлайн')}}
             </p>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-chart-bar"></i>
@@ -112,6 +112,14 @@
                 <i class="nav-icon fas fa-history"></i>
                 <p>
                   {{__('Исключения')}}
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('holidays.index') }}" class="nav-link" style="background: dimgrey;">
+                <i class="nav-icon fas fa-gift"></i>
+                <p>
+                  {{__('Праздники')}}
                 </p>
               </a>
             </li>

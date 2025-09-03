@@ -11,6 +11,7 @@ use App\Operator;
 use App\Feedback;
 use App\Operator_time;
 use App\Unknown_client;
+use App\Holiday;
 use App\Score;
 use App\Exception;
 
@@ -296,10 +297,15 @@ class ReportController extends Controller
         foreach ($times as $ope) {
             $array[] = ['uid' => $ope->uid, 'in' => $ope->timestamp_reg, 'out' => $ope->timestamp_unreg === null ? time() : $ope->timestamp_unreg];
         }
-        
         $oper_times = $this->calculate_total_time($array);
 
-        return Response::json(['oper_times' => $oper_times]);
+        $holidayModels = Holiday::select('date')->cursor();
+        $holidays = [];
+        foreach ($holidayModels as $h) {
+            $holidays[] = $h['date'];
+        }
+
+        return Response::json(['oper_times' => $oper_times, 'holidays' => $holidays]);
     }
 
     public function monitoringUnknownClients(Request $request)
