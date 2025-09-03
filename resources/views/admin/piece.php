@@ -309,6 +309,7 @@ new Vue({
       bigData: [],
       bigDataPeriod: [],
       oper_times: {},
+      holidays: [],
       availableOperators: [],
       oper_misseds: {},
       from_date: "",
@@ -456,7 +457,8 @@ new Vue({
       async getOperatorTime(){
         await axios.get('monitoring/operatorTime', {params: {from: this.from_date, to: this.to_date}}).then(response => {
           if (response.status == 200) {
-            this.oper_times = response.data.oper_times			
+            this.oper_times = response.data.oper_times	
+            this.holidays = response.data.holidays							
           }
         });	
       }, 
@@ -523,12 +525,27 @@ new Vue({
         });	
       },
       checkDateHours(timestamp){
-        let date = new Date(timestamp * 1000),
-          hours = date.getHours();
-        if (hours >= 9 && hours <= 20) {
-          return 1
+        let date = new Date(timestamp * 1000)	
+        let formattedDate = date.toLocaleDateString('en-CA')							
+        let	hours = date.getHours()
+        let day = date.getDay()
+        
+        if (this.holidays.includes(formattedDate)) {
+            
+          if (hours >= 9 && hours < 18) {
+            return 1
+          }else{
+            return 0
+          }
+            
         }else{
-          return 0
+
+          if ( hours >= 9 && ( (hours < 20 && !['0','6'].includes(day)) || (hours < 18 && ['0','6'].includes(day)) ) ) {
+            return 1
+          }else{
+            return 0
+          }
+
         }
       },
       async get_users_feedbacks(){
