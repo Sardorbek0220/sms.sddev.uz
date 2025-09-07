@@ -975,7 +975,7 @@
 					
 				}else{
 
-					if ( hours >= 9 && ( (hours < 20 && !['0','6'].includes(day)) || (hours < 18 && ['0','6'].includes(day)) ) ) {
+					if ( hours >= 9 && ( (hours < 20 && ![0,6].includes(day)) || (hours < 18 && [0,6].includes(day)) ) ) {
 						return 1
 					}else{
 						return 0
