@@ -151,7 +151,7 @@
 										</th>
 										<th class="text-left">Сегодня</th>
 										<th class="text-left">На этой неделе</th>
-										<th class="text-left">В этом месяце</th>
+										<th class="text-left">В этом месяце (период)</th>
 										
 									</tr>
 								</thead>
@@ -232,7 +232,7 @@
 										</th>
 										<th class="text-left">Сегодня</th>
 										<th class="text-left">На этой неделе</th>
-										<th class="text-left">В этом месяце</th>
+										<th class="text-left">В этом месяце (период)</th>
 										
 									</tr>
 								</thead>
@@ -713,15 +713,20 @@
 	  	created(){	
 
 			this.interval = setInterval(async () =>{
-		      	await this.get_date()
-				await this.get_users_feedbacks()
-				await this.getOperatorTime()
-				this.getInfos_5995() 
-				this.getReport_5995()
-				await this.fifoToReport()
-				this.set_data_from_date()
-				if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
-					this.get_by_filter()
+				let fromDate = Math.floor(new Date(this.from_date).getTime() / 1000);
+				let toDate = Math.floor((new Date(this.to_date).getTime() / 1000)+86400);
+				let todayDate = Math.floor(new Date(this.today).getTime() / 1000);
+				if (todayDate >= fromDate && todayDate <= toDate) {
+					await this.get_date()
+					await this.get_users_feedbacks()
+					await this.getOperatorTime()
+					this.getInfos_5995() 
+					this.getReport_5995()
+					await this.fifoToReport()
+					this.set_data_from_date()
+					if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
+						this.get_by_filter()
+					}
 				}
 			},30000)
 
@@ -867,17 +872,42 @@
 							talking_time: 0
 						}
 
+						this.monthData = {
+							answered: 0,
+							missed: 0,
+							missed_in: 0,
+							talking_time: 0
+						}
+						this.out_monthData = {
+							answered: 0,
+							missed: 0,
+							talking_time: 0
+						}
+
 						for (const datum of response.data) {
 							if (datum.accountcode == 'inbound') {
 
 								this.bigDataPeriod.talking_time += datum.user_talk_time
+								this.monthData.talking_time += datum.user_talk_time
 								if (datum.user_talk_time > 0) {
 									this.bigDataPeriod.answered += 1;
+									this.monthData.answered += 1;
 								}else{
+									let checkedDate = this.checkDateHours(datum.start_stamp);
+
 									this.bigDataPeriod.missed += 1;
-									this.bigDataPeriod.missed_in += this.checkDateHours(datum.start_stamp)
+									this.bigDataPeriod.missed_in += checkedDate;
+									this.monthData.missed += 1;
+									this.monthData.missed_in += checkedDate;
 								}
 
+							}else{
+								this.out_monthData.talking_time += datum.user_talk_time
+								if (datum.user_talk_time > 0) {
+									this.out_monthData.answered += 1;
+								}else{
+									this.out_monthData.missed += 1;
+								}
 							}
 						}
 					}
