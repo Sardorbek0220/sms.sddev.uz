@@ -24,7 +24,7 @@
                     <div class="col-12 col-md-5 form-group">
                     </div>
                     <div class="col-12 col-md-2 form-group">
-                      <label for="type">Types</label>
+                      <label for="type">Типы</label>
                       <select class="form-control" name="type" id="type">
                         <option value="1111">Все</option>
                         @foreach($status as $id => $s)
@@ -33,31 +33,31 @@
                       </select>
                     </div>
                     <div class="col-12 col-md-2 form-group">
-                      <label for="from_date">From</label>
+                      <label for="from_date">От</label>
                       <input type="date" class="form-control" id="from_date" name="from_date" value="{{$from_date}}">
                     </div>
                     <div class="col-12 col-md-2 form-group">
-                      <label for="to_date">To</label>
+                      <label for="to_date">До</label>
                       <input type="date" class="form-control" id="to_date" name="to_date" value="{{$to_date}}">
                     </div>
                     <div class="col-12 col-md-1 form-group">
                       <label for="filter">&nbsp;</label><br>
-                      <button type="submit" class="btn btn-success" id="filter" style="width: 100%;">Filter</button>
+                      <button type="submit" class="btn btn-success" id="filter" style="width: 100%;">Фильтр</button>
                     </div>
                   </div>
                 </form>
               </div>
               <div class="card-body">
-                <table class="table table-bordered">
+                <table class="table table-bordered" id="feedbacks">
                   <thead>
                     <tr>
                       <th style="width: 2%">#</th>
-                      <th>{{__('Operator')}}</th>
-                      <th>{{__('Client')}}</th>
-                      <th>{{__('Complaint')}}</th>
-                      <th>{{__('Response')}}</th>
+                      <th>{{__('Оператор')}}</th>
+                      <th>{{__('Клиент')}}</th>
+                      <th>{{__('Комментарий')}}</th>
+                      <th>{{__('Ответ')}}</th>
                       <th>{{__('ID')}}</th>
-                      <th>{{__('Date')}}</th>
+                      <th>{{__('Дата')}}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -81,17 +81,6 @@
                     @endforeach
                   </tbody>
                 </table>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer clearfix">
-                <ul class="pagination pagination-sm m-0 float-right">
-                {!! $allFeedback->appends(request()->query())->links() !!}
-                  <!-- <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item"><a class="page-link" href="#">&raquo;</a></li> -->
-                </ul>
               </div>
             </div>
           </div>

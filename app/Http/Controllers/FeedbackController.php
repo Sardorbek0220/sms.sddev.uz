@@ -184,7 +184,7 @@ class FeedbackController extends Controller
             ->when(($request->type != "1111" && !empty($request->type)), function($query) use($request){
                 return $query->where('solved', $request->type);
             })
-            ->paginate(10);
+            ->get();
         return view('admin.feedback', compact('allFeedback', 'from_date', 'to_date', 'status'));
     }
 
