@@ -48,34 +48,50 @@
                               @endforeach
                           </select>
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-2">
                             <label for="">Ответ</label>
                             <input type="text" class="form-control" name="response" placeholder="Response" value="<?=$product->response?>">
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-2">
                             <label for="">Коммент.</label>
                             <input type="text" class="form-control" name="comment" placeholder="Comment" value="<?=$product->comment?>">
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-2">
                             <label for="">Дата</label>
                             <input type="date" class="form-control" name="date" value="<?=date_format(date_create($product->date), 'Y-m-d')?>">
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-3">
                             <label for="">Скрипт</label>
                             <input type="number" class="form-control" name="script" placeholder="Script" min="0" max="10" value="<?=$product->script?>">
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-3">
                             <label for="">Продукт</label>
                             <input type="number" class="form-control" name="product" placeholder="Product" min="0" max="10" value="<?=$product->product?>">
                         </div>
-                        <div class="col-sm-1">
+                        <div class="col-sm-2">
                             <label for="">Решения</label>
                             <input type="number" class="form-control" name="solution" placeholder="Solution" min="0" max="10" value="<?=$product->solution?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Принцип 1</label>
+                            <input type="number" class="form-control" name="principle_1" placeholder="Принцип 1" min="0" max="10" value="<?=$product->principle_1?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Принцип 2</label>
+                            <input type="number" class="form-control" name="principle_2" placeholder="Принцип 2" min="0" max="10" value="<?=$product->principle_2?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Принцип 3</label>
+                            <input type="number" class="form-control" name="principle_3" placeholder="Принцип 3" min="0" max="10" value="<?=$product->principle_3?>">
+                        </div>
+                        <div class="col-sm-1">
+                            <label for="">Принцип 4</label>
+                            <input type="number" class="form-control" name="principle_4" placeholder="Принцип 4" min="0" max="10" value="<?=$product->principle_4?>">
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранить</button>
                   <a href="{{ route('products.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>

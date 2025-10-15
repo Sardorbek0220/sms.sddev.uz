@@ -80,7 +80,11 @@ class ProductController extends Controller
                 'date' => $datum['date'],
                 'script' => $datum['script'],
                 'product' => $datum['product'],
-                'solution' => $datum['solution'] ?? 0
+                'solution' => $datum['solution'] ?? 0,
+                'principle_1' => $datum['principle_1'] ?? 0,
+                'principle_2' => $datum['principle_2'] ?? 0,
+                'principle_3' => $datum['principle_3'] ?? 0,
+                'principle_4' => $datum['principle_4'] ?? 0
             ]);
         }
         
@@ -136,7 +140,11 @@ class ProductController extends Controller
             'date' => $request->date,
             'script' => $request->script,
             'product' => $request->product,
-            'solution' => $request->solution ?? 0
+            'solution' => $request->solution ?? 0,
+            'principle_1' => $request->principle_1 ?? 0,
+            'principle_2' => $request->principle_2 ?? 0,
+            'principle_3' => $request->principle_3 ?? 0,
+            'principle_4' => $request->principle_4 ?? 0
         ]);
 
         return redirect()->route('products.index');

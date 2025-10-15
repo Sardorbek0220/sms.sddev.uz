@@ -46,29 +46,41 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2">
                         <input type="text" class="form-control" name="data[0][response]" placeholder="Ответ">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2">
                         <input type="text" class="form-control" name="data[0][comment]" placeholder="Комментарий">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2">
                         <input type="date" class="form-control" name="data[0][date]" value="<?=date('Y-m-d')?>">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-3 mt-2">
                         <input type="number" class="form-control" name="data[0][script]" placeholder="Скрипт" min="0" max="10">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-3 mt-2">
                         <input type="number" class="form-control" name="data[0][product]" placeholder="Продукт" min="0" max="10">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][solution]" placeholder="Оценка решения" min="0" max="10">
+                    </div>
+                    <div class="col-sm-1 mt-2">
+                        <input type="number" class="form-control" name="data[0][principle_1]" placeholder="Принцип 1" min="0" max="10">
+                    </div>
+                    <div class="col-sm-1 mt-2">
+                        <input type="number" class="form-control" name="data[0][principle_2]" placeholder="Принцип 2" min="0" max="10">
+                    </div>
+                    <div class="col-sm-1 mt-2">
+                        <input type="number" class="form-control" name="data[0][principle_3]" placeholder="Принцип 3" min="0" max="10">
+                    </div>
+                    <div class="col-sm-1 mt-2">
+                        <input type="number" class="form-control" name="data[0][principle_4]" placeholder="Принцип 4" min="0" max="10">
                     </div>
                   </div>
                   <button type="button" class="btn btn-success float-left mt-2" id="appendValues">+</button>
                 </div>
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success float-right ml-2">Сохранять</button>
+                  <button type="submit" class="btn btn-success float-right ml-2">Сохранить</button>
                   <a href="{{ route('products.index') }}" class="btn btn-default float-right">Отмена</a>
                 </div>
               </form>
@@ -114,23 +126,35 @@ $("#appendValues").click(function(){
         <?}?>
       </select>
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][response]" placeholder="Ответ">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][comment]" placeholder="Комментарий">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="date" class="form-control" name="data[`+n+`][date]" value="<?=date('Y-m-d')?>">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-3 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][script]" placeholder="Скрипт" min="0" max="10">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-3 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][product]" placeholder="Продукт" min="0" max="10">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][solution]" placeholder="Оценка решения" min="0" max="10">
+    </div>
+    <div class="col-sm-1 mt-2">
+        <input type="number" class="form-control" name="data[`+n+`][principle_1]" placeholder="Принцип 1" min="0" max="10">
+    </div>
+    <div class="col-sm-1 mt-2">
+        <input type="number" class="form-control" name="data[`+n+`][principle_2]" placeholder="Принцип 2" min="0" max="10">
+    </div>
+    <div class="col-sm-1 mt-2">
+        <input type="number" class="form-control" name="data[`+n+`][principle_3]" placeholder="Принцип 3" min="0" max="10">
+    </div>
+    <div class="col-sm-1 mt-2">
+        <input type="number" class="form-control" name="data[`+n+`][principle_4]" placeholder="Принцип 4" min="0" max="10">
     </div>
   `);
 });
