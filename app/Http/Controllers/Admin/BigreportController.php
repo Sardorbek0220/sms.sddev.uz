@@ -61,7 +61,16 @@ class BigreportController extends Controller
             ->get();
 
         $products = DB::table('products')
-            ->select('operator', DB::raw('AVG(script) AS avg_script'), DB::raw('AVG(product) AS avg_product'), DB::raw('AVG(solution) AS avg_solution'))
+            ->select(
+                'operator', 
+                DB::raw('AVG(script) AS avg_script'), 
+                DB::raw('AVG(product) AS avg_product'), 
+                DB::raw('AVG(solution) AS avg_solution'),
+                DB::raw('AVG(principle_1) AS avg_p1'),
+                DB::raw('AVG(principle_2) AS avg_p2'),
+                DB::raw('AVG(principle_3) AS avg_p3'),
+                DB::raw('AVG(principle_4) AS avg_p4')
+            )
             ->whereBetween('date', [$from, $to])
             ->groupByRaw('operator')
             ->get();
