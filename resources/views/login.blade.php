@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="{{ asset('assets/logo.png')}}">
-  <title>Sales Doctor | Log in</title>
+  <title>Sales Doctor | Войти</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class="input-group mb-3">
-          <input type="password" id="password" name="password" class="form-control" placeholder="Password">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Пароль">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
@@ -42,7 +42,7 @@
         </div>
         <div class="row">
           <div class="col-4">
-            <button type="submit" class="btn btn-primary btn-block">{{__('Sign In')}}</button>
+            <button type="submit" class="btn btn-primary btn-block">{{__('Войти')}}</button>
           </div>
           <!-- /.col -->
         </div>
