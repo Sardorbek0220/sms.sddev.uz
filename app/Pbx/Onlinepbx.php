@@ -77,7 +77,8 @@ class Onlinepbx {
 
 			$data = json_decode($response, true);
 			if ($data["status"] == "0") {
-				if ($data["isNotAuth"]) {
+				info($data);
+				if (isset($data["isNotAuth"])) {
 					$token = self::getNewToken();
 					file_put_contents($this->tokenFile, $token);
 				}
