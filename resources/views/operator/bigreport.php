@@ -112,10 +112,10 @@
 			display: none;
 		}
 
-        /* .link:hover{
+        .link:hover{
             cursor: pointer;
             text-decoration: underline;
-        } */
+        }
 
         table{
             font-weight: 700;
@@ -193,9 +193,13 @@
               <th v-show="!show_columns.includes('👍 отзывы')" class="text-center">👍 отзывы</th>
               <th v-show="!show_columns.includes('Нравится')" class="text-center">Нравится</th>
               <th v-show="!show_columns.includes('Отток')" class="text-center">Отток</th>
-              <th v-show="!show_columns.includes('Скрипт')" class="text-center">Скрипт</th>
-              <th v-show="!show_columns.includes('Продукт')" class="text-center">Продукт</th>
-              <th v-show="!show_columns.includes('Решения')" class="text-center">Решения</th>
+              <!-- <th v-show="!show_columns.includes('Скрипт')" class="text-center">Скрипт</th> -->
+              <!-- <th v-show="!show_columns.includes('Продукт')" class="text-center">Продукт</th> -->
+              <!-- <th v-show="!show_columns.includes('Решения')" class="text-center">Решения</th> -->
+              <th v-show="!show_columns.includes('П1')" class="text-center">П1</th>
+              <th v-show="!show_columns.includes('П2')" class="text-center">П2</th>
+              <th v-show="!show_columns.includes('П3')" class="text-center">П3</th>
+              <th v-show="!show_columns.includes('П4')" class="text-center">П4</th>
               <th v-show="!show_columns.includes('Обучение')" class="text-center">Обучение</th>
               <th v-show="!show_columns.includes('Онлайн-время')" class="text-center" width="160px">Онлайн-время</th>
               <th v-show="!show_columns.includes('Общий')" class="text-center">Общий</th>
@@ -203,23 +207,27 @@
           </thead>
           <tbody style="border: solid 1px grey;">
             <tr v-for="(report, index) in users_5995.filter((u) => u.num != '')">
-              <td v-show="!show_columns.includes('Имя')" class="link text-left" :style="{backgroundColor: colors[index]}"><span :style="{color: report.color ?? '#646161'}">{{ report.name }}</span></td>
-              <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
-              <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center link" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
-              <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
-              <td v-show="!show_columns.includes('Пропущ. в раб. время')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.missed }}</td>
-              <td v-show="!show_columns.includes('Вход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
-              <td v-show="!show_columns.includes('Исход. звон')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
-              <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
-              <td v-show="!show_columns.includes('Всего отзывов')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
-              <td v-show="!show_columns.includes('👍 отзывы')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
-              <td v-show="!show_columns.includes('Нравится')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
-              <td v-show="!show_columns.includes('Отток')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
-              <td v-show="!show_columns.includes('Скрипт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td>
-              <td v-show="!show_columns.includes('Продукт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td>
-              <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td>
-              <td v-show="!show_columns.includes('Обучение')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.training }}</td>
-              <td v-show="!show_columns.includes('Онлайн-время')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
+              <td v-show="!show_columns.includes('Имя')" class="text-left" :style="{backgroundColor: colors[index]}"><span :style="{color: report.color ?? '#646161'}">{{ report.name }}</span></td>
+              <td v-show="!show_columns.includes('⏰ (вовремя)')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.ontime }}</td>
+              <td v-show="!show_columns.includes('⏰ (поздно)')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.outtime }}</td>
+              <td v-show="!show_columns.includes('Перс. пропущ. звон')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.personal_missed }}</td>
+              <td v-show="!show_columns.includes('Пропущ. в раб. время')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.missed }}</td>
+              <td v-show="!show_columns.includes('Вход. звон')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
+              <td v-show="!show_columns.includes('Исход. звон')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
+              <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
+              <td v-show="!show_columns.includes('Всего отзывов')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
+              <td v-show="!show_columns.includes('👍 отзывы')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
+              <td v-show="!show_columns.includes('Нравится')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
+              <td v-show="!show_columns.includes('Отток')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
+              <!-- <td v-show="!show_columns.includes('Скрипт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td> -->
+              <!-- <td v-show="!show_columns.includes('Продукт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.product }}</td> -->
+              <!-- <td v-show="!show_columns.includes('Решения')" class="link text-center" :style="{backgroundColor: colors[index]}">{{ report.solution }}</td> -->
+              <td v-show="!show_columns.includes('П1')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.p1 }}</td>
+              <td v-show="!show_columns.includes('П2')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.p2 }}</td>
+              <td v-show="!show_columns.includes('П3')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.p3 }}</td>
+              <td v-show="!show_columns.includes('П4')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('product')">{{ report.p4 }}</td>
+              <td v-show="!show_columns.includes('Обучение')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.training }}</td>
+              <td v-show="!show_columns.includes('Онлайн-время')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.online_time }}</td>
               <td v-show="!show_columns.includes('Общий')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_point.toFixed(1) }}</td>
             </tr>
           </tbody>
@@ -267,7 +275,7 @@ new Vue({
         tel_num: localStorage.getItem('tel_num') ?? "712075995",
         company: localStorage.getItem('tel_num') == "781138585" ? 2 : (localStorage.getItem('tel_num') == "781136022" ? 3 : 1),
         show_columns: [],
-        columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "Скрипт", "Продукт", "Решения", "Обучение", "Онлайн-время", "Общий"],
+        columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "П1", "П2", "П3", "П4", "Обучение", "Онлайн-время", "Общий"],
         day: '',
         loading: false,
         today: new Date(),
@@ -886,9 +894,14 @@ new Vue({
                     reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
                     reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
                     reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
-                    reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
-                    reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
-                    reports_support[a].solution = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_solution).toFixed(1)) : 0
+                    // reports_support[a].script = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_script).toFixed(1)) : 0
+                    // reports_support[a].product = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_product).toFixed(1)) : 0
+                    // reports_support[a].solution = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_solution).toFixed(1)) : 0
+                    reports_support[a].p1 = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_p1).toFixed(1)) : 0
+                    reports_support[a].p2 = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_p2).toFixed(1)) : 0
+                    reports_support[a].p3 = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_p3).toFixed(1)) : 0
+                    reports_support[a].p4 = this.extra.products[reports_support[a].num] ? parseFloat(parseFloat(this.extra.products[reports_support[a].num].avg_p4).toFixed(1)) : 0
+                    
                     reports_support[a].training = this.calcPoints(parseFloat(this.training[reports_support[a].num] ?? 0), 'training')
                     reports_support[a].online_time = this.calcPoints((this.oper_times[reports_support[a].num] ?? 0)/3600, 'online_time')
 
@@ -899,7 +912,7 @@ new Vue({
                     reports_support[a].total_point = 
                         reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound + reports_support[a].total_feedback 
                         + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
-                        + reports_support[a].script + reports_support[a].product + reports_support[a].solution + reports_support[a].training +
+                        + reports_support[a].p1 + reports_support[a].p2 + reports_support[a].p3 + reports_support[a].p4 + reports_support[a].training +
                         + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
                     
                     set_support.push(reports_support[a])
@@ -989,17 +1002,20 @@ new Vue({
         },
         calcPoints(value, key){
             var scoress = this.scores[key]
-            if (scoress.value) {
-            return parseFloat((value * parseFloat(scoress.value)).toFixed(1));
-            }else{
-            var point = 0
-            for (const score of scoress) {            
-                if (parseFloat(score.from) <= value && parseFloat(score.to) >= value) {
-                point = parseFloat((value * parseFloat(score.value)).toFixed(1))
-                break;
-                }
+            if (!scoress) {
+                return 0;
             }
-            return point;
+            if (scoress.value) {
+                return parseFloat((value * parseFloat(scoress.value)).toFixed(1));
+            }else{
+                var point = 0
+                for (const score of scoress) {            
+                    if (parseFloat(score.from) <= value && parseFloat(score.to) >= value) {
+                        point = parseFloat((value * parseFloat(score.value)).toFixed(1))
+                        break;
+                    }
+                }
+                return point;
             }
         },
         toReportTable(script){

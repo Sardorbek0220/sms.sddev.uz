@@ -22,23 +22,23 @@
                 @csrf
                 <div class="card-body">
                   <div class="form-group row">
-                    <div class="col-sm-2">
+                    <div class="col-sm-2 mt-2">
                       <select class="form-control" name="data[0][operator]">
                         @foreach($operators as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                         @endforeach
                       </select>
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2 mt-2">
                         <input type="text" class="form-control" name="data[0][client_phone]" placeholder="Телефон клиента">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2 mt-2">
                         <input type="text" class="form-control" name="data[0][audio_url]" placeholder="URL-адрес аудио">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2 mt-2">
                         <input type="text" class="form-control" name="data[0][requestt]" placeholder="Запрос">
                     </div>
-                    <div class="col-sm-1">
+                    <div class="col-sm-2 mt-2">
                       <select class="form-control" name="data[0][request_type_id]">
                         <option value="">Типы запросов</option>
                         @foreach($request_types as $type)
@@ -46,16 +46,16 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="text" class="form-control" name="data[0][response]" placeholder="Ответ">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="text" class="form-control" name="data[0][comment]" placeholder="Комментарий">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="date" class="form-control" name="data[0][date]" value="<?=date('Y-m-d')?>">
                     </div>
-                    <div class="col-sm-3 mt-2">
+                    <!-- <div class="col-sm-3 mt-2">
                         <input type="number" class="form-control" name="data[0][script]" placeholder="Скрипт" min="0" max="10">
                     </div>
                     <div class="col-sm-3 mt-2">
@@ -63,17 +63,17 @@
                     </div>
                     <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][solution]" placeholder="Оценка решения" min="0" max="10">
-                    </div>
-                    <div class="col-sm-1 mt-2">
+                    </div> -->
+                    <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][principle_1]" placeholder="Принцип 1" min="0" max="10">
                     </div>
-                    <div class="col-sm-1 mt-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][principle_2]" placeholder="Принцип 2" min="0" max="10">
                     </div>
-                    <div class="col-sm-1 mt-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][principle_3]" placeholder="Принцип 3" min="0" max="10">
                     </div>
-                    <div class="col-sm-1 mt-2">
+                    <div class="col-sm-2 mt-2">
                         <input type="number" class="form-control" name="data[0][principle_4]" placeholder="Принцип 4" min="0" max="10">
                     </div>
                   </div>
@@ -109,16 +109,16 @@ $("#appendValues").click(function(){
         <?}?>
       </select>
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][client_phone]" placeholder="Телефон клиента">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][audio_url]" placeholder="URL-адрес аудио">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="text" class="form-control" name="data[`+n+`][requestt]" placeholder="Запрос">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
       <select class="form-control" name="data[`+n+`][request_type_id]">
         <option value="">Типы запросов</option>
         <?foreach($request_types as $type){?>
@@ -135,25 +135,16 @@ $("#appendValues").click(function(){
     <div class="col-sm-2 mt-2">
         <input type="date" class="form-control" name="data[`+n+`][date]" value="<?=date('Y-m-d')?>">
     </div>
-    <div class="col-sm-3 mt-2">
-        <input type="number" class="form-control" name="data[`+n+`][script]" placeholder="Скрипт" min="0" max="10">
-    </div>
-    <div class="col-sm-3 mt-2">
-        <input type="number" class="form-control" name="data[`+n+`][product]" placeholder="Продукт" min="0" max="10">
-    </div>
     <div class="col-sm-2 mt-2">
-        <input type="number" class="form-control" name="data[`+n+`][solution]" placeholder="Оценка решения" min="0" max="10">
-    </div>
-    <div class="col-sm-1 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][principle_1]" placeholder="Принцип 1" min="0" max="10">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][principle_2]" placeholder="Принцип 2" min="0" max="10">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][principle_3]" placeholder="Принцип 3" min="0" max="10">
     </div>
-    <div class="col-sm-1 mt-2">
+    <div class="col-sm-2 mt-2">
         <input type="number" class="form-control" name="data[`+n+`][principle_4]" placeholder="Принцип 4" min="0" max="10">
     </div>
   `);

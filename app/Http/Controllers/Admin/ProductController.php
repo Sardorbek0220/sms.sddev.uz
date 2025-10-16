@@ -38,7 +38,6 @@ class ProductController extends Controller
         $users = file_get_contents('configs/pbx_users.json');
         $operators = (array) json_decode($users)->users;
         $routeName = $request->route()->getName();
-        // dump($routeName);
         return view($routeName == 'products.index' ? 'admin.product.index' : 'operator.product', compact('operators', 'products', 'from_date', 'to_date'));
     }
 
@@ -66,7 +65,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         foreach ($request->data as $datum) {
-            if (empty($datum['script']) || empty($datum['product'])) {
+            if (empty($datum['operator']) || empty($datum['client_phone']) || empty($datum['date']) || empty($datum['audio_url'])) {
                 continue;
             }
             Product::create([
@@ -78,8 +77,8 @@ class ProductController extends Controller
                 'request' => $datum['requestt'],
                 'response' => $datum['response'],
                 'date' => $datum['date'],
-                'script' => $datum['script'],
-                'product' => $datum['product'],
+                'script' => $datum['script'] ?? 0,
+                'product' => $datum['product'] ?? 0,
                 'solution' => $datum['solution'] ?? 0,
                 'principle_1' => $datum['principle_1'] ?? 0,
                 'principle_2' => $datum['principle_2'] ?? 0,
@@ -138,8 +137,8 @@ class ProductController extends Controller
             'request' => $request->requestt,
             'response' => $request->response,
             'date' => $request->date,
-            'script' => $request->script,
-            'product' => $request->product,
+            'script' => $request->script ?? 0,
+            'product' => $request->product ?? 0,
             'solution' => $request->solution ?? 0,
             'principle_1' => $request->principle_1 ?? 0,
             'principle_2' => $request->principle_2 ?? 0,

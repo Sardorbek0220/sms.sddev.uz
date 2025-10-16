@@ -61,9 +61,13 @@
                     <th>{{__('Ответ')}}</th>
                     <th style="width: 2%">{{__('Комментарий')}}</th>
                     <th>{{__('Дата')}}</th>
-                    <th style="width: 2%">{{__('Скрипт')}}</th>
-                    <th style="width: 2%">{{__('Продукт')}}</th>
-                    <th style="width: 2%">{{__('Оценка решения')}}</th>
+                    <!-- <th style="width: 2%">{{__('Скрипт')}}</th> -->
+                    <!-- <th style="width: 2%">{{__('Продукт')}}</th> -->
+                    <!-- <th style="width: 2%">{{__('Оценка решения')}}</th> -->
+                    <th style="width: 2%">{{__('П1')}}</th>
+                    <th style="width: 2%">{{__('П2')}}</th>
+                    <th style="width: 2%">{{__('П3')}}</th>
+                    <th style="width: 2%">{{__('П4')}}</th>
                     <th style="width: 5%;" class="text-center">{{__('Действие')}}</th>
                   </tr>
                 </thead>
@@ -80,9 +84,13 @@
                           <td>{{$data->response}}</td>
                           <td>{{$data->comment}}</td>
                           <td>{{date_format(date_create($data->date), 'd.m.Y')}}</td>
-                          <td>{{$data->script}}</td>
-                          <td>{{$data->product}}</td>
-                          <td>{{$data->solution}}</td>
+                          <!-- <td>{{$data->script}}</td> -->
+                          <!-- <td>{{$data->product}}</td> -->
+                          <!-- <td>{{$data->solution}}</td> -->
+                          <td>{{$data->principle_1}}</td>
+                          <td>{{$data->principle_2}}</td>
+                          <td>{{$data->principle_3}}</td>
+                          <td>{{$data->principle_4}}</td>
                           <td style="text-align: center;">
                               <a class="d-inline-block mr-2" href="{{ route('products.edit', ['product'=>$data->id]) }}" title="Изменить" class="btn btn-outline-primary">
                                   <i class="fa fa-edit"></i>
