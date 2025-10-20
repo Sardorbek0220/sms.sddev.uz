@@ -24,6 +24,7 @@ class WebSocketClient
 
         $connector('wss://pbx12127.onpbx.ru:3342/?key=OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM')
             ->then(function ($conn) {
+                info("Connected to WebSocket server\n");
                 echo "Connected to WebSocket server\n";
 
                 $message = json_encode([
@@ -70,9 +71,11 @@ class WebSocketClient
                 });
 
                 $conn->on('close', function () {
+                    info("Connection closed\n");
                     echo "Connection closed\n";
                 });
             }, function ($e) {
+                info("Could not connect: {$e->getMessage()}\n");
                 echo "Could not connect: {$e->getMessage()}\n";
             });
 
