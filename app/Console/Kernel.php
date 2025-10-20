@@ -149,13 +149,13 @@ class Kernel extends ConsoleKernel
 		}
 		curl_close($ch);
 
-		if ($res->status == '0') {
-			info('$res->status == 0 '.$res);
+		if ($res && $res->status == '0') {
+			// info($res);
 			$this->auth();
 			$this->getMonitoringCalls();
 		}
 
-		if ($res->status == '1') {
+		if ($res && $res->status == '1') {
 			$insert_rows = [];
 			$uuids = [];
 			foreach ($res->data as $datum) {
