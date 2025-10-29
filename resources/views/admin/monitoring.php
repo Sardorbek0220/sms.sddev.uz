@@ -955,8 +955,10 @@
 						if (datum.user_talk_time > 0) {
 							this.monthData.answered += 1;
 						}else{
-							this.monthData.missed += 1;
-							this.monthData.missed_in += this.checkDateHours(datum.start_stamp)
+							if (datum.duration > 5) {
+								this.monthData.missed += 1;
+								this.monthData.missed_in += this.checkDateHours(datum.start_stamp)
+							}
 						}
 
 						if (mondayTimestamp < datum.start_stamp) {
@@ -964,8 +966,10 @@
 							if (datum.user_talk_time > 0) {
 								this.weekData.answered += 1;
 							}else{
-								this.weekData.missed += 1;
-								this.weekData.missed_in += this.checkDateHours(datum.start_stamp)
+								if (datum.duration > 5) {
+									this.weekData.missed += 1;
+									this.weekData.missed_in += this.checkDateHours(datum.start_stamp)
+								}
 							}
 						}
 
@@ -1398,8 +1402,10 @@
 						if (inbounds_5995[i].user_talk_time > 0) {
 							this.todayData.answered += 1;
 						}else{
-							this.todayData.missed += 1;
-							this.todayData.missed_in += this.checkDateHours(inbounds_5995[i].start_stamp)
+							if (inbounds_5995[i].duration > 5) {
+								this.todayData.missed += 1;
+								this.todayData.missed_in += this.checkDateHours(inbounds_5995[i].start_stamp)
+							}
 						}
 					}
 		  		}
