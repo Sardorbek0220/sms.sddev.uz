@@ -79,6 +79,11 @@ class WebSocketClient
                 });
             }, function ($e) {
                 info("Could not connect: {$e->getMessage()}\n");
+                if ($this->attemps < 3) {
+                    $this->connect();
+                    info("attemp -> {$this->attemps}\n");
+                    $this->attemps++;
+                }
             });
 
         $this->loop->run();
