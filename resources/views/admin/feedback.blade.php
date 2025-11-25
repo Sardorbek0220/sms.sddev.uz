@@ -21,17 +21,17 @@
                 <form action="{{ route('feedback.all') }}" method="get" enctype="multipart/form-data">
                   @csrf
                   <div class="row">
-                    <div class="col-12 col-md-5 form-group">
+                    <div class="col-12 col-md-7 form-group">
                     </div>
-                    <div class="col-12 col-md-2 form-group">
+                    <!-- <div class="col-12 col-md-2 form-group">
                       <label for="type">Типы</label>
                       <select class="form-control" name="type" id="type">
                         <option value="1111">Все</option>
                         @foreach($status as $id => $s)
-                        <option <?if(isset($_GET['type']) && $_GET['type'] == $id)echo "selected";?> value="{{ $id }}">{{ $s }}</option>
+                        <option <?//if(isset($_GET['type']) && $_GET['type'] == $id)echo "selected";?> value="{{ $id }}">{{ $s }}</option>
                         @endforeach
                       </select>
-                    </div>
+                    </div> -->
                     <div class="col-12 col-md-2 form-group">
                       <label for="from_date">От</label>
                       <input type="date" class="form-control" id="from_date" name="from_date" value="{{$from_date}}">
@@ -55,7 +55,10 @@
                       <th>{{__('Оператор')}}</th>
                       <th>{{__('Клиент')}}</th>
                       <th>{{__('Комментарий')}}</th>
-                      <th>{{__('Ответ')}}</th>
+                      <th>{{__('Вопрос 1')}}</th>
+                      <th>{{__('Вопрос 2')}}</th>
+                      <th>{{__('Вопрос 3')}}</th>
+                      <th>{{__('Вопрос 4')}}</th>
                       <th>{{__('ID')}}</th>
                       <th>{{__('Дата')}}</th>
                     </tr>
@@ -68,11 +71,27 @@
                       <td>{{$data->call->client_telephone}}</td>
                       <td>{{$data->complaint}}</td>
                       <td> 
-                        @if($data->solved == 0) <span style="color: red">Жавоб олмадим</span>
-                        @elseif($data->solved == 1) <span style="color: yellow">Етарли жавоб олмадим</span>
-                        @elseif($data->solved == 2) <span style="color: blue">Жавоб кутяпман</span>
-                        @elseif($data->solved == 3) <span style="color: green">Жавоб олдим</span>
-                        @elseif($data->solved == 4) <span style="color: orange">Дастурда хатолик</span> 
+                        @if($data->q1 == '0') <span></span>
+                        @elseif($data->q1 == '1') <span style="color: green">Да</span>
+                        @else <span style="color: red">Нет</span> 
+                        @endif
+                      </td>
+                      <td> 
+                        @if($data->q2 == '0') <span></span>
+                        @elseif($data->q2 == '1') <span style="color: green">Да</span>
+                        @else <span style="color: red">Нет</span> 
+                        @endif
+                      </td>
+                      <td> 
+                        @if($data->q3 == '0') <span></span>
+                        @elseif($data->q3 == '1') <span style="color: green">Да</span>
+                        @else <span style="color: red">Нет</span> 
+                        @endif
+                      </td>
+                      <td> 
+                        @if($data->q4 == '0') <span></span>
+                        @elseif($data->q4 == '1') <span style="color: green">Да</span>
+                        @else <span style="color: red">Нет</span> 
                         @endif
                       </td>
                       <td>id_{{ $data->call->id}}</td>

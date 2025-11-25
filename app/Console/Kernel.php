@@ -62,7 +62,7 @@ class Kernel extends ConsoleKernel
                     $hash = str_replace ('/', 'withoutslashes', $hash);
 
                     $builder = new Builder();
-                    $shortURLObject = $builder->destinationUrl("https://sms.salesdoc.uz/feedback/".$call['id']."___".$hash)->make();
+                    $shortURLObject = $builder->destinationUrl("https://sms.salesdoc.uz/feedback_new/".$call['id']."___".$hash)->make();
                     $shortURL = $shortURLObject->default_short_url;
 
 					if($call['gateway'] == '712075995'){

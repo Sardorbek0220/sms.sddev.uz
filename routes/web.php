@@ -30,6 +30,10 @@ Route::get('feedback/{id}', [FeedbackController::class, 'index']);
 Route::post('feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
 Route::post('feedback/afterStore', [FeedbackController::class, 'afterStore'])->name('feedback.afterStore');
 
+Route::get('feedback_new/{id}', [FeedbackController::class, 'new']);
+Route::post('feedback_new/store', [FeedbackController::class, 'newStore'])->name('feedback.newStore');
+Route::post('feedback_new/afterStore', [FeedbackController::class, 'afterNewStore'])->name('feedback.afterNewStore');
+
 Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);
 Route::post('pbxBot', [PbxBotController::class, 'send']);
 // ----------------

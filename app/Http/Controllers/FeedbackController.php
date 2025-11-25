@@ -19,6 +19,12 @@ const STATUS = [
     "Дастурда хатолик"
 ];
 
+const ANSWER = [
+    "-1" => "Yo'q",
+    "0" => "",
+    "1" => "Ha",
+];
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +36,140 @@ use Response;
 
 class FeedbackController extends Controller
 {
+    public function new($id)
+    {
+        try {
+            //get rid of 'extra words'
+            $id = str_replace('withoutslashes', '/', $id);
+
+            $clientHash = explode("___", $id);
+
+            $call_id = $clientHash[0];
+            $hash = Hash::make($call_id);
+            $call = Call::find($call_id);
+            
+            if (Hash::check($call_id, $clientHash[1])) {
+                return view('feedback_new', compact('call_id', 'call'));
+            }else{
+                abort(404);
+            }
+        } catch (\Throwable $th) {
+            abort(404);
+        }
+    }
+
+    public function newStore(Request $request){
+
+        $existFeedback = Feedback::where('call_id', $request->call_id)->first();
+        if (empty($existFeedback)) {
+            $feedback = Feedback::create([
+                'call_id' => $request->call_id,
+                'complaint' => '',
+                'solved' => 0,
+                'q1' => $request->q1,
+                'q2' => $request->q2,
+                'q3' => $request->q3,
+                'q4' => $request->q4,
+            ]);
+
+            $message_id = 0;
+            if ($feedback->id) {
+
+                $infoCall = Call::find($request->call_id);
+                $operator = Operator::find($infoCall->operator_id);
+
+                $call_audio_url = $this->getUrl($infoCall->uuid);
+    
+                $text = new Text();
+                $text->appendEntity("Operator: ", "bold")->appendText("#n_".$operator->phone." ".$operator->name)->endl();
+                $text->appendEntity("Telefon raqam: ", "bold")->appendText($infoCall->client_telephone)->endl();
+                $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
+                $text->appendEntity("1-savol: ", "bold")->appendText(ANSWER[$request->q1])->endl();
+                $text->appendEntity("2-savol: ", "bold")->appendText(ANSWER[$request->q2])->endl();
+                $text->appendEntity("3-savol: ", "bold")->appendText(ANSWER[$request->q3])->endl();
+                $text->appendEntity("4-savol: ", "bold")->appendText(ANSWER[$request->q4])->endl();
+                $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
+                $text->endl();
+
+                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."sendAudio");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    "Content-Type: application/json"
+                ]);
+
+                $request = [
+                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
+                    "audio" => $call_audio_url,
+                    "caption" => $text->text,
+                    "caption_entities" => $text->entities,
+                ];
+
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+                $response = curl_exec($ch);
+                curl_close($ch);
+                // info($response);
+
+                $response = json_decode($response);
+                if ($response->ok == true) {
+                    $message_id = $response->result->message_id;
+                }
+            }
+
+            return Response::json(["data" => $feedback, "message_id" => $message_id]);
+        }else{
+            return Response::json([]);
+        }
+
+    }
+
+    public function afterNewStore(Request $request){
+        
+        $feedback = Feedback::where('call_id', $request->call_id)->first();
+        if (!empty($feedback)) {
+            $feedback->update([
+                'complaint' => $request->complaint
+            ]);
+            if (!empty($request->complaint) && $request->message_id != 0) {
+                $infoCall = Call::find($request->call_id);
+                $operator = Operator::find($infoCall->operator_id);
+
+                $text = new Text();
+	
+                $text->appendEntity("Operator: ", "bold")->appendText("#n_".$operator->phone." ".$operator->name)->endl();
+                $text->appendEntity("Telefon raqam: ", "bold")->appendText($infoCall->client_telephone)->endl();
+                $text->appendEntity("Qo'ng'iroq vaqti: ", "bold")->appendText($infoCall->created_at)->endl();
+                $text->appendEntity("1-savol: ", "bold")->appendText(ANSWER[$feedback->q1])->endl();
+                $text->appendEntity("2-savol: ", "bold")->appendText(ANSWER[$feedback->q2])->endl();
+                $text->appendEntity("3-savol: ", "bold")->appendText(ANSWER[$feedback->q3])->endl();
+                $text->appendEntity("4-savol: ", "bold")->appendText(ANSWER[$feedback->q4])->endl();
+                $text->appendEntity("Izoh: ", "bold")->appendText($feedback->complaint)->endl();
+                $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
+                $text->endl();
+
+                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."editMessageCaption");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    "Content-Type: application/json"
+                ]);
+
+                $request = [
+                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
+                    "message_id" => intval($request->message_id),
+                    "caption" => $text->text,
+                    "caption_entities" => $text->entities,
+                ];
+
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+                $response = curl_exec($ch);
+                curl_close($ch);
+                // info($response);
+            }
+            return Response::json($feedback);
+        }else{
+            return Response::json([]);
+        }
+    }
+
     public function index($id)
     {
         try {
