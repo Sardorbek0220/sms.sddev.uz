@@ -414,10 +414,10 @@
 						<th class="text-center">Время</th>
 						<th class="text-center">Общ. вре.</th>
 						<th class="text-center">%</th>
-						<th class="text-center">👍</th>
+						<!-- <th class="text-center">👍</th>
 						<th class="text-center">☹️</th>
 						<th class="text-center">💻</th>
-						<th class="text-center">❌</th>
+						<th class="text-center">❌</th> -->
 					</tr>
 				</thead>
 				<tbody style="border: solid 1px grey;">
@@ -430,10 +430,10 @@
 						<td>{{calcHMS(report.isxod_time)}}</td>
 						<td>{{calcHMS(report.all_time)}}</td>
 						<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
-						<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
+						<!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark4[report.num] ?? 0 }}</td>
-						<td>{{ oper_misseds[report.num] ?? 0 }}</td>
+						<td>{{ oper_misseds[report.num] ?? 0 }}</td> -->
 					</tr>
 				</tbody>
 				</template>
@@ -508,9 +508,9 @@
 							<th class="text-center">Время</th>
 							<th class="text-center">Общ. вре.</th>
 							<th class="text-center">%</th>
-							<th class="text-center">👍</th>
-							<th class="text-center">☹️</th>
-							<th class="text-center">❌</th>
+							<!-- <th class="text-center">👍</th> -->
+							<!-- <th class="text-center">☹️</th> -->
+							<!-- <th class="text-center">❌</th> -->
 							<th class="text-center">от</th>
 							<th class="text-center">до</th>
 							<th class="text-center">Входящие</th>
@@ -529,9 +529,9 @@
 							<td>{{report.isxod_time}}</td>
 							<td>{{report.all_time}}</td>
 							<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
-							<td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
-							<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
-							<td>{{ oper_misseds[report.num] ?? 0 }}</td>
+							<!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
+							<!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
+							<!-- <td>{{ oper_misseds[report.num] ?? 0 }}</td> -->
 							<td>{{ from_date }}</td>
 							<td>{{ to_date }}</td>
 							<td>{{ bigDataPeriod.answered+bigDataPeriod.missed }}</td>
@@ -673,11 +673,11 @@
 	  		pro_infos_5995: [],
 	  		pro_all_infos_5995: [],
 	  		data_by_date: [],
-			feedbacks: {
-				mark0: {},
-				mark3: {},
-				mark4: {}
-			},
+			// feedbacks: {
+			// 	mark0: {},
+			// 	mark3: {},
+			// 	mark4: {}
+			// },
 			bigData: [],
 			bigDataPeriod: [],
 			todayData: {},
@@ -718,7 +718,7 @@
 				let todayDate = Math.floor(new Date(this.today).getTime() / 1000);
 				if (todayDate >= fromDate && todayDate <= toDate) {
 					await this.get_date()
-					await this.get_users_feedbacks()
+					// await this.get_users_feedbacks()
 					await this.getOperatorTime()
 					this.getInfos_5995() 
 					this.getReport_5995()
@@ -741,7 +741,7 @@
 				this.loading = true; 
 
 				await this.getUsers();
-				await this.get_users_feedbacks();
+				// await this.get_users_feedbacks();
 				await this.getOperatorTime();
 				this.getInfos_5995();
 				this.getReport_5995();
@@ -852,7 +852,7 @@
 
 				this.loading = true;
 
-				await this.get_users_feedbacks();
+				// await this.get_users_feedbacks();
 				await this.getOperatorTime();
 				this.getInfos_5995();
 		    	this.getReport_5995();
@@ -1023,28 +1023,28 @@
 					diff = d.getDate() - day + (day == 0 ? -6 : 1);
 				return new Date(d.setDate(diff));
 			},
-			async get_users_feedbacks(){
-				this.feedbacks = {
-					mark0: {},
-					mark3: {},
-					mark4: {}
-				}
-				await axios.get('monitoring/usersFeedbacks', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
-					if (response.status == 200) {
-						for (const datum of response.data) {
-							if (!this.feedbacks.mark0[datum.phone]) {
-								this.feedbacks.mark0[datum.phone] = datum.mark0
-							}
-							if (!this.feedbacks.mark3[datum.phone]) {
-								this.feedbacks.mark3[datum.phone] = datum.mark3
-							}
-							if (!this.feedbacks.mark4[datum.phone]) {
-								this.feedbacks.mark4[datum.phone] = datum.mark4
-							}
-						}
-					}
-				});		
-			},
+			// async get_users_feedbacks(){
+			// 	this.feedbacks = {
+			// 		mark0: {},
+			// 		mark3: {},
+			// 		mark4: {}
+			// 	}
+			// 	await axios.get('monitoring/usersFeedbacks', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
+			// 		if (response.status == 200) {
+			// 			for (const datum of response.data) {
+			// 				if (!this.feedbacks.mark0[datum.phone]) {
+			// 					this.feedbacks.mark0[datum.phone] = datum.mark0
+			// 				}
+			// 				if (!this.feedbacks.mark3[datum.phone]) {
+			// 					this.feedbacks.mark3[datum.phone] = datum.mark3
+			// 				}
+			// 				if (!this.feedbacks.mark4[datum.phone]) {
+			// 					this.feedbacks.mark4[datum.phone] = datum.mark4
+			// 				}
+			// 			}
+			// 		}
+			// 	});		
+			// },
 		  	async getUsers(){
 				await axios.get('monitoring/users').then(response => {
 					if (response.status == 200) {

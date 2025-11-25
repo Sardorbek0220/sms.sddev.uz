@@ -189,8 +189,8 @@
               <th v-show="!show_columns.includes('Вход. звон')" class="text-center">Вход. звон</th>
               <th v-show="!show_columns.includes('Исход. звон')" class="text-center">Исход. звон</th>
               <th v-show="!show_columns.includes('Незарег. вход. клиенты')" class="text-center">Незарег. вход. клиенты</th>
-              <th v-show="!show_columns.includes('Всего отзывов')" class="text-center">Всего отзывов</th>
-              <th v-show="!show_columns.includes('👍 отзывы')" class="text-center">👍 отзывы</th>
+              <!-- <th v-show="!show_columns.includes('Всего отзывов')" class="text-center">Всего отзывов</th> -->
+              <!-- <th v-show="!show_columns.includes('👍 отзывы')" class="text-center">👍 отзывы</th> -->
               <th v-show="!show_columns.includes('Нравится')" class="text-center">Нравится</th>
               <th v-show="!show_columns.includes('Отток')" class="text-center">Отток</th>
               <!-- <th v-show="!show_columns.includes('Скрипт')" class="text-center">Скрипт</th> -->
@@ -215,8 +215,8 @@
               <td v-show="!show_columns.includes('Вход. звон')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.inbound }}</td>
               <td v-show="!show_columns.includes('Исход. звон')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.outbound }}</td>
               <td v-show="!show_columns.includes('Незарег. вход. клиенты')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.unregs }}</td>
-              <td v-show="!show_columns.includes('Всего отзывов')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td>
-              <td v-show="!show_columns.includes('👍 отзывы')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td>
+              <!-- <td v-show="!show_columns.includes('Всего отзывов')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.total_feedback }}</td> -->
+              <!-- <td v-show="!show_columns.includes('👍 отзывы')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.mark3_feedback }}</td> -->
               <td v-show="!show_columns.includes('Нравится')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.like }}</td>
               <td v-show="!show_columns.includes('Отток')" class="text-center" :style="{backgroundColor: colors[index]}">{{ report.punishment }}</td>
               <!-- <td v-show="!show_columns.includes('Скрипт')" class="link text-center" :style="{backgroundColor: colors[index]}" @click="toReportTable('script')">{{ report.script }}</td> -->
@@ -275,7 +275,7 @@ new Vue({
         tel_num: localStorage.getItem('tel_num') ?? "712075995",
         company: localStorage.getItem('tel_num') == "781138585" ? 2 : (localStorage.getItem('tel_num') == "781136022" ? 3 : 1),
         show_columns: [],
-        columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Всего отзывов", "👍 отзывы", "Нравится", "Отток", "П1", "П2", "П3", "П4", "Обучение", "Онлайн-время", "Общий"],
+        columns: ["Имя", "⏰ (вовремя)", "⏰ (поздно)", "Перс. пропущ. звон", "Пропущ. в раб. время", "Вход. звон", "Исход. звон", "Незарег. вход. клиенты", "Нравится", "Отток", "П1", "П2", "П3", "П4", "Обучение", "Онлайн-время", "Общий"],
         day: '',
         loading: false,
         today: new Date(),
@@ -297,10 +297,10 @@ new Vue({
         users_5995: [],
         notTalk_5995: [],
         notAnswer_5995: [],
-        feedbacks: {
-            mark0: {},
-            mark3: {}
-        },
+        // feedbacks: {
+        //     mark0: {},
+        //     mark3: {}
+        // },
         bigData: [],
         bigDataPeriod: [],
         oper_times: {},
@@ -358,7 +358,7 @@ new Vue({
             if (this.from_date == this.day && this.to_date == this.day) {
                 await this.get_date();
                 await this.getOperatorTime();
-                await this.get_users_feedbacks();
+                // await this.get_users_feedbacks();
                 await this.get_users_trainings();
                 this.getInfos_5995();
                 this.getReport_5995();
@@ -382,7 +382,7 @@ new Vue({
             await this.getWorklySchedule();
 
             await this.getUsers();
-            await this.get_users_feedbacks();
+            // await this.get_users_feedbacks();
             await this.get_users_trainings();
             await this.getOperatorTime();
             
@@ -539,7 +539,7 @@ new Vue({
 
             this.loading = true;
 
-            await this.get_users_feedbacks();
+            // await this.get_users_feedbacks();
             await this.get_users_trainings();
             await this.getOperatorTime();
             await this.getUnknownClients();
@@ -575,24 +575,24 @@ new Vue({
 
             }
         },
-        async get_users_feedbacks(){
-            this.feedbacks = {
-            mark0: {},
-            mark3: {}
-            }
-            await axios.get('monitoring/usersFeedbacks', {params: {from: this.from_date, to: this.to_date}}).then(response => {
-            if (response.status == 200) {
-                for (const datum of response.data) {
-                if (!this.feedbacks.mark0[datum.phone]) {
-                    this.feedbacks.mark0[datum.phone] = datum.mark0
-                }
-                if (!this.feedbacks.mark3[datum.phone]) {
-                    this.feedbacks.mark3[datum.phone] = datum.mark3
-                }
-                }
-            }
-            });		
-        },
+        // async get_users_feedbacks(){
+        //     this.feedbacks = {
+        //     mark0: {},
+        //     mark3: {}
+        //     }
+        //     await axios.get('monitoring/usersFeedbacks', {params: {from: this.from_date, to: this.to_date}}).then(response => {
+        //     if (response.status == 200) {
+        //         for (const datum of response.data) {
+        //         if (!this.feedbacks.mark0[datum.phone]) {
+        //             this.feedbacks.mark0[datum.phone] = datum.mark0
+        //         }
+        //         if (!this.feedbacks.mark3[datum.phone]) {
+        //             this.feedbacks.mark3[datum.phone] = datum.mark3
+        //         }
+        //         }
+        //     }
+        //     });		
+        // },
         async get_users_trainings(){
             this.training = {}
             await axios.get('monitoring/usersTrainings', {params: {from: this.from_date, to: this.to_date}}).then(response => {
@@ -889,8 +889,8 @@ new Vue({
                     reports_support[a].missed = this.calcPoints(this.bigDataPeriod.missed_in ?? 0, 'missed')
                     reports_support[a].inbound = this.calcPoints(reports_support[a].vxod_count, 'inbound')
                     reports_support[a].outbound = this.calcPoints(reports_support[a].isxod_count, 'outbound')
-                    reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
-                    reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
+                    // reports_support[a].total_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0) + parseFloat(this.feedbacks.mark0[reports_support[a].num] ?? 0), 'total_feedback')
+                    // reports_support[a].mark3_feedback = this.calcPoints(parseFloat(this.feedbacks.mark3[reports_support[a].num] ?? 0), 'mark3_feedback')
                     reports_support[a].like = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].likes : 0, 'like')
                     reports_support[a].punishment = this.calcPoints(this.extra.likes[reports_support[a].num] ? this.extra.likes[reports_support[a].num].punishments : 0, 'punishment')
                     reports_support[a].unregs = this.calcPoints(this.unknownClients.inbound[reports_support[a].num] ? this.unknownClients.inbound[reports_support[a].num] : 0, 'unreg_client_inbound')
@@ -910,8 +910,8 @@ new Vue({
                     reports_support[a].outtime = times.outtime
 
                     reports_support[a].total_point = 
-                        reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound + reports_support[a].total_feedback 
-                        + reports_support[a].mark3_feedback + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
+                        reports_support[a].personal_missed + reports_support[a].missed + reports_support[a].inbound + reports_support[a].outbound +
+                        + reports_support[a].like + reports_support[a].punishment + reports_support[a].unregs + 
                         + reports_support[a].p1 + reports_support[a].p2 + reports_support[a].p3 + reports_support[a].p4 + reports_support[a].training +
                         + reports_support[a].online_time + reports_support[a].ontime + reports_support[a].outtime;
                     
