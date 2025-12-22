@@ -21,11 +21,19 @@
             </p>
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a href="{{ route('admin.report') }}" class="nav-link">
             <i class="nav-icon fas fa-file-alt"></i>
             <p>
               {{__('Отчеты')}}
+            </p>
+          </a>
+        </li> -->
+        <li class="nav-item">
+          <a href="{{ route('admin.report.calls') }}" class="nav-link">
+            <i class="nav-icon fas fa-phone-alt"></i>
+            <p>
+              {{__('Звонки')}}
             </p>
           </a>
         </li>

@@ -14,6 +14,7 @@ use App\Unknown_client;
 use App\Holiday;
 use App\Score;
 use App\Exception;
+use App\Call;
 
 class ReportController extends Controller
 {
@@ -169,6 +170,25 @@ class ReportController extends Controller
         $footReportsByPercent[] = (object) ['percent' => ''];
         
         return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'footReportsByPercent', 'Total', 'from_date', 'to_date'));
+    }
+
+    public function calls(Request $request)
+    {
+        if ($request->from_date == null) {
+            $from_date = date('Y-m-d');
+        }else{
+            $from_date = $request->from_date;
+        }
+
+        if ($request->to_date == null) {
+            $to_date = date('Y-m-d');
+        }else{
+            $to_date = $request->to_date;
+        } 
+
+        $data = Call::whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])->cursor();
+        
+        return view('admin.report.calls', compact('data', 'from_date', 'to_date'));
     }
 
     public function monitoringKeys()

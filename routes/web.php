@@ -66,6 +66,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
     Route::get('report', [ReportController::class, 'index'])->name('admin.report');
+    Route::get('report/calls', [ReportController::class, 'calls'])->name('admin.report.calls');
 
     Route::get('score', [ReportController::class, 'score']);
 

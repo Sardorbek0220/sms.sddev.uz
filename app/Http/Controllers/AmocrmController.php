@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Call;
 use App\Operator;
 use App\Client;
+use App\Http\Controllers\FeedbackController;
 
 class AmocrmController extends Controller
 {
@@ -58,11 +59,17 @@ class AmocrmController extends Controller
 					]);
 				}
 
+				$real_url = "";
+				if (!empty($contents['uuid'])) {
+					$feedbackController = new FeedbackController();
+					$real_url = $feedbackController->getUrl($contents['uuid']);
+				}
+
 				$call = Call::create([
 					'client_telephone' => $clientTel,
 					'operator_id' => $operator['id'],
 					'pbx_audio_url' => $contents['download_url'],
-					'telegram_audio_url' => '',
+					'telegram_audio_url' => $real_url,
 					'event' => $contents['event'],
 					'direction' => $contents['direction'],
 					'call_duration' => $contents['call_duration'],
