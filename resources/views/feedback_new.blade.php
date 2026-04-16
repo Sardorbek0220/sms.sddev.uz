@@ -98,6 +98,9 @@
                             </label>
                         </div>
                     </div>
+                    <div class="form-group mt-3">
+                        <textarea type="text" class="form-control" name="complaint" id="complaint" placeholder="Izoh"></textarea>
+                    </div>
                     <button class="btn btn-primary btn-block" onclick="send()" id="sendBtn">Fikr-mulohazani yuborish</button>
                     <button style="display: none;" class="btn btn-primary btn-block" id="loadingBtn" disabled>
                         <span class="spinner-border spinner-border-sm"></span>
@@ -141,6 +144,7 @@
             q2: $("[name='q2']:checked").val() ?? 0,
             q3: $("[name='q3']:checked").val() ?? 0,
             q4: $("[name='q4']:checked").val() ?? 0,
+            complaint: $('#complaint').val()
         };        
         
         $.ajax({
@@ -153,9 +157,15 @@
                         el.style.display = 'none';
                     });
                     document.querySelectorAll('.afterCheck').forEach(function(el) {
+                        el.style.display = 'none';
+                    });
+                    document.querySelectorAll('.afterSave').forEach(function(el) {
+                        el.style.display = 'none';
+                    });
+                    document.querySelectorAll('.successSave').forEach(function(el) {
                         el.style.display = 'block';
                     });
-                    document.getElementById("message_id").value = data.message_id;
+                    // document.getElementById("message_id").value = data.message_id;
                 }else{
                     alert("Siz allaqachon baholagansiz !");
                 }

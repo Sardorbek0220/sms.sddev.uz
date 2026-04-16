@@ -33,6 +33,7 @@ use App\Text;
 use App\Call;
 use App\Operator;
 use Response;
+use App\TelegramQueue;
 
 class FeedbackController extends Controller
 {
@@ -64,7 +65,7 @@ class FeedbackController extends Controller
         if (empty($existFeedback)) {
             $feedback = Feedback::create([
                 'call_id' => $request->call_id,
-                'complaint' => '',
+                'complaint' => $request->complaint,
                 'solved' => 0,
                 'q1' => $request->q1,
                 'q2' => $request->q2,
@@ -88,30 +89,23 @@ class FeedbackController extends Controller
                 $text->appendEntity("2-savol: ", "bold")->appendText(ANSWER[$request->q2])->endl();
                 $text->appendEntity("3-savol: ", "bold")->appendText(ANSWER[$request->q3])->endl();
                 $text->appendEntity("4-savol: ", "bold")->appendText(ANSWER[$request->q4])->endl();
+                $text->appendEntity("Izoh: ", "bold")->appendText($request->complaint)->endl();
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
                 $text->endl();
 
-                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."sendAudio");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    "Content-Type: application/json"
-                ]);
-
+                $method = 'sendAudio';
+                $url = $infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL);
                 $request = [
                     "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
                     "audio" => $call_audio_url,
                     "caption" => $text->text,
                     "caption_entities" => $text->entities,
                 ];
-
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-                $response = curl_exec($ch);
-                curl_close($ch);
-                // info($response);
-
+                $response = TelegramQueue::send($url, $method, $request);
                 $response = json_decode($response);
                 if ($response->ok == true) {
-                    $message_id = $response->result->message_id;
+                    $message_id = null;
+                    // $message_id = $response->result->message_id;
                 }
             }
 

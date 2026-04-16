@@ -12,6 +12,7 @@ use App\Pbx\Amocrm;
 use App\Pbx\Onlinepbx;
 use App\Pbx\Amo;
 use App\Pbx\Pbx;
+use App\TelegramQueue;
 
 class PbxBotController extends Controller
 {
@@ -36,18 +37,13 @@ class PbxBotController extends Controller
     }
 
     public function sendTextMessage($chat_id, $text, $entities = [], $queryStatus = false) {
-        $ch = curl_init(self::BOT_URL."sendMessage");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json"
-        ]);
-
+        $method = 'sendMessage';
+        $url = self::BOT_URL;
         $request = [
             "chat_id" => $chat_id,
             "text" => $text,
             "entities" => $entities,
         ];
-
         if ($queryStatus) {
             $request['reply_markup'] = [
                 'inline_keyboard' => [
@@ -73,21 +69,14 @@ class PbxBotController extends Controller
             ];
         }
 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-        $response = curl_exec($ch);
-        curl_close($ch);
-
+        $response = TelegramQueue::send($url, $method, $request);
         header('content-type: application/json');
         echo $response;
     }
 
     public function sendAudioMessage($chat_id, $caption, $caption_entities = [], $url, $queryStatus = false) {
-        $ch = curl_init(self::BOT_URL."sendAudio");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json"
-        ]);
-
+        $method = 'sendAudio';
+        $apiUrl = self::BOT_URL;
         $request = [
             "chat_id" => $chat_id,
             "caption" => $caption,
@@ -119,10 +108,7 @@ class PbxBotController extends Controller
                 ]
             ];
         }
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-        curl_exec($ch);
-        curl_close($ch);
+        TelegramQueue::send($apiUrl, $method, $request);
     }
 
     public function getCallSummary() {
