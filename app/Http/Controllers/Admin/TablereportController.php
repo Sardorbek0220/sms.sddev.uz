@@ -346,13 +346,25 @@ class TablereportController extends Controller
             }
         }
         $data = $reportController->monitoringPersonalMissed($req);
-        if (!empty($data->original)) {
+        // Always unwrap response wrapper, even when ->original is empty/null/falsy.
+        // Otherwise the foreach below iterates the Response's public properties (e.g. headers)
+        // and triggers "Undefined property: ResponseHeaderBag::$create_timestamp".
+        if (is_object($data) && property_exists($data, 'original')) {
             $data = $data->original;
         }
-        
+        if (!is_iterable($data)) {
+            $data = [];
+        }
+
         $fifos = $this->GetOperators();
-        $users =  $reportController->monitoringUsers($req);
-        $users = $users->original;  
+        $users = $reportController->monitoringUsers($req);
+        if (is_object($users) && property_exists($users, 'original')) {
+            $users = $users->original;
+        }
+        if (!is_iterable($users)) {
+            $users = collect();
+        }
+
         //$usersArr = $users;
         $usersArray = $users->toArray();
         // Initialize an empty array to hold the transformed data

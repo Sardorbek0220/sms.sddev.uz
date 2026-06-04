@@ -132,7 +132,7 @@ class Onlinepbx {
 		if ($contents == false) {
 			$contents = $this->getUserList();
 			file_put_contents($this->usersFile, json_encode([
-				"next_update_time" => time() + 86400, // one day
+				"next_update_time" => time() + 10800, // one day
 				"users" => $contents
 			], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 		}

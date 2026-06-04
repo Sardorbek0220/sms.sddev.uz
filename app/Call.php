@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Model;
 
 class Call extends Model
@@ -32,5 +33,15 @@ class Call extends Model
     public function operator()
     {
         return $this->belongsTo(Operator::class, 'operator_id');
+    }
+
+    public function getClientTelephoneAttribute($value)
+    {
+        return PhoneNumber::formatUz($value) ?? $value;
+    }
+
+    public function setClientTelephoneAttribute($value): void
+    {
+        $this->attributes['client_telephone'] = PhoneNumber::formatUz($value) ?? $value;
     }
 }

@@ -91,25 +91,14 @@ class FeedbackController extends Controller
                 $text->appendEntity("ID: ", "bold")->appendText("#id_".$infoCall->id)->endl();
                 $text->endl();
 
-                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."sendAudio");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    "Content-Type: application/json"
-                ]);
-
-                $request = [
-                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
-                    "audio" => $call_audio_url,
-                    "caption" => $text->text,
-                    "caption_entities" => $text->entities,
-                ];
-
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-                $response = curl_exec($ch);
-                curl_close($ch);
-                // info($response);
-
-                $response = json_decode($response);
+                $response = $this->sendAudioToTelegram(
+                    ($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL)),
+                    ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
+                    $text->text,
+                    $text->entities,
+                    $call_audio_url,
+                    $infoCall->recording_local_path ?? null
+                );
                 if ($response->ok == true) {
                     $message_id = $response->result->message_id;
                 }
@@ -148,6 +137,8 @@ class FeedbackController extends Controller
 
                 $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."editMessageCaption");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
                 ]);
@@ -221,25 +212,14 @@ class FeedbackController extends Controller
                 }
                 $text->endl();
 
-                $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."sendAudio");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    "Content-Type: application/json"
-                ]);
-
-                $request = [
-                    "chat_id" => ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
-                    "audio" => $call_audio_url,
-                    "caption" => $text->text,
-                    "caption_entities" => $text->entities,
-                ];
-
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-                $response = curl_exec($ch);
-                curl_close($ch);
-                // info($response);
-
-                $response = json_decode($response);
+                $response = $this->sendAudioToTelegram(
+                    ($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL)),
+                    ($infoCall->gateway == '712075995' ? TG_USER_CHANNEL : ($infoCall->gateway == '781138585' ? IBOX_TG_USER_CHANNEL : IDOKON_TG_USER_CHANNEL)),
+                    $text->text,
+                    $text->entities,
+                    $call_audio_url,
+                    $infoCall->recording_local_path ?? null
+                );
                 if ($response->ok == true) {
                     $message_id = $response->result->message_id;
                 }
@@ -278,6 +258,8 @@ class FeedbackController extends Controller
 
                 $ch = curl_init(($infoCall->gateway == '712075995' ? BOT_URL : ($infoCall->gateway == '781138585' ? IBOX_BOT_URL : IDOKON_BOT_URL))."editMessageCaption");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     "Content-Type: application/json"
                 ]);
@@ -305,27 +287,79 @@ class FeedbackController extends Controller
     }
 
     public function all(Request $request){
-        if ($request->from_date == null) {
-            $from_date = date('Y-m-d');
-        }else{
-            $from_date = $request->from_date;
-        }
-
-        if ($request->to_date == null) {
-            $to_date = date('Y-m-d');
-        }else{
-            $to_date = $request->to_date;
-        } 
+        $from_date = $request->from_date ?: date('Y-m-d');
+        $to_date   = $request->to_date   ?: date('Y-m-d');
         $status = STATUS;
 
-        $allFeedback = Feedback::
-            whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])
-            ->orderByDesc('created_at')
+        // Phase 6 filters
+        $gateway     = $request->input('gateway');             // int
+        $scoreFilter = $request->input('score_filter');        // 0..4
+        $hasComment  = $request->input('has_comment');         // 'yes'|'no'
+
+        $allFeedback = Feedback::with('call.operator')
+            ->whereBetween('feedback.created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])
             ->when(($request->type != "1111" && !empty($request->type)), function($query) use($request){
                 return $query->where('solved', $request->type);
             })
+            ->when($gateway, function ($q) use ($gateway) {
+                return $q->whereHas('call', function ($qq) use ($gateway) { $qq->where('gateway', (int)$gateway); });
+            })
+            ->when(in_array((string)$scoreFilter, ['0','1','2','3','4'], true), function ($q) use ($scoreFilter) {
+                $sf = (int)$scoreFilter;
+                return $q->whereRaw(
+                    '((CASE WHEN q1=1 THEN 1 ELSE 0 END)+(CASE WHEN q2=1 THEN 1 ELSE 0 END)+(CASE WHEN q3=1 THEN 1 ELSE 0 END)+(CASE WHEN q4=1 THEN 1 ELSE 0 END)) = ?',
+                    [$sf]
+                );
+            })
+            ->when($hasComment === 'yes', function ($q) {
+                return $q->whereNotNull('complaint')->where('complaint', '<>', '');
+            })
+            ->when($hasComment === 'no', function ($q) {
+                return $q->where(function ($qq) { $qq->whereNull('complaint')->orWhere('complaint', ''); });
+            })
+            ->orderByDesc('feedback.created_at')
             ->get();
-        return view('admin.feedback', compact('allFeedback', 'from_date', 'to_date', 'status'));
+
+        // Phase 11: CSV export
+        if ($request->input('export') === 'csv') {
+            $filename = 'feedback_' . $from_date . '_' . $to_date . '.csv';
+            return response()->stream(function () use ($allFeedback) {
+                $h = fopen('php://output', 'w');
+                fwrite($h, "\xEF\xBB\xBF");
+                fputcsv($h, ['ID','Дата','Компания','Оператор','Клиент','Score','Q1','Q2','Q3','Q4','Решено','Комментарий'], ';');
+                $ans = function ($v) { $v = (int)$v; return $v === 1 ? 'Да' : ($v === -1 ? 'Нет' : ''); };
+                foreach ($allFeedback as $f) {
+                    $score = ((int)$f->q1 === 1)+((int)$f->q2 === 1)+((int)$f->q3 === 1)+((int)$f->q4 === 1);
+                    fputcsv($h, [
+                        $f->id,
+                        (string)$f->created_at,
+                        \App\Services\GatewayService::name(optional($f->call)->gateway),
+                        optional(optional($f->call)->operator)->name ?: '',
+                        optional($f->call)->client_telephone ?: '',
+                        $score . '/4',
+                        $ans($f->q1), $ans($f->q2), $ans($f->q3), $ans($f->q4),
+                        ((int)$f->solved === 1) ? 'Да' : 'Нет',
+                        (string)$f->complaint,
+                    ], ';');
+                }
+                fclose($h);
+            }, 200, [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            ]);
+        }
+
+        // Aggregated stats via service
+        $summary = app(\App\Services\FeedbackReportService::class)
+            ->summary($from_date, $to_date, $gateway);
+        $distribution = app(\App\Services\FeedbackReportService::class)
+            ->scoreDistribution($from_date, $to_date, $gateway);
+
+        return view('admin.feedback', compact(
+            'allFeedback', 'from_date', 'to_date', 'status',
+            'gateway', 'scoreFilter', 'hasComment',
+            'summary', 'distribution'
+        ));
     }
 
     public function getUrl($uuid){
@@ -340,11 +374,17 @@ class FeedbackController extends Controller
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json'
             ),
-            CURLOPT_POSTFIELDS => json_encode($postData)
+            CURLOPT_POSTFIELDS => json_encode($postData),
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 10,
         ));
 
         $response = curl_exec($ch);
         $response = json_decode($response);
+        if (!is_object($response) || !isset($response->status)) {
+            \Log::warning('FeedbackController.getUrl: malformed PBX auth response', ['uuid' => $uuid, 'curl_error' => curl_error($ch)]);
+            return false;
+        }
         if ($response->status == 1) {
             $postData = array(
                 'uuid' => $uuid,
@@ -362,11 +402,17 @@ class FeedbackController extends Controller
                     'Content-Type: application/json',
                     "x-pbx-authentication: $key_id:$key"
                 ),
-                CURLOPT_POSTFIELDS => json_encode($postData)
+                CURLOPT_POSTFIELDS => json_encode($postData),
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 10,
             ));
 
             $response = curl_exec($ch);
             $response = json_decode($response);
+            if (!is_object($response) || !isset($response->status)) {
+                \Log::warning('FeedbackController.getUrl: malformed PBX history response', ['uuid' => $uuid, 'curl_error' => curl_error($ch)]);
+                return false;
+            }
             if ($response->status == 1) {
                 return $response->data;
             }else{
@@ -374,6 +420,91 @@ class FeedbackController extends Controller
             }
         }else{
             return false;
+        }
+    }
+
+    /**
+     * Send audio to Telegram. Prefers local file (multipart upload) — Telegram's
+     * URL-fetch fails on OnlinePBX recordings ("wrong type of the web page content").
+     * Returns decoded response JSON or null on failure.
+     */
+    private function sendAudioToTelegram(string $botUrl, $chatId, string $caption, array $captionEntities, string $audioUrl, ?string $localPath = null)
+    {
+        $absolute = null;
+        $tmpToDelete = null;
+        if ($localPath && is_file(storage_path('app/' . $localPath))) {
+            $absolute = storage_path('app/' . $localPath);
+        } else {
+            // Try downloading the URL into a temp file.
+            $tmp = tempnam(sys_get_temp_dir(), 'fbaudio_') . '.mp3';
+            $tmpToDelete = $tmp;
+            $dch = curl_init($audioUrl);
+            $fp = fopen($tmp, 'w');
+            curl_setopt_array($dch, [
+                CURLOPT_FILE           => $fp,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT        => 12,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $okDl   = curl_exec($dch);
+            $dlCode = (int) curl_getinfo($dch, CURLINFO_HTTP_CODE);
+            curl_close($dch);
+            fclose($fp);
+            if ($okDl !== false && $dlCode === 200 && is_file($tmp) && filesize($tmp) >= 1024) {
+                $absolute = $tmp;
+            } else {
+                @unlink($tmp);
+                $tmpToDelete = null;
+            }
+        }
+
+        try {
+            if ($absolute) {
+                // Multipart upload — works around URL-fetch failure.
+                $request = [
+                    "chat_id"          => $chatId,
+                    "caption"          => $caption,
+                    "caption_entities" => json_encode($captionEntities),
+                    "audio"            => new \CURLFile($absolute, 'audio/mpeg', basename($absolute)),
+                ];
+                $uch = curl_init($botUrl . 'sendAudio');
+                curl_setopt_array($uch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_TIMEOUT        => 25,
+                    CURLOPT_POST           => true,
+                    CURLOPT_POSTFIELDS     => $request,
+                ]);
+                $resp = curl_exec($uch);
+                $code = (int) curl_getinfo($uch, CURLINFO_HTTP_CODE);
+                $err  = curl_error($uch);
+                curl_close($uch);
+                if ($code !== 200) {
+                    \Illuminate\Support\Facades\Log::warning('Feedback.sendAudio multipart failed', [
+                        'code' => $code, 'err' => $err, 'resp_head' => mb_substr((string)$resp, 0, 200),
+                    ]);
+                }
+                return $resp ? json_decode($resp) : null;
+            }
+
+            // Last resort: URL-fetch (Telegram tries to download itself).
+            $ch = curl_init($botUrl . 'sendAudio');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+                "chat_id"          => $chatId,
+                "caption"          => $caption,
+                "caption_entities" => $captionEntities,
+                "audio"            => $audioUrl,
+            ]));
+            $resp = curl_exec($ch);
+            curl_close($ch);
+            return $resp ? json_decode($resp) : null;
+        } finally {
+            if ($tmpToDelete && is_file($tmpToDelete)) @unlink($tmpToDelete);
         }
     }
 }

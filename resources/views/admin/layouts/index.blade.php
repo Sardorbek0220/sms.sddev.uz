@@ -33,13 +33,12 @@
   <link rel="stylesheet" href="{{ asset('assets/dist/css/adminlte.min.css')}}">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-  <style>
-    #example2_info{
-      display: none;
-    }
-  </style>
+  <!-- Phone unified theme (Phase 1) -->
+  <link rel="stylesheet" href="{{ asset('assets/dist/css/theme.css') }}?v={{ filemtime(public_path('assets/dist/css/theme.css')) }}">
+    <link rel="stylesheet" href="{{ asset("assets/admin-ds.css")."?v=".filemtime(public_path("assets/admin-ds.css")) }}">
+    @stack("styles")
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed role-admin ds-themed">
 <div class="wrapper">
 
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">

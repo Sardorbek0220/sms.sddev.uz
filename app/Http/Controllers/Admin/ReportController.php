@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Response;
 use App\All_call;
 use App\Operator;
@@ -15,6 +16,12 @@ use App\Holiday;
 use App\Score;
 use App\Exception;
 use App\Call;
+use App\Services\BitrixSurveyService;
+use App\Services\CallAnalyticsService;
+use App\Services\OperatorWorkspaceService;
+use App\Services\PbxLiveStateService;
+use App\Support\PhoneNumber;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -24,6 +31,8 @@ class ReportController extends Controller
     const username = "oybek.mirkasimov@gmail.com";
     const password = "P@ssw0rd";
     const workly_auth = 'configs/workly_auth.json';
+    private const ONLINEPBX_DOMAIN = 'pbx12127.onpbx.ru';
+    private const ONLINEPBX_AUTH_KEY = 'OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM';
 
     public function timeExceptions($from_unix, $to_unix)
     {
@@ -172,7 +181,7 @@ class ReportController extends Controller
         return view('admin.report.index', compact('reports', 'reports_by_date', 'footReports', 'footReportsByDate', 'footReportsByPercent', 'Total', 'from_date', 'to_date'));
     }
 
-    public function calls(Request $request)
+    public function calls(Request $request, BitrixSurveyService $bitrixSurveyService)
     {
         if ($request->from_date == null) {
             $from_date = date('Y-m-d');
@@ -184,31 +193,366 @@ class ReportController extends Controller
             $to_date = date('Y-m-d');
         }else{
             $to_date = $request->to_date;
-        } 
+        }
 
-        $data = Call::whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])->cursor();
-        
-        return view('admin.report.calls', compact('data', 'from_date', 'to_date'));
+        $phone = trim((string) $request->phone);
+        $phoneFilter = PhoneNumber::canonicalUzDigits($phone);
+
+        // Phase 5: optional filters
+        $gateway      = $request->input('gateway');                 // int
+        $direction    = $request->input('direction');               // 'inbound' | 'outbound'
+        $statusFilter = $request->input('status_call');             // 'answered' | 'missed'
+        $hasSms       = $request->input('has_sms');                 // 'yes' | 'no'
+        $hasFeedback  = $request->input('has_feedback');            // 'yes' | 'no'
+        $sort         = $request->input('sort', '');                // 'b24_desc' | 'b24_asc' | ''
+
+        // b24-sort: precompute surveyed call IDs once (used by both the Анкета filter
+        // and the "Действия / Bitrix" column sort).
+        $surveyedCallIds = [];
+        if (in_array($hasFeedback, ['yes', 'no'], true) || in_array($sort, ['b24_desc', 'b24_asc'], true)) {
+            $matchH = (int) env('BITRIX_SURVEY_MATCH_HOURS', 72);
+            $svFrom = Carbon::parse($from_date . ' 00:00:00')->subHours($matchH);
+            $svTo   = Carbon::parse($to_date . ' 23:59:59')->addDays(30);
+
+            $rawIds = DB::connection('bitrix_survey')
+                ->table(env('BITRIX_SURVEY_DB_TABLE', 'b24_call_survey_logs'))
+                ->whereBetween('created_at', [$svFrom, $svTo])
+                ->where('call_id', 'like', '%:call:%')
+                ->pluck('call_id');
+            $ids = [];
+            foreach ($rawIds as $cid) {
+                if (preg_match('|:call:(\d+):|', (string) $cid, $m)) {
+                    $ids[(int) $m[1]] = true;
+                }
+            }
+            $surveyedCallIds = array_keys($ids);
+        }
+
+        $data = Call::with('operator')
+            ->whereBetween('created_at', [$from_date." 00:00:00", $to_date." 23:59:59"])
+            ->when(Auth::check() && Auth::user()->isOperator(), function ($query) {
+                return $query->where('operator_id', Auth::user()->operator_id);
+            })
+            ->when($phone !== '', function ($query) use ($phoneFilter) {
+                if ($phoneFilter === null) {
+                    return $query;
+                }
+
+                return $query->whereRaw(
+                    PhoneNumber::mysqlCanonicalUzDigitsExpression('client_telephone') . ' = ?',
+                    [$phoneFilter]
+                );
+            })
+            ->when($gateway, function ($q) use ($gateway) { return $q->where('gateway', (int)$gateway); })
+            ->when(in_array($direction, ['inbound', 'outbound'], true), function ($q) use ($direction) {
+                return $q->where('direction', $direction);
+            })
+            ->when($statusFilter === 'answered', function ($q) { return $q->where('dialog_duration', '>=', 1); })
+            ->when($statusFilter === 'missed', function ($q) {
+                return $q->where(function ($qq) { $qq->whereNull('dialog_duration')->orWhere('dialog_duration', '<', 1); });
+            })
+            ->when($hasSms === 'yes', function ($q) { return $q->where('sent_sms', 1); })
+            ->when($hasSms === 'no', function ($q) { return $q->where('sent_sms', 0); })
+            // anketa filter — uses precomputed $surveyedCallIds (above)
+            ->when($hasFeedback === 'yes', function ($q) use ($surveyedCallIds) {
+                $q->whereIn('calls.id', $surveyedCallIds ?: [0]);
+            })
+            ->when($hasFeedback === 'no', function ($q) use ($surveyedCallIds) {
+                if (!empty($surveyedCallIds)) $q->whereNotIn('calls.id', $surveyedCallIds);
+            });
+
+        // sort: clickable column header on "Действия / Bitrix"
+        if ($sort === 'b24_desc' && !empty($surveyedCallIds)) {
+            // with-anketa first
+            $list = implode(',', array_map('intval', $surveyedCallIds));
+            $data->orderByRaw("FIND_IN_SET(calls.id, '{$list}') > 0 DESC");
+        } elseif ($sort === 'b24_asc' && !empty($surveyedCallIds)) {
+            // without-anketa first
+            $list = implode(',', array_map('intval', $surveyedCallIds));
+            $data->orderByRaw("FIND_IN_SET(calls.id, '{$list}') > 0 ASC");
+        }
+        $data->orderByDesc('created_at');
+
+        // Phase 11: CSV export
+        if ($request->input('export') === 'csv') {
+            $export = (clone $data)->limit(5000)->get();
+            $callIds = $export->pluck('id')->all();
+            $feedbacks = !empty($callIds)
+                ? \DB::table('feedback')->whereIn('call_id', $callIds)
+                    ->select('call_id', 'q1', 'q2', 'q3', 'q4', 'solved')
+                    ->get()->keyBy('call_id')
+                : collect();
+
+            $filename = 'calls_' . $from_date . '_' . $to_date . '.csv';
+            return response()->stream(function () use ($export, $feedbacks) {
+                $h = fopen('php://output', 'w');
+                fwrite($h, "\xEF\xBB\xBF"); // UTF-8 BOM
+                fputcsv($h, ['ID','Дата','Компания','Клиент','Оператор','Тип','Длительность (сек)','Статус','SMS','Анкета','Score'], ';');
+                foreach ($export as $c) {
+                    $fb = $feedbacks->get($c->id);
+                    $score = $fb ? ((int)$fb->q1===1)+((int)$fb->q2===1)+((int)$fb->q3===1)+((int)$fb->q4===1) : '';
+                    $isAns = (int)$c->dialog_duration >= 1;
+                    fputcsv($h, [
+                        $c->id,
+                        (string)$c->created_at,
+                        \App\Services\GatewayService::name($c->gateway),
+                        (string)$c->client_telephone,
+                        optional($c->operator)->name ?: '',
+                        $c->direction === 'inbound' ? 'Входящий' : ($c->direction === 'outbound' ? 'Исходящий' : ''),
+                        (int)$c->dialog_duration,
+                        $isAns ? 'Отвечен' : 'Пропущен',
+                        ((int)$c->sent_sms === 1) ? 'Да' : 'Нет',
+                        $fb ? 'Да' : 'Нет',
+                        $score === '' ? '' : $score . '/4',
+                    ], ';');
+                }
+                fclose($h);
+            }, 200, [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            ]);
+        }
+
+        $data = $data->paginate(100)->appends($request->query());
+
+        $data->setCollection(
+            $bitrixSurveyService->attachToCalls(collect($data->items()), $from_date, $to_date)
+        );
+
+        // Phase 5: eager-load feedback (q1..q4) for page items
+        $callIds = collect($data->items())->pluck('id')->all();
+        $feedbacks = !empty($callIds)
+            ? \DB::table('feedback')->whereIn('call_id', $callIds)
+                ->select('call_id', 'q1', 'q2', 'q3', 'q4', 'solved', 'complaint')
+                ->get()->keyBy('call_id')
+            : collect();
+        foreach ($data->items() as $call) {
+            $call->ph_feedback = $feedbacks->get($call->id);
+        }
+
+        if ($phoneFilter !== null) {
+            $phone = PhoneNumber::formatUz($phoneFilter) ?? $phone;
+        }
+
+        return view('admin.report.calls', compact(
+            'data', 'from_date', 'to_date', 'phone',
+            'gateway', 'direction', 'statusFilter', 'hasSms', 'hasFeedback'
+        ));
+    }
+
+    public function callbackAnalytics(Request $request, CallAnalyticsService $callAnalyticsService)
+    {
+        [$from_date, $to_date, $activePreset] = $this->resolveCallbackAnalyticsRange($request);
+
+        $gateway = $request->input('gateway') !== null && $request->input('gateway') !== ''
+            ? (int) $request->input('gateway') : null;
+
+        $analytics = $callAnalyticsService->buildDashboard($from_date, $to_date, $gateway);
+
+        return view('admin.report.callback-analytics', compact('analytics', 'from_date', 'to_date', 'activePreset', 'gateway'));
+    }
+
+    private function resolveCallbackAnalyticsRange(Request $request): array
+    {
+        $preset = trim((string) $request->query('preset', ''));
+        $availablePresets = ['today', 'yesterday', 'week', 'month', 'previous_month'];
+        $from_date = trim((string) $request->query('from_date', ''));
+        $to_date = trim((string) $request->query('to_date', ''));
+
+        $today = new \DateTimeImmutable('today');
+
+        if (!in_array($preset, $availablePresets, true)) {
+            $preset = '';
+        }
+
+        if ($preset !== '') {
+            [$from_date, $to_date] = $this->callbackAnalyticsPresetRange($preset, $today);
+
+            return [$from_date, $to_date, $preset];
+        }
+
+        if ($from_date !== '' || $to_date !== '') {
+            if ($from_date === '') {
+                $from_date = $to_date;
+            }
+
+            if ($to_date === '') {
+                $to_date = $from_date;
+            }
+
+            return [$from_date, $to_date, $this->detectCallbackAnalyticsPreset($from_date, $to_date, $today)];
+        }
+
+        return [
+            $today->format('Y-m-01'),
+            $today->format('Y-m-d'),
+            'month',
+        ];
+    }
+
+    private function callbackAnalyticsPresetRange(string $preset, \DateTimeImmutable $today): array
+    {
+        if ($preset === 'today') {
+            $value = $today->format('Y-m-d');
+
+            return [$value, $value];
+        }
+
+        if ($preset === 'yesterday') {
+            $value = $today->modify('-1 day')->format('Y-m-d');
+
+            return [$value, $value];
+        }
+
+        if ($preset === 'week') {
+            $weekStart = $today->modify('-' . (((int) $today->format('N')) - 1) . ' days');
+
+            return [$weekStart->format('Y-m-d'), $today->format('Y-m-d')];
+        }
+
+        if ($preset === 'previous_month') {
+            $previousMonth = $today->modify('first day of last month');
+
+            return [
+                $previousMonth->format('Y-m-01'),
+                $previousMonth->format('Y-m-t'),
+            ];
+        }
+
+        return [
+            $today->format('Y-m-01'),
+            $today->format('Y-m-d'),
+        ];
+    }
+
+    private function detectCallbackAnalyticsPreset(string $from_date, string $to_date, \DateTimeImmutable $today): string
+    {
+        foreach (['today', 'yesterday', 'week', 'month', 'previous_month'] as $preset) {
+            [$presetFrom, $presetTo] = $this->callbackAnalyticsPresetRange($preset, $today);
+
+            if ($presetFrom === $from_date && $presetTo === $to_date) {
+                return $preset;
+            }
+        }
+
+        return '';
+    }
+
+    public function operatorWorkspace(OperatorWorkspaceService $operatorWorkspaceService)
+    {
+        abort_unless(Auth::check() && Auth::user()->isOperator(), 404);
+
+        $workspaceData = $operatorWorkspaceService->buildForUser(Auth::user());
+
+        // Phase 7: extra fields for the new layout. Kept separate from $workspaceData
+        // so that /workspace/data JSON contract stays unchanged for JS pollers.
+        $extra = ['avg_score' => 0.0, 'missed_today' => 0, 'working_seconds' => 0,
+                  'recent_days' => [], 'fb_count_today' => 0];
+        $opId = optional(Auth::user()->operator)->id;
+        if ($opId) {
+            $today = date('Y-m-d');
+            $stats = app(\App\Services\OperatorStatsService::class);
+
+            $extra['working_seconds'] = $stats->workingTimeToday($opId);
+            $extra['recent_days']     = $stats->recentDays($opId, 14);
+
+            $row = \DB::table('feedback')
+                ->join('calls', 'calls.id', '=', 'feedback.call_id')
+                ->where('calls.operator_id', $opId)
+                ->whereDate('feedback.created_at', $today)
+                ->selectRaw('COUNT(*) AS c,
+                    SUM((CASE WHEN q1=1 THEN 1 ELSE 0 END)+(CASE WHEN q2=1 THEN 1 ELSE 0 END)
+                        +(CASE WHEN q3=1 THEN 1 ELSE 0 END)+(CASE WHEN q4=1 THEN 1 ELSE 0 END)) AS sumYes')
+                ->first();
+            $extra['fb_count_today'] = $row ? (int)$row->c : 0;
+            $extra['avg_score'] = ($row && (int)$row->c > 0) ? round((float)$row->sumYes / (float)$row->c, 2) : 0.0;
+
+            $extra['missed_today'] = (int) Call::query()
+                ->where('operator_id', $opId)
+                ->where('event', 'call_end')
+                ->whereDate('created_at', $today)
+                ->where(function ($q) { $q->whereNull('dialog_duration')->orWhere('dialog_duration', '<', 1); })
+                ->count();
+        }
+
+        return view('operator.workspace', compact('workspaceData', 'extra'));
+    }
+
+    public function operatorWorkspaceData(OperatorWorkspaceService $operatorWorkspaceService)
+    {
+        abort_unless(Auth::check() && Auth::user()->isOperator(), 404);
+
+        return Response::json($operatorWorkspaceService->buildForUser(Auth::user()));
     }
 
     public function monitoringKeys()
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
+        $auth = $this->getMonitoringAuthData();
         $key_and_id = $auth->key_id.":".$auth->key;
 
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
+        $auth_key = self::ONLINEPBX_AUTH_KEY;
 
         return Response::json(['key_and_id' => $key_and_id, 'auth_key' => $auth_key]);
     }
 
     public function monitoring()
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
-        $key_and_id = $auth->key_id.":".$auth->key;
+        return view('admin.monitoring');
+    }
 
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
+    public function monitoringLiveState(Request $request, PbxLiveStateService $pbxLiveStateService)
+    {
+        // Long-polling: hold the request until the snapshot version advances
+        // past `since`, or until `wait` seconds elapse.
+        $since   = (int) $request->query('since', 0);
+        $maxWait = (int) $request->query('wait', 25);
+        if ($maxWait < 1)  $maxWait = 1;
+        if ($maxWait > 15) $maxWait = 15; // stay under php max_execution_time
 
-        return view('admin.monitoring', compact('key_and_id', 'auth_key'));
+        // Release session lock so other tabs aren't blocked while we wait.
+        if (function_exists('session_write_close') && session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        @set_time_limit($maxWait + 5);
+
+        $deadline = microtime(true) + $maxWait;
+        $sleepUs  = 200000; // 200ms
+
+        while (true) {
+            $snap = $pbxLiveStateService->snapshot();
+            $version = (int) ($snap['version'] ?? 0);
+
+            if ($since === 0 || $version > $since) {
+                return Response::json($snap);
+            }
+            if (microtime(true) >= $deadline) {
+                return Response::json($snap); // timeout: return current state
+            }
+            // Bail early if the client disconnected.
+            if (connection_aborted()) {
+                return Response::json($snap);
+            }
+            usleep($sleepUs);
+        }
+    }
+
+    public function monitoringFifo()
+    {
+        try {
+            $payload = $this->fetchMonitoringFifo();
+        } catch (\Throwable $exception) {
+            return Response::json([
+                'status' => '0',
+                'comment' => 'fifo_unavailable',
+                'message' => $exception->getMessage(),
+                'data' => [],
+            ], 200);
+        }
+
+        return Response::json([
+            'status' => '1',
+            'data' => $payload,
+        ]);
     }
 
     public function monitoringData(Request $request)
@@ -229,7 +573,7 @@ class ReportController extends Controller
             }
         }
 
-        return Response::json($calls);
+        return Response::json($this->normalizeAllCallRows($calls));
     }
 
     public function monitoringUsers(Request $request)
@@ -237,6 +581,85 @@ class ReportController extends Controller
         $users = DB::table('operators')->select('name', 'phone as num', 'field', 'color', DB::raw('LENGTH(phone) as phone_len'))->where('active', 'Y')->having('phone_len', '>', 2)->get();
 
         return Response::json($users);
+    }
+
+    public function monitoringSurveysCount(Request $request)
+    {
+        // A call is "анкетировано" if a Bitrix24 survey exists with the same
+        // normalized phone within ±72h (same logic BitrixSurveyService uses).
+        // We do two indexed SELECTs and match in PHP — much faster than a
+        // cross-database JOIN with on-the-fly phone normalization.
+
+        $from = ($request->input('from') ?: date('Y-m-d')) . ' 00:00:00';
+        $to   = ($request->input('to')   ?: date('Y-m-d')) . ' 23:59:59';
+        $matchHours = (int) env('BITRIX_SURVEY_MATCH_HOURS', 72);
+        $b24Table = env('BITRIX_SURVEY_DB_TABLE', 'b24_call_survey_logs');
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $b24Table)) $b24Table = 'b24_call_survey_logs';
+
+        // 1. Total calls in period.
+        $totalCalls = (int) DB::table('calls')
+            ->whereBetween('created_at', [$from, $to])
+            ->count();
+
+        if ($totalCalls === 0) {
+            return Response::json([
+                'count' => 0, 'with_survey' => 0,
+                'total_calls' => 0, 'percent' => 0.0,
+            ]);
+        }
+
+        // 3. Pull all calls in period (id, normalized phone, ts).
+        $calls = DB::table('calls')
+            ->whereBetween('created_at', [$from, $to])
+            ->select('id', 'client_telephone', 'created_at')
+            ->get();
+
+        $phoneIndex = []; // normalized_phone => [['id'=>int,'ts'=>int], ...]
+        foreach ($calls as $c) {
+            $norm = \App\Support\PhoneNumber::canonicalUzDigits($c->client_telephone);
+            if ($norm === null) continue;
+            $phoneIndex[$norm][] = [
+                'id' => (int) $c->id,
+                'ts' => strtotime($c->created_at),
+            ];
+        }
+
+        // 4. Pull Bitrix surveys in extended window.
+        $extFrom = \Carbon\Carbon::parse($from)->subHours($matchHours)->format('Y-m-d H:i:s');
+        $extTo   = \Carbon\Carbon::parse($to)->addHours($matchHours)->format('Y-m-d H:i:s');
+        $matchedCallIds = [];
+        $windowSec = $matchHours * 3600;
+
+        try {
+            $b24 = DB::connection('bitrix_survey')
+                ->table($b24Table)
+                ->whereBetween('created_at', [$extFrom, $extTo])
+                ->select('phone_number', 'created_at')
+                ->get();
+
+            foreach ($b24 as $b) {
+                $norm = \App\Support\PhoneNumber::canonicalUzDigits($b->phone_number);
+                if ($norm === null || empty($phoneIndex[$norm])) continue;
+                $bts = strtotime($b->created_at);
+                foreach ($phoneIndex[$norm] as $cc) {
+                    if (abs($bts - $cc['ts']) <= $windowSec) {
+                        $matchedCallIds[$cc['id']] = true;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Bitrix DB unavailable — fall back silently to SMS-only count.
+        }
+
+        $withSurvey = count($matchedCallIds);
+        $percent = $totalCalls > 0 ? round($withSurvey / $totalCalls * 100, 1) : 0.0;
+
+        return Response::json([
+            'count'        => $withSurvey,
+            'with_survey'  => $withSurvey,
+            'total_calls'  => $totalCalls,
+            'percent'      => $percent,
+        ]);
     }
 
     public function monitoringUsersFeedbacks(Request $request)
@@ -294,7 +717,7 @@ class ReportController extends Controller
             }
         }
 
-        return Response::json($calls);
+        return Response::json($this->normalizeAllCallRows($calls));
     }
 
     public function monitoringOperatorCondition(Request $request)
@@ -305,6 +728,25 @@ class ReportController extends Controller
         $calls = Operator_time::select('uid')->where('unregister', 0)->whereBetween('timestamp_reg', [$from, $to])->get()->unique('uid');
 
         return Response::json(['calls' => $calls]);
+    }
+
+    private function normalizeAllCallRows(array $calls): array
+    {
+        foreach ($calls as $call) {
+            if (!is_object($call)) {
+                continue;
+            }
+
+            if (property_exists($call, 'caller_id_number')) {
+                $call->caller_id_number = PhoneNumber::formatUz($call->caller_id_number) ?? $call->caller_id_number;
+            }
+
+            if (property_exists($call, 'destination_number')) {
+                $call->destination_number = PhoneNumber::formatUz($call->destination_number) ?? $call->destination_number;
+            }
+        }
+
+        return $calls;
     }
 
     public function monitoringOperatorTime(Request $request)
@@ -330,46 +772,158 @@ class ReportController extends Controller
 
     public function monitoringUnknownClients(Request $request)
     {
-        // $from = $request['from'] . " 00:00:00";
-        // $to = $request['to'] . " 23:59:59";
-        
-        // $clients = DB::table('unknown_clients')
-        //     ->select('operator', 'direction', DB::raw('COUNT(phone) as count'))
-        //     ->where('event', '=', 'call_end')
-        //     ->whereBetween('created_at', [$from, $to])
-        //     ->groupByRaw('direction, operator')
-        //     ->get();
-        // return Response::json($clients);
-        return [];
+        $from = $request['from'] . " 00:00:00";
+        $to = $request['to'] . " 23:59:59";
+
+        $clients = DB::table('unknown_clients')
+            ->select('operator', 'direction', DB::raw('COUNT(phone) as count'))
+            ->where('event', '=', 'call_end')
+            ->whereBetween('created_at', [$from, $to])
+            ->groupByRaw('direction, operator')
+            ->get();
+
+        return Response::json($clients);
     }
 
     public function monitoringPersonalMissed(Request $request)
     {
-        
-		// $ch = curl_init();
+        $ch = curl_init();
 
-		// curl_setopt($ch, CURLOPT_URL, "https://161.97.137.120:8441/download/v3");
-		// curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); // Disable SSL verification
-		// curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); // Disable host verification
-		// curl_setopt($ch, CURLOPT_HTTPHEADER, [
-		// 	"Content-Type: application/json"
-		// ]);
-		// curl_setopt($ch, CURLOPT_POST, 1);
-		// curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-		// 	'date_start' => $request->from,
-        //     'date_end' => $request->to
-		// ]));
+        curl_setopt($ch, CURLOPT_URL, "https://161.97.137.120:8441/download/v3");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/json"
+        ]);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+            'date_start' => $request->from,
+            'date_end' => $request->to
+        ]));
 
-		// $output = curl_exec($ch);
+        $output = curl_exec($ch);
+        if ($output === false) {
+            curl_close($ch);
 
-		// if ($output === false) {
-        //     return Response::json(['error' => curl_error($ch)]);
-		// }
-		// curl_close($ch);
+            return Response::json([]);
+        }
 
-        // return Response::json(json_decode($output));
-        return [];
+        curl_close($ch);
+
+        $decoded = json_decode($output, true);
+        if (!is_array($decoded)) {
+            return Response::json([]);
+        }
+
+        return Response::json($decoded);
+    }
+
+    private function getMonitoringAuthPaths(): array
+    {
+        return [
+            base_path('configs/auth.txt'),
+            public_path('configs/auth.txt'),
+        ];
+    }
+
+    private function getMonitoringAuthData(bool $forceRefresh = false)
+    {
+        if (!$forceRefresh) {
+            foreach ($this->getMonitoringAuthPaths() as $path) {
+                if (!is_file($path)) {
+                    continue;
+                }
+
+                $decoded = json_decode((string) file_get_contents($path));
+                if (!empty($decoded->key) && !empty($decoded->key_id)) {
+                    return $decoded;
+                }
+            }
+        }
+
+        return $this->refreshMonitoringAuthData();
+    }
+
+    private function refreshMonitoringAuthData()
+    {
+        $response = $this->performOnlinePbxJsonRequest(
+            'https://api2.onlinepbx.ru/' . self::ONLINEPBX_DOMAIN . '/auth.json',
+            ['auth_key' => self::ONLINEPBX_AUTH_KEY]
+        );
+
+        if (($response['status'] ?? null) !== '1' || empty($response['data']['key']) || empty($response['data']['key_id'])) {
+            throw new \RuntimeException('Не удалось обновить токен очереди OnlinePBX.');
+        }
+
+        $encoded = json_encode($response['data'], JSON_UNESCAPED_UNICODE);
+        foreach ($this->getMonitoringAuthPaths() as $path) {
+            @file_put_contents($path, $encoded);
+        }
+
+        return json_decode($encoded);
+    }
+
+    private function fetchMonitoringFifo(): array
+    {
+        $auth = $this->getMonitoringAuthData();
+
+        $response = $this->performOnlinePbxJsonRequest(
+            'https://api2.onlinepbx.ru/' . self::ONLINEPBX_DOMAIN . '/fifo/get.json',
+            ['asd' => 'asdad'],
+            [
+                'x-pbx-authentication: ' . $auth->key_id . ':' . $auth->key,
+            ]
+        );
+
+        if (($response['isNotAuth'] ?? false) || ($response['errorCode'] ?? '') === 'API_KEY_CHECK_FAILED') {
+            $auth = $this->getMonitoringAuthData(true);
+            $response = $this->performOnlinePbxJsonRequest(
+                'https://api2.onlinepbx.ru/' . self::ONLINEPBX_DOMAIN . '/fifo/get.json',
+                ['asd' => 'asdad'],
+                [
+                    'x-pbx-authentication: ' . $auth->key_id . ':' . $auth->key,
+                ]
+            );
+        }
+
+        if (($response['status'] ?? null) !== '1' || !isset($response['data']) || !is_array($response['data'])) {
+            $message = $response['comment'] ?? 'Очередь OnlinePBX временно недоступна.';
+            throw new \RuntimeException($message);
+        }
+
+        return $response['data'];
+    }
+
+    private function performOnlinePbxJsonRequest(string $url, array $payload, array $headers = []): array
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge([
+            'Content-Type: application/json',
+        ], $headers));
+
+        $rawResponse = curl_exec($ch);
+        if ($rawResponse === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new \RuntimeException('OnlinePBX request failed: ' . $error);
+        }
+
+        curl_close($ch);
+
+        $decoded = json_decode($rawResponse, true);
+        if (!is_array($decoded)) {
+            throw new \RuntimeException('OnlinePBX returned an invalid response.');
+        }
+
+        return $decoded;
     }
 
     public function calculate_total_time($array) 

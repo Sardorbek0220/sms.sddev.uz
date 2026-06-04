@@ -6,6 +6,7 @@ use App\Call;
 use App\Operator;
 use App\Client;
 use App\Http\Controllers\FeedbackController;
+use Illuminate\Support\Facades\Log;
 
 class AmocrmController extends Controller
 {
@@ -41,10 +42,10 @@ class AmocrmController extends Controller
 					// 	}
 					// }
 					Client::create([
-						'name' => $client_data['name'] ?? '',
-						'telephone' => $clientTel,
-						'company' => $company_name,
-						'server' => $server_name
+						'name'      => '',
+						'telephone' => (string) $clientTel,
+						'company'   => (string) $company_name,
+						'server'    => (string) $server_name,
 					]);
 					
 				}
@@ -65,25 +66,30 @@ class AmocrmController extends Controller
 					$real_url = $feedbackController->getUrl($contents['uuid']);
 				}
 
+				// Force scalar casts: PBX webhook occasionally sends array values
+				// for some fields, which crashes Eloquent string-column inserts.
+				$str = function ($v) { return is_scalar($v) ? (string) $v : (is_array($v) ? implode(',', array_filter($v, 'is_scalar')) : ''); };
+				$int = function ($v) { return is_numeric($v) ? (int) $v : 0; };
+
 				$call = Call::create([
-					'client_telephone' => $clientTel,
-					'operator_id' => $operator['id'],
-					'pbx_audio_url' => $contents['download_url'],
-					'telegram_audio_url' => $real_url,
-					'event' => $contents['event'],
-					'direction' => $contents['direction'],
-					'call_duration' => $contents['call_duration'],
-					'dialog_duration' => $contents['dialog_duration'],
-					'uuid' => $contents['uuid'],
-					'gateway' => $contents['gateway'],
-					'date' => $contents['date']
+					'client_telephone'   => $str($clientTel),
+					'operator_id'        => $int($operator['id']),
+					'pbx_audio_url'      => $str($contents['download_url'] ?? ''),
+					'telegram_audio_url' => $str($real_url),
+					'event'              => $str($contents['event'] ?? ''),
+					'direction'          => $str($contents['direction'] ?? ''),
+					'call_duration'      => $int($contents['call_duration'] ?? 0),
+					'dialog_duration'    => $int($contents['dialog_duration'] ?? 0),
+					'uuid'               => $str($contents['uuid'] ?? ''),
+					'gateway'            => $str($contents['gateway'] ?? ''),
+					'date'               => $str($contents['date'] ?? ''),
 				]);
 
-				dd($call);
+				Log::info('AmocrmController.mainProcess: call stored', ['call_id' => $call->id ?? null]);
 			}
 
 		} catch (\Throwable $th) {
-			dd($th);
+			Log::error('AmocrmController.mainProcess failed: ' . $th->getMessage(), ['exception' => get_class($th), 'file' => $th->getFile(), 'line' => $th->getLine()]);
 		}
 		
     }

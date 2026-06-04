@@ -1,0 +1,54 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class WorkHour extends Model
+{
+    protected $table = 'work_hours';
+    protected $primaryKey = 'weekday';
+    public $incrementing = false;
+    protected $keyType = 'int';
+
+    protected $fillable = [
+        'weekday',
+        'start_hour',
+        'end_hour',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'weekday'    => 'int',
+        'start_hour' => 'int',
+        'end_hour'   => 'int',
+        'is_active'  => 'bool',
+    ];
+
+    public static function defaultMap(): array
+    {
+        return [
+            0 => ['start_hour' => 9, 'end_hour' => 18, 'is_active' => true],
+            1 => ['start_hour' => 9, 'end_hour' => 20, 'is_active' => true],
+            2 => ['start_hour' => 9, 'end_hour' => 20, 'is_active' => true],
+            3 => ['start_hour' => 9, 'end_hour' => 20, 'is_active' => true],
+            4 => ['start_hour' => 9, 'end_hour' => 20, 'is_active' => true],
+            5 => ['start_hour' => 9, 'end_hour' => 20, 'is_active' => true],
+            6 => ['start_hour' => 9, 'end_hour' => 18, 'is_active' => true],
+        ];
+    }
+
+    /** Returns map weekday(0..6) => [start_hour, end_hour, is_active]. */
+    public static function asMap(): array
+    {
+        $map = self::defaultMap();
+        foreach (self::all() as $row) {
+            $map[(int) $row->weekday] = [
+                'start_hour' => (int) $row->start_hour,
+                'end_hour'   => (int) $row->end_hour,
+                'is_active'  => (bool) $row->is_active,
+            ];
+        }
+        return $map;
+    }
+}

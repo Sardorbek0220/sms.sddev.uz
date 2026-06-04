@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\AmocrmController;
+use App\Http\Controllers\PbxEventController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\OperatorController;
 use App\Http\Controllers\Admin\ReportController;
@@ -10,6 +11,17 @@ use App\Http\Controllers\Admin\BigreportController;
 use App\Http\Controllers\PbxBot\PbxBotController;
 use App\Http\Controllers\Admin\TablereportController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserAccountController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SurveySettingsController;
+use App\Http\Controllers\Admin\SurveyReportsController;
+use App\Http\Controllers\Admin\CallsWithoutSurveyController;
+use App\Http\Controllers\Admin\WorkHoursController;
+use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\AccessControlController;
+use App\Http\Controllers\Admin\RecordingController;
+use App\Http\Controllers\Operator\OperatorSettingsController;
+use App\Http\Controllers\CallSurveyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +48,8 @@ Route::post('feedback_new/afterStore', [FeedbackController::class, 'afterNewStor
 
 Route::post('mainProcess', [AmocrmController::class, 'mainProcess']);
 Route::post('pbxBot', [PbxBotController::class, 'send']);
+Route::post('pbx/event', [PbxEventController::class, 'store'])
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 // ----------------
 // Route::get('auth', [AmocrmController::class, 'getMonitoringCalls']);
 // ----------------
@@ -46,7 +60,20 @@ Route::group(['middleware' => 'guest'], function () {
     Route::post('/login_store', [UserController::class, 'login_store'])->name('login.store');
 });
 
-Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
+Route::group(['prefix' => 'admin', 'middleware' => ['admin', 'audit']], function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('survey-settings', [SurveySettingsController::class, 'index'])->name('admin.survey-settings');
+    Route::get('work-hours', [WorkHoursController::class, 'index'])->name('admin.work-hours');
+    Route::post('work-hours', [WorkHoursController::class, 'update'])->name('admin.work-hours.update');
+    Route::get('monitoring/workHours', [WorkHoursController::class, 'asJson']);
+    Route::get('audit-log', [AuditLogController::class, 'index'])->name('admin.audit-log');
+    Route::get('access-control', [AccessControlController::class, 'index'])->name('admin.access-control');
+    Route::post('access-control', [AccessControlController::class, 'update'])->name('admin.access-control.update');
+    Route::get('calls/{call}/audio', [RecordingController::class, 'stream'])->name('admin.calls.audio');
+    Route::get('monitoring/workHours', [WorkHoursController::class, 'asJson']);
+    Route::post('survey-settings', [SurveySettingsController::class, 'update'])->name('admin.survey-settings.update');
+    Route::get('anketi', [SurveyReportsController::class, 'index'])->name('admin.anketi');
+    Route::get('calls-no-anketa', [CallsWithoutSurveyController::class, 'index'])->name('admin.calls-no-anketa');
     Route::resource('operators', 'OperatorController');
     Route::resource('likes', 'LikeController');
     Route::resource('trainings', 'TrainingController');
@@ -66,11 +93,21 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('profile/{id}', [UserController::class, 'profile'])->name('admin.profile');
     Route::put('profile_save', [UserController::class, 'profile_save'])->name('admin.profile_save');
     Route::get('report', [ReportController::class, 'index'])->name('admin.report');
+    Route::get('report/callback-analytics', [ReportController::class, 'callbackAnalytics'])->name('admin.report.callback-analytics');
     Route::get('report/calls', [ReportController::class, 'calls'])->name('admin.report.calls');
+    Route::get('report/calls/{call}/survey/create', [CallSurveyController::class, 'create'])->name('admin.call-surveys.create');
+    Route::post('report/calls/{call}/survey', [CallSurveyController::class, 'store'])->name('admin.call-surveys.store');
+    Route::get('users', [UserAccountController::class, 'index'])->name('admin.users.index');
+    Route::post('users', [UserAccountController::class, 'store'])->name('admin.users.store');
+    Route::get('users/{user}/edit', [UserAccountController::class, 'edit'])->name('admin.users.edit');
+    Route::put('users/{user}', [UserAccountController::class, 'update'])->name('admin.users.update');
+    Route::delete('users/{user}', [UserAccountController::class, 'destroy'])->name('admin.users.destroy');
 
     Route::get('score', [ReportController::class, 'score']);
 
     Route::get('monitoring', [ReportController::class, 'monitoring'])->name('admin.monitoring');
+    Route::get('monitoring/fifo', [ReportController::class, 'monitoringFifo']);
+    Route::get('monitoring/liveState', [ReportController::class, 'monitoringLiveState']);
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
     Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
 
@@ -80,6 +117,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
+    Route::get('monitoring/surveysCount', [ReportController::class, 'monitoringSurveysCount']);
     Route::get('monitoring/usersTrainings', [ReportController::class, 'monitoringusersTrainings']);
     Route::get('monitoring/personalMissed', [ReportController::class, 'monitoringPersonalMissed']);
 
@@ -89,32 +127,35 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 });
 
 Route::group(['prefix' => 'operator', 'middleware' => 'operator'], function () {
-    Route::get('bigreport', [BigreportController::class, 'operator'])->name('operator.bigreport');
-    Route::get('bigreport/extra', [BigreportController::class, 'extra']);
-    Route::get('score', [ReportController::class, 'score']);
+    Route::get('workspace', [ReportController::class, 'operatorWorkspace'])->name('operator.workspace');
+    Route::get('settings', [OperatorSettingsController::class, 'index'])->name('operator.settings');
+    Route::post('settings', [OperatorSettingsController::class, 'update'])->name('operator.settings.update');
+    Route::get('calls/{call}/audio', [RecordingController::class, 'stream'])->name('operator.calls.audio');
 
-    Route::get('monitoring', [ReportController::class, 'monitoring'])->name('monitoring');
+    // Operator-level monitoring (same controller methods, operator-prefixed names so blade picks up auth context)
+    Route::get('monitoring', [ReportController::class, 'monitoring'])->name('operator.monitoring');
+    Route::get('monitoring/fifo', [ReportController::class, 'monitoringFifo']);
+    Route::get('monitoring/liveState', [ReportController::class, 'monitoringLiveState']);
     Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
     Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
-
+    Route::get('monitoring/workHours', [WorkHoursController::class, 'asJson']);
     Route::get('monitoring/operatorCondition', [ReportController::class, 'monitoringOperatorCondition']);
     Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);
     Route::get('monitoring/unknownClients', [ReportController::class, 'monitoringUnknownClients']);
-
     Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
     Route::get('monitoring/usersFeedbacks', [ReportController::class, 'monitoringUsersFeedbacks']);
-    Route::get('monitoring/usersTrainings', [ReportController::class, 'monitoringusersTrainings']);
-    Route::get('monitoring/personalMissed', [ReportController::class, 'monitoringPersonalMissed']);
+    Route::get('monitoring/surveysCount', [ReportController::class, 'monitoringSurveysCount']);
+    Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);
 
-    Route::get('monitoring/worklyData', [ReportController::class, 'worklyData']);
-    Route::get('monitoring/worklySchedule', [ReportController::class, 'worklySchedule']);
-    Route::get('monitoring/worklyOperators', [ReportController::class, 'worklyOperators']);
-
-    Route::get('tablereport', [TablereportController::class, 'index'])->name('operator.tablereport');
-    Route::get('productoper', [ProductController::class, 'index'])->name('operator.products');
-    
-    //Route::resource('products', 'ProductController')->name('operator.product');
-
-    // Route::get('monitoring', [UserController::class, 'monitoring'])->name('monitoring');
+    Route::get('workspace/data', [ReportController::class, 'operatorWorkspaceData'])->name('operator.workspace.data');
+    Route::get('report/calls', [ReportController::class, 'calls'])->name('operator.report.calls');
+    Route::get('calls-no-anketa', [CallsWithoutSurveyController::class, 'index'])->name('operator.calls-no-anketa');
+    Route::get('report/calls/{call}/survey/create', [CallSurveyController::class, 'create'])->name('operator.call-surveys.create');
+    Route::post('report/calls/{call}/survey', [CallSurveyController::class, 'store'])->name('operator.call-surveys.store');
+    Route::redirect('bigreport', '/operator/workspace')->name('operator.bigreport');
+    Route::redirect('tablereport', '/operator/workspace')->name('operator.tablereport');
+    Route::any('{any}', function () {
+        return redirect()->route('operator.workspace');
+    })->where('any', '.*');
 });
 

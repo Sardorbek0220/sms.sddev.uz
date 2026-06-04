@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function () {
             
-            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 11)).gettimeofday()["dsttime"], 0, -1);
+            $date1 = substr(date("Y-m-d H:i:s", (time() - 60 * 180)).gettimeofday()["dsttime"], 0, -1);
 		    $date2 = substr(date("Y-m-d H:i:s", (time() - 60 * 10)).gettimeofday()["dsttime"], 0, -1);
 
             $date3 = substr(date("Y-m-d H:i:s", (time() - 60 * 240)).gettimeofday()["dsttime"], 0, -1);
@@ -62,7 +62,7 @@ class Kernel extends ConsoleKernel
                     $hash = str_replace ('/', 'withoutslashes', $hash);
 
                     $builder = new Builder();
-                    $shortURLObject = $builder->destinationUrl("https://sms.salesdoc.uz/feedback_new/".$call['id']."___".$hash)->make();
+                    $shortURLObject = $builder->destinationUrl("https://phone.sdteam.uz/feedback_new/".$call['id']."___".$hash)->make();
                     $shortURL = $shortURLObject->default_short_url;
 
 					if($call['gateway'] == '712075995'){
@@ -93,7 +93,8 @@ class Kernel extends ConsoleKernel
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 20);
                 $res = curl_exec($ch);
         
                 if (curl_errno($ch)) {
@@ -111,7 +112,15 @@ class Kernel extends ConsoleKernel
             self::getMonitoringCalls();
         })->everyMinute();
 
-		$schedule->call(function () {
+		// Download new call recordings every 5 min (last 3 days only).
+		$schedule->command('recordings:download')->everyFiveMinutes()
+			->withoutOverlapping(15)->runInBackground();
+
+		// Purge recordings older than 3 days, hourly.
+		$schedule->command('recordings:purge --days=30')->hourly()
+			->withoutOverlapping(15);
+
+				$schedule->call(function () {
             $deleted = Operator_time::where('created_at', '<', date('Y-m-d'))->where('unregister', 0)->delete();
 			info("deleted times: ".$deleted);
         })->dailyAt('10:20');
@@ -119,17 +128,18 @@ class Kernel extends ConsoleKernel
 
 	public function getMonitoringCalls(): void
 	{
-		$auth = json_decode(file_get_contents("/var/www/sms.sddev.uz/public/configs/auth.txt"));
+		$auth = json_decode(file_get_contents(public_path("configs/auth.txt")));
 		if (empty($auth->key) || empty($auth->key_id)) {
 			$this->auth();
-			$this->getMonitoringCalls();
+			return; // next cron tick will retry; avoid unbounded recursion
 		}
 
-		$timeStamp = strtotime(date('Y-m-d H:i:s'));
+		$timeStampTo = strtotime(date('Y-m-d H:i:s'));
+		$timeStampFrom = $timeStampTo - 120;
 
 		$data = [
-			'start_stamp_from' => $timeStamp,
-			'start_stamp_to' => $timeStamp
+			'start_stamp_from' => $timeStampFrom,
+			'start_stamp_to' => $timeStampTo
 		];
 		$url = 'https://api2.onlinepbx.ru/pbx12127.onpbx.ru/mongo_history/search.json';
 
@@ -139,7 +149,8 @@ class Kernel extends ConsoleKernel
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 		$res = json_decode(curl_exec($ch));
 
 		if (curl_errno($ch)) {
@@ -152,7 +163,7 @@ class Kernel extends ConsoleKernel
 		if ($res && $res->status == '0') {
 			// info($res);
 			$this->auth();
-			$this->getMonitoringCalls();
+			return; // next cron tick will retry; avoid unbounded recursion
 		}
 
 		if ($res && $res->status == '1') {
@@ -206,7 +217,8 @@ class Kernel extends ConsoleKernel
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 		$res = json_decode(curl_exec($ch));
 
 		if (curl_errno($ch)) {
@@ -217,7 +229,7 @@ class Kernel extends ConsoleKernel
 		curl_close($ch);
 
 		if ($res->status == '1') {
-			file_put_contents("/var/www/sms.sddev.uz/public/configs/auth.txt", json_encode($res->data));
+			file_put_contents(public_path("configs/auth.txt"), json_encode($res->data));
 		}
 	}
 

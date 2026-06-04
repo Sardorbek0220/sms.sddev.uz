@@ -17,9 +17,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && (Auth::user()->email=='admin@gmail.com' || Auth::user()->email=='sardor@gmail.com')) {
+        if (Auth::check() && Auth::user()->isAdmin()) {
             return $next($request);
-          }
-          abort(404);
+        }
+
+        abort(404);
     }
 }

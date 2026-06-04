@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Call;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Response;
+
+class RecordingController extends Controller
+{
+    /** Stream a stored recording to the browser. Falls back to PBX URL redirect if local copy expired. */
+    public function stream(Call $call)
+    {
+        // Operator can only play their own calls; admins play any.
+        $u = auth()->user();
+        if ($u && method_exists($u, "isOperator") && $u->isOperator()) {
+            if ((int) $call->operator_id !== (int) $u->operator_id) {
+                abort(403, "Доступ только к своим звонкам");
+            }
+        }
+        if ($call->recording_local_path) {
+            $absolute = storage_path('app/' . $call->recording_local_path);
+            if (is_file($absolute)) {
+                return Response::file($absolute, [
+                    'Content-Type'        => 'audio/mpeg',
+                    'Content-Disposition' => 'inline; filename="call-' . $call->id . '.mp3"',
+                    'Cache-Control'       => 'private, max-age=600',
+                    'Accept-Ranges'       => 'bytes',
+                ]);
+            }
+        }
+        // Local copy expired or never downloaded — try fallback PBX URL.
+        if ($call->pbx_audio_url) {
+            return redirect()->away($call->pbx_audio_url);
+        }
+        abort(404, 'Recording not available');
+    }
+}

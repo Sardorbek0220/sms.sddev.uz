@@ -1,73 +1,500 @@
-@extends('admin.layouts.index')
+@extends(auth()->check() && auth()->user()->isOperator() ? 'operator.layouts.index' : 'admin.layouts.index')
+
+@php
+    $isOperator = auth()->check() && auth()->user()->isOperator();
+    $reportRoute = $isOperator ? route('operator.report.calls') : route('admin.report.calls');
+    $createSurveyRouteName = $isOperator ? 'operator.call-surveys.create' : 'admin.call-surveys.create';
+    $storeSurveyRouteName = $isOperator ? 'operator.call-surveys.store' : 'admin.call-surveys.store';
+    $surveyFormConfig = app(\App\Services\BitrixSurveyService::class)->getFormConfig();
+@endphp
 
 @section('content')
-<div class="content-wrapper">
-    <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>{{__('Звонки')}}</h1>
-          </div>
-        </div>
-      </div>
-    </section>
+<div class="content-wrapper p-3 p-md-4">
 
-    <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <form action="{{ route('admin.report.calls') }}" method="get" enctype="multipart/form-data">
-                        @csrf
-                        <div class="row">
-                            <div class="col-12 col-md-7 form-group">
-                            </div>
-                            <div class="col-12 col-md-2 form-group">
-                                <label for="from_date">От</label>
-                                <input type="date" class="form-control" id="from_date" name="from_date" value="{{$from_date}}">
-                            </div>
-                            <div class="col-12 col-md-2 form-group">
-                                <label for="to_date">До</label>
-                                <input type="date" class="form-control" id="to_date" name="to_date" value="{{$to_date}}">
-                            </div>
-                            <div class="col-12 col-md-1 form-group">
-                                <label for="filter">&nbsp;</label><br>
-                                <button type="submit" class="btn btn-success" id="filter" style="width: 100%;">Фильтр</button>
-                            </div>
-                        </div>
-                    </form>
+    <x-page-header title="Отчёт по звонкам"
+                   subtitle="Период: {{ $from_date }} — {{ $to_date }}"
+                   :breadcrumbs="[
+                       ['label' => 'Главная', 'url' => $isOperator ? url('/operator') : route('admin.bigreport')],
+                       ['label' => 'Звонки'],
+                   ]">
+        <x-slot name="actions">
+            <a href="{{ $reportRoute }}?{{ http_build_query(array_merge(request()->query(), ['export'=>'csv'])) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-file-csv"></i> Экспорт CSV
+            </a>
+        </x-slot>
+    </x-page-header>
+
+    @if(session('success'))<div class="alert alert-success" style="border-radius:12px;"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+    @if(session('info'))<div class="alert alert-info" style="border-radius:12px;"><i class="fas fa-info-circle"></i> {{ session('info') }}</div>@endif
+    @if($errors->any())
+        <div class="alert alert-danger" style="border-radius:12px;">
+            <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        </div>
+    @endif
+
+    {{-- Filter card --}}
+    <form action="{{ $reportRoute }}" method="get" class="ph-filter-card">
+        <div class="ph-filter-row">
+            <div>
+                <label>Телефон</label>
+                <input type="text" name="phone" value="{{ $phone ?? '' }}" placeholder="998xx или 9xxxxxxxx" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>От</label>
+                <input type="date" name="from_date" value="{{ $from_date }}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>До</label>
+                <input type="date" name="to_date" value="{{ $to_date }}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>Компания</label>
+                <select name="gateway" class="form-control form-control-sm">
+                    <option value="">Все</option>
+                    @foreach(\App\Services\GatewayService::options() as $gw => $label)
+                        <option value="{{ $gw }}" {{ (string)($gateway ?? '') === (string)$gw ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Тип</label>
+                <select name="direction" class="form-control form-control-sm">
+                    <option value="">Любой</option>
+                    <option value="inbound" {{ ($direction ?? '') === 'inbound' ? 'selected' : '' }}>Входящий</option>
+                    <option value="outbound" {{ ($direction ?? '') === 'outbound' ? 'selected' : '' }}>Исходящий</option>
+                </select>
+            </div>
+            <div>
+                <label>Статус</label>
+                <select name="status_call" class="form-control form-control-sm">
+                    <option value="">Любой</option>
+                    <option value="answered" {{ ($statusFilter ?? '') === 'answered' ? 'selected' : '' }}>Отвечен</option>
+                    <option value="missed" {{ ($statusFilter ?? '') === 'missed' ? 'selected' : '' }}>Пропущен</option>
+                </select>
+            </div>
+            <div>
+                <label>SMS</label>
+                <select name="has_sms" class="form-control form-control-sm">
+                    <option value="">Любой</option>
+                    <option value="yes" {{ ($hasSms ?? '') === 'yes' ? 'selected' : '' }}>Отправлено</option>
+                    <option value="no" {{ ($hasSms ?? '') === 'no' ? 'selected' : '' }}>Не отправлено</option>
+                </select>
+            </div>
+            <div>
+                <label>Анкета</label>
+                <select name="has_feedback" class="form-control form-control-sm">
+                    <option value="">Любая</option>
+                    <option value="yes" {{ ($hasFeedback ?? '') === 'yes' ? 'selected' : '' }}>Есть</option>
+                    <option value="no" {{ ($hasFeedback ?? '') === 'no' ? 'selected' : '' }}>Нет</option>
+                </select>
+            </div>
+        </div>
+        <div class="ph-filter-actions">
+            <a href="{{ $reportRoute }}" class="btn btn-light btn-sm"><i class="fas fa-undo"></i> Сбросить</a>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Применить</button>
+        </div>
+    </form>
+
+    {{-- Table --}}
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0" style="font-weight:600;font-size:1rem;">Звонки ({{ $data->total() }})</h3>
+            <small class="text-muted">страница {{ $data->currentPage() }} / {{ $data->lastPage() }}</small>
+        </div>
+
+        <div class="card-body p-0">
+            @if($data->isEmpty())
+                <div class="ph-empty">
+                    <div class="ph-empty-icon"><i class="fas fa-search"></i></div>
+                    <h4>Ничего не найдено</h4>
+                    <div class="text-muted small">Попробуйте сменить фильтры или период.</div>
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered" id="operator_list">
+            @else
+                <div class="table-responsive table-responsive-mobile-cards">
+                    <table class="table table-sm table-hover mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 2%">#</th>
-                                <th>{{__('Клиент')}}</th>
-                                <th>{{__('Оператор')}}</th>
-                                <th>{{__('Аудио')}}</th>
-                                <th>{{__('Вход')}}</th>
-                                <th>{{__('Дата')}}</th>
+                                <th>#</th>
+                                <th>Дата</th>
+                                <th>Компания</th>
+                                <th>Клиент</th>
+                                <th>Оператор</th>
+                                <th>Тип</th>
+                                <th>Длит.</th>
+                                <th>Статус</th>
+                                <th>SMS</th>
+                                <th>Анкета</th>
+                                <th>Score</th>
+                                <th>Аудио</th>
+                                <th style="min-width:280px;" data-sort="b24">
+                                    @php
+                                        $cur = request('sort');
+                                        $nextSort = $cur === 'b24_desc' ? 'b24_asc' : ($cur === 'b24_asc' ? '' : 'b24_desc');
+                                        $sortLink = request()->fullUrlWithQuery(['sort' => $nextSort ?: null]);
+                                    @endphp
+                                    <a href="{{ $sortLink }}" class="text-reset text-decoration-none d-inline-flex align-items-center" style="gap:6px;" title="Сортировать по наличию анкеты">
+                                        Действия / Bitrix
+                                        @if($cur === 'b24_desc')
+                                            <i class="fas fa-sort-down" style="color:#5b67f4;"></i>
+                                        @elseif($cur === 'b24_asc')
+                                            <i class="fas fa-sort-up" style="color:#5b67f4;"></i>
+                                        @else
+                                            <i class="fas fa-sort" style="color:#9aa1ab;opacity:.7;"></i>
+                                        @endif
+                                    </a>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($data as $datum)
-                            <tr>
-                                <td>{{$datum->id}}</td>
-                                <td>{{$datum->client_telephone}}</td>
-                                <td>{{$datum->operator->name}}</td>
-                                <td><?if(!empty($datum->telegram_audio_url)){?> <a href="{{$datum->telegram_audio_url}}" target="_blank">{{$datum->id}}</a> <?}?></td>
-                                <td>{{$datum->gateway}}</td>
-                                <td>{{$datum->created_at}}</td>
-                            </tr>
+                                @php
+                                    $dur = (int)$datum->dialog_duration;
+                                    $isAnswered = $dur >= 1;
+                                    $fb = $datum->ph_feedback ?? null;
+                                    $score = $fb ? ((int)$fb->q1 === 1) + ((int)$fb->q2 === 1) + ((int)$fb->q3 === 1) + ((int)$fb->q4 === 1) : null;
+                                    $scoreVar = $score === null ? 'muted' : ($score >= 3 ? 'success' : ($score >= 2 ? 'warning' : 'danger'));
+                                    $gwInfo = \App\Services\GatewayService::info($datum->gateway);
+                                @endphp
+                                <tr>
+                                    <td><small class="text-muted">#{{ $datum->id }}</small></td>
+                                    <td><small>{{ \Carbon\Carbon::parse($datum->created_at)->format('d.m H:i') }}</small></td>
+                                    <td><span class="ph-badge is-info">{{ $gwInfo['short'] }}</span></td>
+                                    <td><small>{{ ph_format_phone($datum->client_telephone) }}</small></td>
+                                    <td><small>{{ optional($datum->operator)->name ?: '—' }}</small></td>
+                                    <td>
+                                        @if($datum->direction === 'inbound')
+                                            <span class="ph-badge is-info"><i class="fas fa-arrow-down"></i> Вх.</span>
+                                        @elseif($datum->direction === 'outbound')
+                                            <span class="ph-badge is-primary"><i class="fas fa-arrow-up"></i> Исх.</span>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td><small>{{ ph_format_duration($dur) }}</small></td>
+                                    <td>
+                                        @if($isAnswered)
+                                            <span class="ph-badge is-success"><i class="fas fa-check"></i> Отвечен</span>
+                                        @else
+                                            <span class="ph-badge is-danger"><i class="fas fa-phone-slash"></i> Пропущ.</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if((int)$datum->sent_sms === 1)
+                                            <span class="ph-badge is-success" title="SMS отправлено"><i class="fas fa-comment-dots"></i></span>
+                                        @else
+                                            <span class="ph-badge is-muted" title="SMS не отправлено"><i class="fas fa-comment-slash"></i></span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($fb)
+                                            <span class="ph-badge is-success" title="Анкета заполнена"><i class="fas fa-check-circle"></i></span>
+                                        @else
+                                            <span class="ph-badge is-muted" title="Без анкеты"><i class="fas fa-circle"></i></span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($score !== null)
+                                            <span class="ph-badge is-{{ $scoreVar }}"><i class="fas fa-star"></i> {{ $score }}/4</span>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(!empty($datum->recording_local_path) || !empty($datum->pbx_audio_url) || !empty($datum->telegram_audio_url))
+                                            <audio controls preload="metadata" style="height: 28px; max-width: 400px; vertical-align: middle;">
+                                                @if(!empty($datum->recording_local_path) || !empty($datum->pbx_audio_url))
+                                                    <source src="{{ route(auth()->user() && auth()->user()->isOperator() ? 'operator.calls.audio' : 'admin.calls.audio', $datum->id) }}" type="audio/mpeg">
+                                                @elseif(!empty($datum->telegram_audio_url))
+                                                    <source src="{{ $datum->telegram_audio_url }}" type="audio/mpeg">
+                                                @endif
+                                                Ваш браузер не поддерживает аудио.
+                                            </audio>
+                                            @if(empty($datum->recording_local_path) && !empty($datum->pbx_audio_url))
+                                                <small class="text-muted d-block" title="Локальной копии ещё нет, играем с PBX (ссылка может истечь)">⏳ Загрузка</small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td style="white-space: normal;">
+                                        @if(!empty($datum->bitrixSurvey))
+                                            <div><strong>{{ $datum->bitrixSurvey->reason_label ?: 'Без причины' }}</strong></div>
+                                            @if(!empty($datum->bitrixSurvey->status_label))
+                                                <div class="text-muted small">{{ $datum->bitrixSurvey->status_label }}</div>
+                                            @endif
+                                            @php
+                                                $modules = [];
+                                                if (!empty($datum->bitrixSurvey->modules_json)) {
+                                                    $decodedModules = json_decode($datum->bitrixSurvey->modules_json, true);
+                                                    $modules = is_array($decodedModules) ? $decodedModules : [];
+                                                }
+                                            @endphp
+                                            @if(!empty($modules))
+                                                <small><strong>{{ $datum->bitrixSurvey->module_title ?: 'Модули' }}:</strong> {{ implode(', ', $modules) }}</small>
+                                            @endif
+                                            @if(!empty($datum->bitrixSurvey->comment_text) || !empty($datum->bitrixSurvey->summary_text))
+                                                <div class="small">{{ \Illuminate\Support\Str::limit($datum->bitrixSurvey->comment_text ?: $datum->bitrixSurvey->summary_text, 140) }}</div>
+                                            @endif
+                                        @else
+                                            <a class="btn btn-sm btn-outline-primary js-open-survey-modal"
+                                                href="{{ route($createSurveyRouteName, ['call' => $datum->id, 'back' => request()->fullUrl()]) }}"
+                                                data-call-id="{{ $datum->id }}"
+                                                data-call-phone="{{ $datum->client_telephone }}"
+                                                data-call-operator="{{ optional($datum->operator)->name ?: '-' }}"
+                                                data-call-date="{{ $datum->created_at }}"
+                                                data-call-direction="{{ $datum->direction ?: '-' }}"
+                                                data-call-gateway="{{ $datum->gateway ?: '-' }}"
+                                                data-store-url="{{ route($storeSurveyRouteName, ['call' => $datum->id]) }}"
+                                                data-back-url="{{ request()->fullUrl() }}">
+                                                <i class="fas fa-plus"></i> Анкета
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-            </div>
-          </div>
+            @endif
         </div>
-      </div>
-    </section>
-  </div>
+
+        @if(!$data->isEmpty())
+            <div class="card-footer bg-transparent">
+                {{ $data->links() }}
+            </div>
+        @endif
+    </div>
+</div>
+
+<div class="modal fade" id="surveyModal" tabindex="-1" role="dialog" aria-labelledby="surveyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form method="post" id="surveyModalForm">
+                @csrf
+                <input type="hidden" name="back" id="survey_back" value="{{ old('back', request()->fullUrl()) }}">
+                <input type="hidden" name="survey_call_id" id="survey_call_id" value="{{ old('survey_call_id') }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="surveyModalLabel">Заполнить анкету</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3 px-3 py-2 rounded" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.85rem;display:flex;flex-wrap:wrap;gap:14px;">
+                        <span><span class="text-muted">№</span> <strong id="survey_call_meta_id">-</strong></span>
+                        <span><span class="text-muted">📞</span> <strong id="survey_call_meta_phone">-</strong></span>
+                        <span><span class="text-muted">👤</span> <strong id="survey_call_meta_operator">-</strong></span>
+                        <span><span class="text-muted">📅</span> <strong id="survey_call_meta_date">-</strong></span>
+                        <span><span class="text-muted">🚪</span> <strong id="survey_call_meta_gateway">-</strong></span>
+                        <span><span class="text-muted">↕</span> <strong id="survey_call_meta_direction">-</strong></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason_key">Причина обращения</label>
+                        <select class="form-control" id="reason_key" name="reason_key" required>
+                            <option value="">Выберите причину</option>
+                            @foreach(($surveyFormConfig['reasons'] ?? []) as $reason)
+                                <option value="{{ $reason['k'] }}">{{ $reason['l'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="modules_label">Модули / подтема</label>
+                        <div id="modules_box" class="border rounded p-3 bg-light">
+                            Сначала выберите причину обращения.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status_label">Статус</label>
+                        <select class="form-control" id="status_label" name="status_label" required>
+                            <option value="">Выберите статус</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label for="comment_text">Комментарий</label>
+                        <textarea class="form-control" id="comment_text" name="comment_text" rows="5" placeholder="Добавьте детали разговора...">{{ old('comment_text') }}</textarea>
+                        <small class="form-text text-muted" id="comment_hint">Комментарий не обязателен.</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить анкету</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const surveyConfig = @json($surveyFormConfig);
+const surveyOldState = {
+    callId: @json(old('survey_call_id')),
+    reason: @json(old('reason_key')),
+    modules: @json(array_values((array) old('modules', []))),
+    status: @json(old('status_label')),
+    comment: @json(old('comment_text')),
+    hasErrors: @json($errors->any()),
+};
+
+const modalForm = document.getElementById('surveyModalForm');
+const reasonSelect = document.getElementById('reason_key');
+const modulesBox = document.getElementById('modules_box');
+const modulesLabel = document.getElementById('modules_label');
+const statusSelect = document.getElementById('status_label');
+const commentInput = document.getElementById('comment_text');
+const commentHint = document.getElementById('comment_hint');
+const backInput = document.getElementById('survey_back');
+const callIdInput = document.getElementById('survey_call_id');
+const callMeta = {
+    id: document.getElementById('survey_call_meta_id'),
+    phone: document.getElementById('survey_call_meta_phone'),
+    operator: document.getElementById('survey_call_meta_operator'),
+    date: document.getElementById('survey_call_meta_date'),
+    gateway: document.getElementById('survey_call_meta_gateway'),
+    direction: document.getElementById('survey_call_meta_direction'),
+};
+
+function findReason(reasonKey) {
+    return (surveyConfig.reasons || []).find(function (item) {
+        return item.k === reasonKey;
+    }) || null;
+}
+
+function renderModules(reason, selectedModules) {
+    modulesBox.innerHTML = '';
+
+    if (!reason) {
+        modulesLabel.textContent = 'Модули / подтема';
+        modulesBox.textContent = 'Сначала выберите причину обращения.';
+        return;
+    }
+
+    modulesLabel.textContent = reason.mTitle || 'Модули / подтема';
+
+    if (!Array.isArray(reason.m) || reason.m.length === 0) {
+        modulesBox.textContent = 'Для этой причины дополнительные модули не настроены.';
+        return;
+    }
+
+    reason.m.forEach(function (moduleName) {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'd-block font-weight-normal mb-1';
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'modules[]';
+        input.value = moduleName;
+        input.checked = selectedModules.includes(moduleName);
+        input.className = 'mr-2';
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(document.createTextNode(moduleName));
+        modulesBox.appendChild(wrapper);
+    });
+}
+
+function renderStatuses(reason, selectedStatus) {
+    statusSelect.innerHTML = '';
+
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = 'Выберите статус';
+    statusSelect.appendChild(empty);
+
+    if (!reason) {
+        return;
+    }
+
+    (reason.s || []).forEach(function (statusName) {
+        const option = document.createElement('option');
+        option.value = statusName;
+        option.textContent = statusName;
+
+        if (selectedStatus === statusName) {
+            option.selected = true;
+        }
+
+        statusSelect.appendChild(option);
+    });
+}
+
+function renderCommentRequirement(reason) {
+    const required = Boolean(reason && reason.req);
+
+    commentInput.required = required;
+    commentHint.textContent = required
+        ? 'Для этой причины комментарий обязателен.'
+        : 'Комментарий не обязателен.';
+}
+
+function renderFormState(selectedModules, selectedStatus) {
+    const reason = findReason(reasonSelect.value);
+    renderModules(reason, selectedModules || []);
+    renderStatuses(reason, selectedStatus || '');
+    renderCommentRequirement(reason);
+}
+
+function populateCallMeta(button) {
+    callMeta.id.textContent = button.dataset.callId || '-';
+    callMeta.phone.textContent = button.dataset.callPhone || '-';
+    callMeta.operator.textContent = button.dataset.callOperator || '-';
+    callMeta.date.textContent = button.dataset.callDate || '-';
+    callMeta.gateway.textContent = button.dataset.callGateway || '-';
+    callMeta.direction.textContent = button.dataset.callDirection || '-';
+}
+
+function openSurveyModal(button, keepOldState) {
+    if (!button || !modalForm) {
+        return;
+    }
+
+    modalForm.action = button.dataset.storeUrl || button.getAttribute('href');
+    backInput.value = button.dataset.backUrl || window.location.href;
+    callIdInput.value = button.dataset.callId || '';
+
+    populateCallMeta(button);
+
+    const useOldState = Boolean(keepOldState);
+    const reasonValue = useOldState ? (surveyOldState.reason || '') : '';
+    const modulesValue = useOldState ? (surveyOldState.modules || []) : [];
+    const statusValue = useOldState ? (surveyOldState.status || '') : '';
+    const commentValue = useOldState ? (surveyOldState.comment || '') : '';
+
+    reasonSelect.value = reasonValue;
+    commentInput.value = commentValue;
+    renderFormState(modulesValue, statusValue);
+
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.modal) {
+        window.jQuery('#surveyModal').modal('show');
+        return;
+    }
+
+    window.location.href = button.getAttribute('href');
+}
+
+document.querySelectorAll('.js-open-survey-modal').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+        event.preventDefault();
+        openSurveyModal(button, false);
+    });
+});
+
+reasonSelect.addEventListener('change', function () {
+    renderFormState([], '');
+});
+
+if (surveyOldState.hasErrors && surveyOldState.callId) {
+    const failedButton = document.querySelector('.js-open-survey-modal[data-call-id="' + surveyOldState.callId + '"]');
+
+    if (failedButton) {
+        openSurveyModal(failedButton, true);
+    }
+}
+</script>
 @endsection

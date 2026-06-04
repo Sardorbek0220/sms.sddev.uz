@@ -13,11 +13,22 @@
 	<link rel="icon" href="../assets/logo.png">
 	<title>Monitoring | Sales Doctor</title>
 	<style scoped>
+		body {
+			margin: 0;
+			background:
+				radial-gradient(circle at top right, rgba(59, 130, 246, 0.10), transparent 24%),
+				linear-gradient(180deg, #eef3f8 0%, #f8fafc 100%);
+			color: #1f2937;
+		}
+		.monitoring-shell {
+			padding: 18px 18px 26px !important;
+		}
 		.online_text {
-			background: chartreuse;
-			padding: 5px;
-			border-radius: 10px;
-			color: black;
+			background: #c6f6d5;
+			padding: 5px 9px;
+			border-radius: 999px;
+			color: #166534;
+			font-weight: 700;
 		}
 		.dot {
 			height: 15px;
@@ -30,14 +41,165 @@
 		background-color: #b0160c;
 		font-size: 10px !important;
 		color: white;
+		border-radius: 999px;
+		padding: 4px 8px !important;
 		}
 		.cl-warn-red {
 			background-color: #EF7C24;
 			font-size: 10px !important;
 			color: white;
+			border-radius: 999px;
+			padding: 4px 8px !important;
+		}
+		.cl-green {
+			background-color: #15803d;
+			font-size: 10px !important;
+			color: white;
+			border-radius: 999px;
+			padding: 4px 8px !important;
+		}
+		.cl-dnd {
+			background-color: #6d28d9;
+			font-size: 10px !important;
+			color: white;
+			border-radius: 999px;
+			padding: 4px 8px !important;
 		}
 		.v-data-table>.v-data-table__wrapper>table>thead>tr>th {
 			padding: 0 12px;
+		}
+		.monitoring-shell .v-card {
+			border-radius: 18px !important;
+			border: 1px solid rgba(148, 163, 184, 0.20) !important;
+			box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+			background: rgba(255, 255, 255, 0.96) !important;
+		}
+		.monitoring-shell .v-list-item {
+			background: transparent !important;
+		}
+		.monitoring-shell .v-simple-table {
+			border-radius: 14px;
+			overflow: hidden;
+		}
+		.monitoring-shell .v-simple-table thead[style],
+		.monitoring-shell .v-simple-table tbody[style] {
+			border-color: #d6dde8 !important;
+		}
+		.monitoring-shell .v-simple-table thead th {
+			background: #f8fafc;
+			color: #475569 !important;
+			font-size: 12px !important;
+			font-weight: 700 !important;
+			letter-spacing: 0.02em;
+		}
+		.monitoring-shell .v-simple-table tbody td {
+			background: #fff;
+			border-color: #e5e7eb !important;
+		}
+		.monitoring-shell .v-simple-table tbody tr:hover td {
+			background: #f8fbff;
+		}
+		.monitoring-summary-row > .col,
+		.monitoring-summary-row > [class*="col-"] {
+			padding-bottom: 10px;
+		}
+		.monitoring-filters-row {
+			margin-top: -8px;
+			margin-bottom: 12px;
+		}
+		.monitoring-filter-controls,
+		.monitoring-filter-actions {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 10px 12px;
+			float: none !important;
+		}
+		.monitoring-filter-bar {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			gap: 12px 16px;
+			padding: 16px 18px;
+			border-radius: 16px;
+			border: 1px solid rgba(148, 163, 184, 0.20);
+			background: rgba(255, 255, 255, 0.92);
+			box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+		}
+		.monitoring-filter-bar .form-control {
+			border-radius: 12px;
+			border-color: #cbd5e1;
+			box-shadow: none !important;
+		}
+		.monitoring-filter-bar .btn.btn-primary {
+			border-radius: 12px;
+			font-weight: 700;
+			padding-left: 16px;
+			padding-right: 16px;
+			box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+		}
+		.monitoring-filter-bar button[onclick*="tableToExcel"] {
+			border-radius: 12px !important;
+			padding: 8px 14px !important;
+			border: 1px solid #16a34a !important;
+			background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important;
+			color: #fff !important;
+			font-weight: 700 !important;
+			box-shadow: 0 8px 18px rgba(34, 197, 94, 0.18);
+		}
+		.monitoring-filter-bar .filtersCheckbox {
+			margin-top: 0 !important;
+			margin-left: 0 !important;
+			width: auto !important;
+			display: inline-flex !important;
+		}
+		.monitoring-filter-bar > .form-control,
+		.monitoring-filter-bar > span {
+			margin-top: 0 !important;
+		}
+		.monitoring-header-select {
+			margin-top: 0 !important;
+			margin-left: auto !important;
+			width: 190px !important;
+			border-radius: 12px;
+		}
+		.monitoring-updated-badge {
+			display: inline-block;
+			margin-left: 12px !important;
+			padding: 8px 12px !important;
+			background: #e2e8f0 !important;
+			border-radius: 999px;
+			color: #334155;
+			font-size: 12px;
+			font-weight: 700;
+		}
+		.monitoring-updated-badge--warning {
+			background: #fff7ed !important;
+			color: #9a3412 !important;
+		}
+		.monitoring-status-row {
+			margin-bottom: 12px;
+		}
+		.monitoring-status-banner {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px 14px;
+			border-radius: 14px;
+			border: 1px solid transparent;
+			font-size: 13px;
+			font-weight: 700;
+			box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+		}
+		.monitoring-status-banner--warning {
+			background: #fff7ed;
+			border-color: #fdba74;
+			color: #9a3412;
+		}
+		.monitoring-status-banner--error {
+			background: #fef2f2;
+			border-color: #fca5a5;
+			color: #b91c1c;
 		}
 		.switch {
 		position: relative;
@@ -111,6 +273,248 @@
 		label{
 			margin-bottom: 2px !important
 		}
+		.range-presets {
+			display: inline-flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			margin-right: 8px;
+		}
+		.range-preset-btn {
+			border: 1px solid #ced4da;
+			background: #fff;
+			color: #495057;
+			border-radius: 20px;
+			padding: 6px 12px;
+			font-size: 12px;
+			font-weight: 600;
+			line-height: 1.2;
+			box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+			transition: all .18s ease;
+		}
+		.range-preset-btn:hover {
+			background: #f1f5f9;
+			border-color: #94a3b8;
+		}
+		.range-preset-btn.active {
+			background: #007bff;
+			border-color: #007bff;
+			color: #fff;
+		}
+		.range-date-input {
+			display: inline;
+			width: auto;
+			min-width: 155px;
+		}
+		.monitoring-logout-btn {
+			border-radius: 12px !important;
+			padding: 10px 16px !important;
+			font-weight: 700 !important;
+			background: rgba(255, 255, 255, 0.92);
+		}
+		@media (max-width: 991px) {
+			.monitoring-shell {
+				padding: 12px 10px 20px !important;
+			}
+			.monitoring-header-select {
+				margin-left: 0 !important;
+				width: 100% !important;
+			}
+			.monitoring-updated-badge {
+				margin-left: 0 !important;
+			}
+			.monitoring-filter-bar {
+				padding: 14px;
+			}
+		}
+
+		/* ===== Phase 9 — visual polish (no JS changes) ===== */
+		/* Status dots: bigger, with subtle glow + ring */
+		.dot {
+			height: 12px !important;
+			width: 12px !important;
+			border-radius: 50% !important;
+			display: inline-block;
+			position: relative;
+			box-shadow: 0 0 0 2px rgba(255,255,255,0.95), 0 0 0 3px rgba(15,23,42,0.05), 0 0 6px rgba(15,23,42,0.10);
+			transition: background 0.3s ease, transform 0.2s ease;
+			vertical-align: middle;
+		}
+		.dot[style*="red"], .dot[style*="background: red"] {
+			background: #94a3b8 !important;        /* offline → muted gray, not aggressive red */
+		}
+		.dot[style*="chartreuse"], .dot[style*="background: chartreuse"] {
+			background: #16a34a !important;
+		}
+		.dot[style*="blue"]   { background: #2563eb !important; }
+		.dot[style*="orange"] { background: #f59e0b !important; }
+		.dot[style*="yellow"] { background: #facc15 !important; }
+		.dot[style*="green"]  { background: #16a34a !important; }
+
+		/* Pulsing animation for "in call" / active states */
+		.dot[style*="chartreuse"]::after,
+		.dot[style*="background: chartreuse"]::after,
+		.dot[style*="background: green"]::after {
+			content: "";
+			position: absolute;
+			inset: -3px;
+			border-radius: 50%;
+			border: 2px solid #16a34a;
+			opacity: 0.6;
+			animation: ph-pulse 1.6s ease-out infinite;
+		}
+		@keyframes ph-pulse {
+			0%   { transform: scale(0.6); opacity: 0.7; }
+			80%  { transform: scale(1.6); opacity: 0;   }
+			100% { transform: scale(1.6); opacity: 0;   }
+		}
+
+		/* Status pills — softer pastel surfaces */
+		.online_text {
+			background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+			color: #166534 !important;
+			font-weight: 700;
+			padding: 4px 10px !important;
+			border-radius: 999px !important;
+			font-size: 0.78rem !important;
+			letter-spacing: 0.2px;
+		}
+		.cl-green {
+			background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+			color: #166534 !important;
+			border-radius: 999px !important;
+			padding: 4px 10px !important;
+			font-size: 0.78rem !important;
+			font-weight: 600;
+		}
+		.cl-warn-red {
+			background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+			color: #92400e !important;
+			border-radius: 999px !important;
+			padding: 4px 10px !important;
+			font-size: 0.78rem !important;
+			font-weight: 600;
+		}
+		.cl-red {
+			background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+			color: #991b1b !important;
+			border-radius: 999px !important;
+			padding: 4px 10px !important;
+			font-size: 0.78rem !important;
+			font-weight: 600;
+		}
+		.cl-dnd {
+			background: linear-gradient(135deg, #e0e7ff, #c7d2fe) !important;
+			color: #3730a3 !important;
+			border-radius: 999px !important;
+			padding: 4px 10px !important;
+			font-size: 0.78rem !important;
+			font-weight: 600;
+		}
+
+		/* Banners */
+		.monitoring-status-banner {
+			border-radius: 12px !important;
+			padding: 10px 14px !important;
+			font-size: 0.95rem !important;
+		}
+		.monitoring-status-banner--warning {
+			background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+			color: #92400e !important;
+			border-left: 4px solid #f59e0b !important;
+		}
+		.monitoring-status-banner--error {
+			background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+			color: #991b1b !important;
+			border-left: 4px solid #dc2626 !important;
+		}
+
+		/* Tables — softer headers */
+		table thead th {
+			background: #f8fafc !important;
+			color: #334155 !important;
+			font-weight: 700 !important;
+			font-size: 0.82rem !important;
+			text-transform: uppercase;
+			letter-spacing: 0.4px;
+			border-bottom: 0 !important;
+		}
+		table tbody tr:hover {
+			background: #f1f5f9 !important;
+		}
+
+		/* "Sticky" updated-at badge */
+		.monitoring-updated-badge {
+			background: rgba(255,255,255,0.85) !important;
+			backdrop-filter: blur(8px);
+			border-radius: 999px !important;
+			padding: 4px 12px !important;
+			font-size: 0.78rem !important;
+			font-weight: 600 !important;
+			color: #475569 !important;
+			box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+		}
+
+		/* Subtle card lift everywhere */
+		.v-card,
+		.monitoring-section-card {
+			border-radius: 16px !important;
+			box-shadow: 0 8px 24px rgba(15,23,42,0.06) !important;
+		}
+
+		/* Operator name cell — subtle separator */
+		td {
+			vertical-align: middle !important;
+		}
+
+		/* ===== Toolbar (header strip) — phase-clean ===== */
+		.monitoring-toolbar {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: wrap;
+			margin: 12px 0 4px 8px;
+		}
+		.monitoring-toolbar__filters {
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		.monitoring-toolbar__spacer {
+			flex: 1 1 auto;
+		}
+		.monitoring-header-select {
+			width: 220px !important;
+			border-radius: 12px !important;
+			margin: 0 !important;
+		}
+		.monitoring-updated-badge {
+			margin: 0 !important;
+		}
+		.monitoring-toolbar .monitoring-logout-btn {
+			margin: 0 !important;
+		}
+		@media (max-width: 991px) {
+			.monitoring-toolbar { gap: 8px; }
+			.monitoring-header-select { width: 100% !important; }
+			.monitoring-toolbar__spacer { display: none; }
+		}
+
+		/* Stats card — friendlier headers */
+		.monitoring-card-title {
+			padding: 14px 18px 0;
+			color: #0f172a;
+			font-weight: 700;
+			letter-spacing: 0.02em;
+		}
+		.monitoring-card-title small {
+			display: block;
+			color: #64748b;
+			font-weight: 500;
+			font-size: 0.72rem;
+			margin-top: 2px;
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+		}
 	</style>
 </head>
 <body>
@@ -118,8 +522,8 @@
 
 <div id="app">
  <template>
-  <v-container fluid class="grey lighten-5">
-    <v-row class="mb-6" no-gutters>
+  <v-container fluid class="grey lighten-5 monitoring-shell">
+    <v-row class="mb-6 monitoring-summary-row" no-gutters>
       	<v-col>
 			<v-card
 			elevation="2"
@@ -127,31 +531,17 @@
 			>
 				<v-list-item three-line>
 					<v-list-item-content>
-						<!-- <div class="text-overline mb-4">
-							<h5>Входящие: {{inbounds_5995.length}}</h5>
-							<div class="progress">
-								<div class="progress-bar" role="progressbar" :style="{width: inGetProg_5995+'%'}" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{inTalk_5995.length}}</div>
-							</div>
-						</div>
-						<v-list-item-title class="text-h5 mb-1">
-							Ответили: {{inTalk_5995.length}}
-						</v-list-item-title>
-						<v-list-item-title class="text-h5 mb-1">
-							Пропущенные: {{notTalk_5995.length}}
-						</v-list-item-title>
-						<v-list-item-title class="text-h5 mb-1">
-							Время разговора: {{calcHMS(inSumTalk_5995)}}
-						</v-list-item-title> -->
+						<div class="monitoring-card-title">📞 Входящие<small>Сегодня · Неделя · Месяц</small></div>
 						<v-simple-table>
 							<template v-slot:default>
 								<thead>
 									<tr>
 										<th>
-											<h5>Входящие: {{todayData.answered + todayData.missed}}</h5>
+											
 										</th>
 										<th class="text-left">Сегодня</th>
-										<th class="text-left">На этой неделе</th>
-										<th class="text-left">В этом месяце (период)</th>
+										<th class="text-left">Неделя</th>
+										<th class="text-left">Месяц</th>
 										
 									</tr>
 								</thead>
@@ -170,21 +560,33 @@
 									</tr>
 									<tr>
 										<td>Пропущенные:</td>
-										<td>{{todayData.missed}} ({{((todayData.missed/(todayData.answered + todayData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{weekData.missed}} ({{((weekData.missed/(weekData.answered + weekData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{monthData.missed}} ({{((monthData.missed/(monthData.answered + monthData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{todayData.missed}} ({{formatPercent(todayData.missed, todayData.answered + todayData.missed)}} %)</td>
+										<td>{{weekData.missed}} ({{formatPercent(weekData.missed, weekData.answered + weekData.missed)}} %)</td>
+										<td>{{monthData.missed}} ({{formatPercent(monthData.missed, monthData.answered + monthData.missed)}} %)</td>
 									</tr>
 									<tr>
 										<td>Пропущенний в раб. время:</td>
-										<td>{{todayData.missed_in}} ({{((todayData.missed_in/(todayData.answered + todayData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{weekData.missed_in}} ({{((weekData.missed_in/(weekData.answered + weekData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{monthData.missed_in}} ({{((monthData.missed_in/(monthData.answered + monthData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{todayData.missed_in}} ({{formatPercent(todayData.missed_in, todayData.answered + todayData.missed)}} %)</td>
+										<td>{{weekData.missed_in}} ({{formatPercent(weekData.missed_in, weekData.answered + weekData.missed)}} %)</td>
+										<td>{{monthData.missed_in}} ({{formatPercent(monthData.missed_in, monthData.answered + monthData.missed)}} %)</td>
+									</tr>
+									<tr>
+										<td>В раб. время:</td>
+										<td>{{todayData.in_hours || 0}}</td>
+										<td>{{weekData.in_hours || 0}}</td>
+										<td>{{monthData.in_hours || 0}}</td>
+									</tr>
+									<tr>
+										<td>Анкет заполнено:</td>
+										<td>{{formatSurvey(surveys.today)}}</td>
+										<td>{{formatSurvey(surveys.week)}}</td>
+										<td>{{formatSurvey(surveys.month)}}</td>
 									</tr>
 									<tr>
 										<td>Среднее время разговора:</td>
-										<td>{{calcHMS(todayData.talking_time/(todayData.answered + todayData.missed))}}</td>
-										<td>{{calcHMS(weekData.talking_time/(weekData.answered + weekData.missed))}}</td>
-										<td>{{calcHMS(monthData.talking_time/(monthData.answered + monthData.missed))}}</td>
+										<td>{{averageDuration(todayData.talking_time, todayData.answered + todayData.missed)}}</td>
+										<td>{{averageDuration(weekData.talking_time, weekData.answered + weekData.missed)}}</td>
+										<td>{{averageDuration(monthData.talking_time, monthData.answered + monthData.missed)}}</td>
 									</tr>
 									<tr>
 										<td>Общее время разговора:</td>
@@ -208,31 +610,17 @@
 			>
 				<v-list-item three-line>
 					<v-list-item-content>
-						<!-- <div class="text-overline mb-4">
-							<h5>Исходящие: {{outbounds_5995.length}}</h5>
-							<div class="progress">
-								<div class="progress-bar" role="progressbar" :style="{width: outGetProg_5995+'%'}" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{outTalk_5995.length}}</div>
-							</div>
-						</div>
-						<v-list-item-title class="text-h5 mb-1">
-							Успешные: {{outTalk_5995.length}}
-						</v-list-item-title>
-						<v-list-item-title class="text-h5 mb-1">
-							Не дозвонились: {{outbounds_5995.length - outTalk_5995.length}}
-						</v-list-item-title>
-						<v-list-item-title class="text-h5 mb-1">
-							Время разговора: {{calcHMS(outSumTalk_5995)}}
-						</v-list-item-title> -->
+						<div class="monitoring-card-title">📤 Исходящие<small>Сегодня · Неделя · Месяц</small></div>
 						<v-simple-table>
 							<template v-slot:default>
 								<thead>
 									<tr>
 										<th>
-											<h5>Исходящие: {{out_todayData.answered + out_todayData.missed}}</h5>
+											
 										</th>
 										<th class="text-left">Сегодня</th>
-										<th class="text-left">На этой неделе</th>
-										<th class="text-left">В этом месяце (период)</th>
+										<th class="text-left">Неделя</th>
+										<th class="text-left">Месяц</th>
 										
 									</tr>
 								</thead>
@@ -251,15 +639,15 @@
 									</tr>
 									<tr>
 										<td>Не дозвонились:</td>
-										<td>{{out_todayData.missed}} ({{((out_todayData.missed/(out_todayData.answered + out_todayData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{out_weekData.missed}} ({{((out_weekData.missed/(out_weekData.answered + out_weekData.missed))*100).toFixed(1)}} %)</td>
-										<td>{{out_monthData.missed}} ({{((out_monthData.missed/(out_monthData.answered + out_monthData.missed))*100).toFixed(1)}} %)</td>
+										<td>{{out_todayData.missed}} ({{formatPercent(out_todayData.missed, out_todayData.answered + out_todayData.missed)}} %)</td>
+										<td>{{out_weekData.missed}} ({{formatPercent(out_weekData.missed, out_weekData.answered + out_weekData.missed)}} %)</td>
+										<td>{{out_monthData.missed}} ({{formatPercent(out_monthData.missed, out_monthData.answered + out_monthData.missed)}} %)</td>
 									</tr>
 									<tr>
 										<td>Среднее время разговора:</td>
-										<td>{{calcHMS(out_todayData.talking_time/(out_todayData.answered + out_todayData.missed))}}</td>
-										<td>{{calcHMS(out_weekData.talking_time/(out_weekData.answered + out_weekData.missed))}}</td>
-										<td>{{calcHMS(out_monthData.talking_time/(out_monthData.answered + out_monthData.missed))}}</td>
+										<td>{{averageDuration(out_todayData.talking_time, out_todayData.answered + out_todayData.missed)}}</td>
+										<td>{{averageDuration(out_weekData.talking_time, out_weekData.answered + out_weekData.missed)}}</td>
+										<td>{{averageDuration(out_monthData.talking_time, out_monthData.answered + out_monthData.missed)}}</td>
 									</tr>
 									<tr>
 										<td>Общее время разговора:</td>
@@ -274,58 +662,74 @@
 					</v-list-item-content>
 				</v-list-item>
 			</v-card>
-			<v-checkbox
-				style="margin-top: 2%; margin-left: 1%; width: 10%; display:inline-block"
-				v-model="filters"
-				label="Фильтры"
-				@change="!filters"
-				class="filtersCheckbox"
-			></v-checkbox>
-			<select style="margin-top: 2%; margin-left: 40%; width: 17%; display:inline-block" class="form-control" v-model="company" @change="set_company()">
-				<option value="1">Sales Doctor</option>
-				<option value="2">Ibox</option>
-				<option value="3">Ido'kon</option>
-			</select>
-			<span style="display:inline-block; margin-left:2%; background:gainsboro; padding:0.5%;">Посл. обновление: {{today.toLocaleTimeString()}}</span>
+			<div class="monitoring-toolbar">
+				<v-checkbox
+					v-model="filters"
+					label="Фильтры"
+					@change="!filters"
+					class="filtersCheckbox monitoring-toolbar__filters"
+					hide-details
+				></v-checkbox>
+				<div class="monitoring-toolbar__spacer"></div>
+				<select class="form-control monitoring-header-select" v-model="company" @change="set_company()">
+					<option value="1">Sales Doctor</option>
+					<option value="2">Ibox</option>
+					<option value="3">IDokon</option>
+				</select>
+				<span class="monitoring-updated-badge" :title="'Последнее обновление'">Обновлено в {{today.toLocaleTimeString()}}</span>
+				<span v-if="fifoWarning" class="monitoring-updated-badge monitoring-updated-badge--warning">Резервный состав</span>
+				<a href="/logout" class="btn btn-outline-dark monitoring-logout-btn">Выйти</a>
+			</div>
       	</v-col>
     </v-row>
-    <v-row v-show="filters">
+	<v-row v-if="fifoWarning || loadError" class="monitoring-status-row" no-gutters>
+		<v-col cols="12">
+			<div v-if="fifoWarning" class="monitoring-status-banner monitoring-status-banner--warning mb-2">
+				{{ fifoWarning }}
+			</div>
+			<div v-if="loadError" class="monitoring-status-banner monitoring-status-banner--error">
+				{{ loadError }}
+			</div>
+		</v-col>
+	</v-row>
+    <v-row v-show="filters" class="monitoring-filters-row">
     	<v-col>
-    		<div class="float-right">
+			<div class="monitoring-filter-bar">
+    		<div class="float-right monitoring-filter-controls">
 				<div class="d-inline-block">
 					<label for="" class="mt-2 font-weight-bold">Фильтр:</label>
 					<label class="mr-5 ml-4 mb-2">
 						<select class="form-control mt-4" name="propuw" id="propuw" @change="get_by_filter()">
 						 	<option value="0">По умолчанию</option>
 							<option value="1">Не дозвон.</option>
-							<option value="2">Не перезв.</option>
+							<option value="2">Похоже на DND</option>
 						</select>
 					</label>
 				</div>
 
-				<input class="form-control" type="date" id="start_date" name="start_date" style="display: inline;width: auto;">
-		   		<input class="form-control" type="date" id="get_date" name="get_date" style="display: inline;width: auto;">
+				<div class="range-presets">
+					<button type="button" class="range-preset-btn" :class="{active: selectedRange === 'today'}" @click="applyRangePreset('today')">Сегодня</button>
+					<button type="button" class="range-preset-btn" :class="{active: selectedRange === 'yesterday'}" @click="applyRangePreset('yesterday')">Вчера</button>
+					<button type="button" class="range-preset-btn" :class="{active: selectedRange === 'week'}" @click="applyRangePreset('week')">Неделя</button>
+					<button type="button" class="range-preset-btn" :class="{active: selectedRange === 'month'}" @click="applyRangePreset('month')">Месяц</button>
+					<button type="button" class="range-preset-btn" :class="{active: selectedRange === 'previous_month'}" @click="applyRangePreset('previous_month')">Прошлый месяц</button>
+				</div>
+				<input class="form-control range-date-input" type="date" id="start_date" name="start_date" style="display: inline;width: auto;" @change="selectedRange = 'custom'">
+		   		<input class="form-control range-date-input" type="date" id="get_date" name="get_date" style="display: inline;width: auto;" @change="selectedRange = 'custom'">
 		   		<button class="mb-1 btn btn-primary text-white" :loading="loading" type="button" @click="filter()">Поиск</button>
 		   	</div>
-		   	<div class="float-right">
+		   	<div class="float-right monitoring-filter-actions">
 		   		<div class="d-inline-block">
 		   			<v-row>
 		   				<v-col>
-		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable','excel','excel')">EXCEL 1</button>
+		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable','excel','excel')">📊 Звонки в Excel</button>
             				<a id="dlink"  href="" style="display: none"></a>
 		   				</v-col>
 						<v-col>
-		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">EXCEL 2</button>
+		   					<button style="border-radius: 4px; padding: 8px; border: 1px solid white; background-color: #28a745; color: white;" onclick="tableToExcel('exportTable2','excel','excel')">👥 Операторы в Excel</button>
             				<a id="dlink"  href="" style="display: none"></a>
 		   				</v-col>
 		   			</v-row>
-				</div>
-		   		<div class="d-inline-block ml-2">
-					<label for="" class="mt-4 font-weight-bold">Со вчера: </label>
-					<label class="switch mr-5 ml-4 mb-2">
-					  <input type="checkbox" id="yesterday" name="yesterday" value="1" @change="get_with_yesterday()">
-					  <span class="slider round"></span>
-					</label>
 				</div>
 				<div class="d-inline-block">
 					<label for="" class="mt-4 font-weight-bold">Показать все пропущенные: </label>
@@ -335,6 +739,7 @@
 					</label>
 				</div>
 		   	</div>
+			</div>
     	</v-col>
 	</v-row>
 
@@ -383,7 +788,7 @@
 						<td>{{report.number.replace('+998', '')}}</td>
 						<td>{{report.count_pro}}</td>
 						<td>{{report.count_nedoz}}</td>
-						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
+						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Похоже на DND' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
 						<td>{{report.user_call}}</td>
 						<td>
 							<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
@@ -429,7 +834,7 @@
 						<td>{{report.isxod_count}}</td>
 						<td>{{calcHMS(report.isxod_time)}}</td>
 						<td>{{calcHMS(report.all_time)}}</td>
-						<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
+						<td>{{formatPercent(report.all_time_s, inSumTalk_5995 + outSumTalk_5995, 2)}}</td>
 						<!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark0[report.num] ?? 0 }}</td>
 						<td>{{ feedbacks.mark4[report.num] ?? 0 }}</td>
@@ -479,7 +884,7 @@
 							<td>{{report.number}}</td>
 							<td>{{report.count_pro}}</td>
 							<td>{{report.count_nedoz}}</td>
-							<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Не перезв.' ? 'cl-red' : 'cl-warn-red']">{{report.status}}</td>
+							<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Похоже на DND' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
 							<td>{{report.user_call}}</td>
 							<td>
 								<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
@@ -528,7 +933,7 @@
 							<td>{{report.isxod_count}}</td>
 							<td>{{report.isxod_time}}</td>
 							<td>{{report.all_time}}</td>
-							<td>{{((report.all_time_s/(inSumTalk_5995+outSumTalk_5995))*100).toFixed(2)}}</td>
+							<td>{{formatPercent(report.all_time_s, inSumTalk_5995 + outSumTalk_5995, 2)}}</td>
 							<!-- <td>{{ feedbacks.mark3[report.num] ?? 0 }}</td> -->
 							<!-- <td>{{ feedbacks.mark0[report.num] ?? 0 }}</td> -->
 							<!-- <td>{{ oper_misseds[report.num] ?? 0 }}</td> -->
@@ -545,12 +950,6 @@
 		</v-col>
       	<!-- ------------ -->
     </v-row>
-	<v-row>
-		<v-col cols="11"></v-col>
-		<v-col cols="1">
-			<a href="/logout" class="mb-2 btn btn-outline-dark float-right">Выйти</a>
-		</v-col>
-	</v-row>
   </v-container>
  </template>
 	
@@ -573,32 +972,35 @@
 		unregister: 'red',
 		pre_register: 'brown',
 		register_attempt: 'brown',
-	}
-	
-	const exampleSocket = new WebSocket("wss://pbx12127.onpbx.ru:3342/?key=<?= $auth_key ?>");
-
-	exampleSocket.onopen = function (e) {
-		let mes = {
-			"command": "subscribe",
-			"reqId": "123123",
-			"data": {
-				"eventGroups": [
-					"user_blf",
-					"user_registration"
-				]
-			}
-		}
-		exampleSocket.send(JSON.stringify(mes))
+		dnd: '#7c3aed',
+		do_not_disturb: '#7c3aed',
+		busy: '#f97316',
 	}
 
-	exampleSocket.onmessage = function (e) {
-		var data = JSON.parse(e.data)
-		var span = document.getElementById("num_"+data.data.uid);
-		if (data.event == 'user_blf' && span != null) {
-			span.style.background=statusColors[data.data.status];
+	function normalizePbxStatus(value) {
+		return String(value || '').trim().toLowerCase();
+	}
+
+	function resolvePbxIndicatorColor(data) {
+		const status = normalizePbxStatus(data && data.data && data.data.status);
+		const state = normalizePbxStatus(data && data.data && data.data.state);
+
+		if (statusColors[status]) {
+			return statusColors[status];
 		}
-		if (data.event == 'user_registration' && span != null) {
-			span.style.background=statusColors[data.data.state];
+
+		if (statusColors[state]) {
+			return statusColors[state];
+		}
+
+		return null;
+	}
+
+	function applyMonitoringIndicator(uid, stateName) {
+		const normalized = normalizePbxStatus(stateName);
+		const span = uid ? document.getElementById("num_" + uid) : null;
+		if (span != null) {
+			span.style.background = statusColors[normalized] || statusColors.unregistered;
 		}
 	}
 
@@ -624,10 +1026,10 @@
     })();
 	const statuses = {
 		SUCCESS: "Успешно",
-		NO_ATTEMPT: "Не перезв.",
+		NO_ATTEMPT: "Похоже на DND",
 		DIDNT_ANSWER: "Не дозв."
 	};
-	new Vue({
+	window.monitoringApp = new Vue({
 	  	el: '#app',
 	  	vuetify: new Vuetify(),
 	  	data: {
@@ -683,6 +1085,12 @@
 			todayData: {},
 			weekData: {},
 			monthData: {},
+			workHours: {},   // weekday(0..6) → {start_hour,end_hour,is_active}
+			surveys: {
+				today: {with_survey: 0, total_calls: 0, percent: 0},
+				week:  {with_survey: 0, total_calls: 0, percent: 0},
+				month: {with_survey: 0, total_calls: 0, percent: 0},
+			},
 			out_todayData: {},
 			out_weekData: {},
 			out_monthData: {},
@@ -692,12 +1100,23 @@
 			oper_misseds: {},
 			from_date: "",
 			to_date: "",
+			selectedRange: "today",
+			refreshBusy: false,
+			realtimeRefreshTimer: null,
+			liveStatePollTimer: null,
+			liveStateVersion: 0,
+			visibilityHandler: null,
+			wsConnected: false,
+			loadError: "",
+			fifoWarning: "",
 			unknownClients: {
 				inbound: {},
 				outbound: {}
 			}
 	  	},
 	  	async mounted () {
+			await this.loadWorkHours();
+			this.loadSurveysCounts();
 			var day = ("0" + this.today.getDate()).slice(-2);
 			var month = ("0" + (this.today.getMonth() + 1)).slice(-2);
 			var today = this.today.getFullYear()+"-"+(month)+"-"+(day);
@@ -709,53 +1128,280 @@
 			$('#start_date').val(today);
 
 			await this.TRIGGER();
+			this.startLiveStatePolling();
+			this.visibilityHandler = () => {
+				if (!document.hidden) {
+					this.refreshMonitoringRealtime('visibility');
+				}
+			};
+			document.addEventListener('visibilitychange', this.visibilityHandler);
 	  	},
-	  	created(){	
+	  	created(){},/*
 
-			this.interval = setInterval(async () =>{
+			this.interval = legacyIntervalDisabled(async () =>{
+				if (this.loading || this.refreshBusy || document.hidden) {
+					return;
+				}
 				let fromDate = Math.floor(new Date(this.from_date).getTime() / 1000);
 				let toDate = Math.floor((new Date(this.to_date).getTime() / 1000)+86400);
 				let todayDate = Math.floor(new Date(this.today).getTime() / 1000);
 				if (todayDate >= fromDate && todayDate <= toDate) {
-					await this.get_date()
-					// await this.get_users_feedbacks()
-					await this.getOperatorTime()
-					this.getInfos_5995() 
-					this.getReport_5995()
-					await this.fifoToReport()
-					this.set_data_from_date()
+					this.refreshBusy = true;
+					try {
+						this.loadError = "";
+						await this.get_date();
+						await Promise.all([
+							this.getOperatorTime(),
+							this.getOperatorCondition(),
+							this.getFifo()
+						]);
+						this.getInfos_5995();
+						this.getReport_5995();
+						await this.fifoToReport();
+						this.set_data_from_date();
+						if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
+							this.get_by_filter()
+						}
+					} catch (error) {
+						this.handleRequestError('Автообновление мониторинга временно не сработало.', error);
+					} finally {
+						this.refreshBusy = false;
+					}
+				}
+			},disabledRealtimePolling)
+
+		},*/
+		destroyed(){
+			if (this.realtimeRefreshTimer) {
+				clearTimeout(this.realtimeRefreshTimer)
+			}
+			this.liveStatePollActive = false;
+			if (this.liveStatePollTimer) {
+				clearTimeout(this.liveStatePollTimer);
+				this.liveStatePollTimer = null;
+			}
+			if (this.visibilityHandler) {
+				document.removeEventListener('visibilitychange', this.visibilityHandler)
+				this.visibilityHandler = null
+			}
+		},
+	  	methods: {
+			formatDateForInput(date) {
+				const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+				const day = ("0" + normalizedDate.getDate()).slice(-2);
+				const month = ("0" + (normalizedDate.getMonth() + 1)).slice(-2);
+				return normalizedDate.getFullYear() + "-" + month + "-" + day;
+			},
+			safeDivide(value, total) {
+				const normalizedValue = Number(value) || 0;
+				const normalizedTotal = Number(total) || 0;
+				return normalizedTotal > 0 ? normalizedValue / normalizedTotal : 0;
+			},
+			formatPercent(value, total, digits = 1) {
+				return (this.safeDivide(value, total) * 100).toFixed(digits);
+			},
+			averageDuration(totalSeconds, count) {
+				return this.calcHMS(this.safeDivide(totalSeconds, count));
+			},
+			handleRequestError(message, error) {
+				this.loadError = message;
+				console.error(message, error);
+			},
+			getFallbackOperators() {
+				return Array.from(new Set(
+					this.users
+						.map((user) => String(user.num || '').trim())
+						.filter(Boolean)
+				));
+			},
+			isRealtimeRangeActive() {
+				const fromDate = Math.floor(new Date(this.from_date).getTime() / 1000);
+				const toDate = Math.floor((new Date(this.to_date).getTime() / 1000) + 86400);
+				const todayDate = Math.floor(new Date(this.today).getTime() / 1000);
+				return todayDate >= fromDate && todayDate <= toDate;
+			},
+			async refreshMonitoringRealtime(reason = 'realtime') {
+				if (this.loading || this.refreshBusy || document.hidden || !this.isRealtimeRangeActive()) {
+					return;
+				}
+
+				this.refreshBusy = true;
+				try {
+					this.loadError = "";
+					await this.get_date();
+					await Promise.all([
+						this.getOperatorTime(),
+						this.getOperatorCondition(),
+						this.getFifo()
+					]);
+					this.getInfos_5995();
+					this.getReport_5995();
+					await this.fifoToReport();
+					this.set_data_from_date();
 					if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
 						this.get_by_filter()
 					}
+				} catch (error) {
+					this.handleRequestError('Не удалось обновить мониторинг в realtime режиме.', error);
+				} finally {
+					this.refreshBusy = false;
 				}
-			},30000)
+			},
+			scheduleRealtimeRefresh() {
+				if (this.realtimeRefreshTimer) {
+					clearTimeout(this.realtimeRefreshTimer);
+				}
+				this.realtimeRefreshTimer = setTimeout(() => {
+					this.realtimeRefreshTimer = null;
+					this.refreshMonitoringRealtime();
+				}, 1200);
+			},
+			applyLiveStateSnapshot(snapshot) {
+				this.wsConnected = Boolean(snapshot && snapshot.bridge_connected);
 
-		},
-		destroyed(){
-		    clearInterval(this.interval)
-		},
-	  	methods: {
+				for (const user of this.users) {
+					if (!user || !user.num) {
+						continue;
+					}
+					applyMonitoringIndicator(user.num, 'unregistered');
+				}
+
+				const operatorStates = snapshot && snapshot.operators ? snapshot.operators : {};
+				Object.keys(operatorStates).forEach((uid) => {
+					const state = operatorStates[uid];
+					applyMonitoringIndicator(uid, state && state.status ? state.status : 'unregistered');
+				});
+
+				if (!this.wsConnected && Array.isArray(snapshot && snapshot.fallback_registered_uids ? snapshot.fallback_registered_uids : [])) {
+					snapshot.fallback_registered_uids.forEach((uid) => {
+						applyMonitoringIndicator(uid, 'register');
+					});
+				}
+			},
+			async pollLiveState(triggerRealtimeRefresh = true) {
+				// Long-poll: ask server to wait until version advances past ours.
+				const since = this.liveStateVersion || 0;
+				const response = await axios.get('monitoring/liveState', {
+					params: { since: since, wait: 25 },
+					timeout: 30000,
+				});
+				if (response.status !== 200 || !response.data) {
+					return;
+				}
+
+				const nextVersion = Number(response.data.version || 0);
+				if (this.liveStateVersion === 0) {
+					this.liveStateVersion = nextVersion;
+				} else if (nextVersion > this.liveStateVersion) {
+					this.liveStateVersion = nextVersion;
+					if (triggerRealtimeRefresh) {
+						this.scheduleRealtimeRefresh();
+					}
+				}
+
+				this.applyLiveStateSnapshot(response.data);
+			},
+			startLiveStatePolling() {
+				if (this.liveStatePollTimer) {
+					clearTimeout(this.liveStatePollTimer);
+					this.liveStatePollTimer = null;
+				}
+				this.liveStatePollActive = true;
+
+				const loop = async () => {
+					if (!this.liveStatePollActive) return;
+					if (document.hidden) {
+						// Tab hidden: idle 2s then check again.
+						this.liveStatePollTimer = setTimeout(loop, 2000);
+						return;
+					}
+					try {
+						await this.pollLiveState();
+						this.wsConnected = true;
+						// Immediately fire next long-poll.
+						this.liveStatePollTimer = setTimeout(loop, 0);
+					} catch (error) {
+						this.wsConnected = false;
+						console.warn('Monitoring live-state polling failed', error);
+						// Back off briefly on error.
+						this.liveStatePollTimer = setTimeout(loop, 2000);
+					}
+				};
+				loop();
+			},
+			normalizeFifoUsers(rawUsers) {
+				if (Array.isArray(rawUsers)) {
+					return rawUsers
+						.map((item) => String(item || '').split(':')[0].trim())
+						.filter(Boolean);
+				}
+
+				if (typeof rawUsers === 'string') {
+					return rawUsers
+						.split(';')
+						.map((item) => String(item || '').split(':')[0].trim())
+						.filter(Boolean);
+				}
+
+				return [];
+			},
+			getPresetRange(preset) {
+				const today = new Date();
+				let from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+				let to = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+				if (preset === 'yesterday') {
+					from.setDate(from.getDate() - 1);
+					to = new Date(from);
+				} else if (preset === 'week') {
+					from = this.getMonday(from);
+				} else if (preset === 'month') {
+					from = new Date(today.getFullYear(), today.getMonth(), 1);
+				} else if (preset === 'previous_month') {
+					from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+					to = new Date(today.getFullYear(), today.getMonth(), 0);
+				}
+
+				return {
+					from: this.formatDateForInput(from),
+					to: this.formatDateForInput(to)
+				};
+			},
+			async applyRangePreset(preset) {
+				const range = this.getPresetRange(preset);
+
+				this.selectedRange = preset;
+				this.from_date = range.from;
+				this.to_date = range.to;
+
+				$('#start_date').val(range.from);
+				$('#get_date').val(range.to);
+
+				await this.filter();
+			},
 			async TRIGGER(){
-				await this.get_date();
-
+				this.loadError = "";
 				this.loading = true; 
-
-				await this.getUsers();
-				// await this.get_users_feedbacks();
-				await this.getOperatorTime();
-				this.getInfos_5995();
-				this.getReport_5995();
-				await this.getFifo();
-				await this.fifoToReport();
-				this.set_data_from_date();
-				this.bigDataPeriod = this.todayData;
-
-				await this.getBigData();
-				this.setTable();
-
-				await this.getOperatorCondition();
-
-				this.loading = false;
+				try {
+					await this.get_date();
+					await Promise.all([
+						this.getUsers(),
+						this.getOperatorTime(),
+						this.getBigData(),
+						this.getOperatorCondition(),
+						this.getFifo()
+					]);
+					this.getInfos_5995();
+					this.getReport_5995();
+					await this.fifoToReport();
+					this.set_data_from_date();
+					this.bigDataPeriod = this.todayData;
+					this.setTable();
+				} catch (error) {
+					this.handleRequestError('Не удалось загрузить мониторинг. Обнови страницу ещё раз.', error);
+				} finally {
+					this.loading = false;
+				}
 			},
 			async set_company(){
 				if (this.company == 2) {
@@ -775,9 +1421,9 @@
 
 			},
 			async personalMissed(){	
+				this.oper_misseds = {}
 				await axios.get('monitoring/personalMissed', {params: {from: this.from_date, to: this.to_date}}).then(response => {
 					if (response.status == 200) {	
-						this.oper_misseds = []		
 						for (const res of response.data) {
 							var create = new Date(res.create_timestamp);
 							var destroy = new Date(res.destroy_timestamp);
@@ -790,9 +1436,6 @@
 								if (!this.oper_misseds[res.destination_number]) {
 									this.oper_misseds[res.destination_number] = 0;
 								}
-								if (res.destination_number == '116') {
-									console.log(res);
-								}
 								this.oper_misseds[res.destination_number] += 1;								
 							}
 						}			
@@ -800,21 +1443,7 @@
 				});									
 		  	},
 			async getOperatorCondition(){
-				await axios.get('monitoring/operatorCondition', {params: {date: this.today.toISOString().split('T')[0]}}).then(response => {
-					if (response.status == 200) {		
-						try {							
-							for (const id in response.data.calls) {
-								const data = response.data.calls[id]
-								const span = document.getElementById("num_"+data.uid);								
-								if (span != null) {
-									span.style.background=statusColors['register']
-								}
-							}
-						} catch (error) {
-							console.log(error);
-						}
-					}
-				});	
+				await this.pollLiveState(false);
 			}, 
 			async getOperatorTime(){
 				await axios.get('monitoring/operatorTime', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
@@ -825,6 +1454,10 @@
 				});	
 			}, 
 			async getUnknownClients(){
+				this.unknownClients = {
+					inbound: {},
+					outbound: {}
+				}
 				await axios.get('monitoring/unknownClients', {params: {from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
 					if (response.status == 200) {
 						for (const datum of response.data) {
@@ -845,22 +1478,35 @@
 				});	
 			}, 
 			async filter(){
-				this.from_date = $('#start_date').val()
-				this.to_date = $('#get_date').val()
-				
-				await this.get_date();
-
+				const nextFromDate = $('#start_date').val()
+				const nextToDate = $('#get_date').val()
+				if (nextFromDate !== this.from_date || nextToDate !== this.to_date) {
+					this.selectedRange = 'custom'
+				}
+				this.from_date = nextFromDate
+				this.to_date = nextToDate
+				this.loadError = "";
 				this.loading = true;
-
-				// await this.get_users_feedbacks();
-				await this.getOperatorTime();
-				this.getInfos_5995();
-		    	this.getReport_5995();
-				this.fifoToReport();
-				this.set_data_from_date();
-				await this.getBigDataPeriod();
-
-				this.loading = false;
+				try {
+					await this.get_date();
+					await Promise.all([
+						this.getOperatorTime(),
+						this.getBigDataPeriod(),
+						this.getOperatorCondition(),
+						this.getFifo()
+					]);
+					this.getInfos_5995();
+		    		this.getReport_5995();
+					await this.fifoToReport();
+					this.set_data_from_date();
+					if ($("#propuw").val() == 1 || $("#propuw").val() == 2) {
+						this.get_by_filter()
+					}
+				} catch (error) {
+					this.handleRequestError('Не удалось обновить мониторинг по фильтру.', error);
+				} finally {
+					this.loading = false;
+				}
 			},
 			async getBigDataPeriod(){
 				await axios.get('monitoring/bigData', {params: {gateway: this.tel_num, from: $('#start_date').val(), to: $('#get_date').val()}}).then(response => {
@@ -893,7 +1539,7 @@
 									this.bigDataPeriod.answered += 1;
 									this.monthData.answered += 1;
 								}else{
-									let checkedDate = this.checkDateHours(datum.start_stamp);
+									let checkedDate = this.checkDateHours(datum.start_stamp, datum.gateway);
 
 									this.bigDataPeriod.missed += 1;
 									this.bigDataPeriod.missed_in += checkedDate;
@@ -952,23 +1598,29 @@
 					if (datum.accountcode == 'inbound') {
 
 						this.monthData.talking_time += datum.user_talk_time
+						const _monthInbInHours = this.checkDateHours(datum.start_stamp, datum.gateway);
 						if (datum.user_talk_time > 0) {
 							this.monthData.answered += 1;
+							this.monthData.in_hours = (this.monthData.in_hours || 0) + _monthInbInHours;
 						}else{
 							if (datum.duration > 5) {
 								this.monthData.missed += 1;
-								this.monthData.missed_in += this.checkDateHours(datum.start_stamp)
+								this.monthData.missed_in += _monthInbInHours;
+								this.monthData.in_hours = (this.monthData.in_hours || 0) + _monthInbInHours;
 							}
 						}
 
 						if (mondayTimestamp < datum.start_stamp) {
 							this.weekData.talking_time += datum.user_talk_time
+							const _weekInbInHours = this.checkDateHours(datum.start_stamp, datum.gateway);
 							if (datum.user_talk_time > 0) {
 								this.weekData.answered += 1;
+								this.weekData.in_hours = (this.weekData.in_hours || 0) + _weekInbInHours;
 							}else{
 								if (datum.duration > 5) {
 									this.weekData.missed += 1;
-									this.weekData.missed_in += this.checkDateHours(datum.start_stamp)
+									this.weekData.missed_in += _weekInbInHours;
+									this.weekData.in_hours = (this.weekData.in_hours || 0) + _weekInbInHours;
 								}
 							}
 						}
@@ -993,29 +1645,53 @@
 					
 				}
 			},
-			checkDateHours(timestamp){
-				let date = new Date(timestamp * 1000)	
-				let formattedDate = date.toLocaleDateString('en-CA')							
-				let	hours = date.getHours()
-				let day = date.getDay()
-				
-				if (this.holidays.includes(formattedDate)) {
-					
-					if (hours >= 9 && hours < 18) {
-						return 1
-					}else{
-						return 0
-					}
-					
-				}else{
-
-					if ( hours >= 9 && ( (hours < 20 && ![0,6].includes(day)) || (hours < 18 && [0,6].includes(day)) ) ) {
-						return 1
-					}else{
-						return 0
-					}
-
+			async loadWorkHours(){
+				try {
+					const r = await axios.get('monitoring/workHours');
+					if (r && r.data && r.data.hours) this.workHours = r.data.hours;
+				} catch(e) { /* keep defaults; checkDateHours has fallbacks */ }
+			},
+			async loadSurveysCounts(){
+				const fmt = (d) => d.toISOString().split('T')[0];
+				const today = new Date(this.today);
+				const monday = this.getMonday(today.toISOString().split('T')[0]);
+				const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+				const pick = (r) => (r && r.data) ? {
+					with_survey: r.data.with_survey || 0,
+					total_calls: r.data.total_calls || 0,
+					percent:     r.data.percent     || 0,
+				} : {with_survey: 0, total_calls: 0, percent: 0};
+				try {
+					const [a, b, c] = await Promise.all([
+						axios.get('monitoring/surveysCount', {params: {from: fmt(today),       to: fmt(today)}}),
+						axios.get('monitoring/surveysCount', {params: {from: fmt(monday),      to: fmt(today)}}),
+						axios.get('monitoring/surveysCount', {params: {from: fmt(monthStart),  to: fmt(today)}}),
+					]);
+					this.surveys = {today: pick(a), week: pick(b), month: pick(c)};
+				} catch(e) { /* leave previous values */ }
+			},
+			formatSurvey(s){
+				if (!s || !s.total_calls) return s && s.with_survey ? String(s.with_survey) : '0';
+				return s.with_survey + ' / ' + s.total_calls + ' (' + s.percent + '%)';
+			},
+			checkDateHours(timestamp, gateway){
+				// Returns 1 if the timestamp falls inside configured work hours
+				// for the given gateway, 0 otherwise. Falls back to "" (default).
+				let date = new Date(timestamp * 1000);
+				let formattedDate = date.toLocaleDateString('en-CA');
+				let hours = date.getHours();
+				let day = date.getDay();
+				let gw = String(gateway != null ? gateway : '');
+				let wh = this.workHours || {};
+				let cfgGw = wh[gw] || wh[''] || null;
+				let cfg;
+				if (this.holidays && this.holidays.includes(formattedDate)) {
+					cfg = (cfgGw && cfgGw[0]) || {start_hour: 9, end_hour: 18, is_active: true};
+				} else {
+					cfg = (cfgGw && cfgGw[day]) || {start_hour: 9, end_hour: 18, is_active: true};
 				}
+				if (!cfg.is_active) return 0;
+				return (hours >= cfg.start_hour && hours < cfg.end_hour) ? 1 : 0;
 			},
 			getMonday(d) {
 				d = new Date(d);
@@ -1113,7 +1789,7 @@
 				}
 				this.inSumTalk_5995 = sum
 
-				let inGetProg = ((this.inTalk_5995.length / this.inbounds_5995.length) * 100);
+				let inGetProg = Number(this.formatPercent(this.inTalk_5995.length, this.inbounds_5995.length, 1));
 				this.inGetProg_5995 = inGetProg;
 
 				// -------------------------------- outbounds_5995 -----------------------------------------
@@ -1175,7 +1851,7 @@
 				}
 				this.outSumTalk_5995 = osum
 
-				let outGetProg = ((this.outTalk_5995.length / this.outbounds_5995.length) * 100);
+				let outGetProg = Number(this.formatPercent(this.outTalk_5995.length, this.outbounds_5995.length, 1));
 				this.outGetProg_5995 = outGetProg;
 		  	},
 		  	getReport_5995: function(){
@@ -1242,10 +1918,10 @@
 			    this.real_reports_5995 = byVxod_count
 		  	},
 		  	calcHMS: function(d, format = '0'){
-		  		if (d == 0) {
+				d = Number(d);
+		  		if (!Number.isFinite(d) || d <= 0) {
 	      			return 0;
 	      		}else {
-	      			d = Number(d);
 				    var h = Math.floor(d / 3600);
 				    var m = Math.floor(d % 3600 / 60);
 				    var s = Math.floor(d % 3600 % 60);
@@ -1261,10 +1937,10 @@
 	      		}
 		  	},
 		  	calcHMSexcel: function(d){
-		  		if (d == 0) {
+				d = Number(d);
+		  		if (!Number.isFinite(d) || d <= 0) {
 	      			return "00:00:00";
 	      		}else {
-	      			d = Number(d);
 				    var h = Math.floor(d / 3600);
 				    var m = Math.floor(d % 3600 / 60);
 				    var s = Math.floor(d % 3600 % 60);
@@ -1304,17 +1980,18 @@
 		  		return arr1
 		  	},
 		  	async getFifo(){
-		  	    let response = await axios({
-				    method: 'post',
-				    url: "https://api2.onlinepbx.ru/pbx12127.onpbx.ru/fifo/get.json",
-				    data: {
-				    	asd: 'asdad'
-				    },
-				    headers: {
-				        "x-pbx-authentication": "<?= $key_and_id ?>"
-				    }
-				});
-				this.fifos = response.data.data;		 		
+				this.fifoWarning = "";
+				try {
+					let response = await axios.get('monitoring/fifo');
+					if (!response.data || response.data.status !== '1' || !Array.isArray(response.data.data)) {
+						throw new Error(response.data && response.data.comment ? response.data.comment : 'FIFO API is unavailable');
+					}
+					this.fifos = response.data.data;
+				} catch (error) {
+					this.fifos = [];
+					this.fifoWarning = "Состав очереди из OnlinePBX временно недоступен. Показан резервный список операторов.";
+					console.warn('Monitoring FIFO fallback', error);
+				}
 		  	},
 			async fifoToReport(){
 				let user_5995;
@@ -1325,7 +2002,10 @@
 					}
 				}
 				
-				var myArray_5995 = user_5995;	
+				var myArray_5995 = this.normalizeFifoUsers(user_5995);
+				if (!myArray_5995.length) {
+					myArray_5995 = this.getFallbackOperators();
+				}
 				this.availableOperators = myArray_5995;
 
 				await this.personalMissed();
@@ -1348,14 +2028,11 @@
 				let fromDate = Math.floor(new Date(startDate).getTime() / 1000);
 				let toDate = Math.floor((new Date(endDate).getTime() / 1000)+86400);
 
-				this.loading = true;
-				await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}}).then(response => {
-					if (response.status == 200) {
-						this.calls = response.data
-						this.today = new Date()
-						this.loading = false
-					}
-				});		
+				const response = await axios.get('monitoring/data', {params: {gateway: this.tel_num, from: fromDate, to: toDate}});
+				if (response.status == 200) {
+					this.calls = response.data
+					this.today = new Date()
+				}
 			},
 		  	set_data_from_date() {
 				let calls = this.calls	
@@ -1404,7 +2081,9 @@
 						}else{
 							if (inbounds_5995[i].duration > 5) {
 								this.todayData.missed += 1;
-								this.todayData.missed_in += this.checkDateHours(inbounds_5995[i].start_stamp)
+								this.todayData.missed_in += this.checkDateHours(inbounds_5995[i].start_stamp, inbounds_5995[i].gateway)
+								// also count as in_hours for total
+								this.todayData.in_hours = (this.todayData.in_hours || 0) + this.checkDateHours(inbounds_5995[i].start_stamp, inbounds_5995[i].gateway);
 							}
 						}
 					}

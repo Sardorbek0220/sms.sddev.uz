@@ -9,18 +9,16 @@ class VerifyCsrfToken extends Middleware
     /**
      * The URIs that should be excluded from CSRF verification.
      *
+     * Use relative paths so it works on any domain (phone.sdteam.uz, phone.sddev.uz, etc.).
+     *
      * @var array
      */
     protected $except = [
-        'https://sms.sddev.uz/mainProcess',
-        'https://sms.sddev.uz/pbxBot',
-        'https://sms.sddev.uz/feedback/store',
-        'https://sms.sddev.uz/feedback/afterStore',
-        'https://sms.salesdoc.uz/mainProcess',
-        'https://sms.salesdoc.uz/pbxBot',
-        'https://sms.salesdoc.uz/feedback/store',
-        'https://sms.salesdoc.uz/feedback/afterStore',
-        'https://sms.salesdoc.uz/feedback_new/store',
-        'https://sms.salesdoc.uz/feedback_new/afterStore'
+        'mainProcess',
+        'pbxBot',
+        'feedback/store',
+        'feedback/afterStore',
+        'feedback_new/store',
+        'feedback_new/afterStore',
     ];
 }

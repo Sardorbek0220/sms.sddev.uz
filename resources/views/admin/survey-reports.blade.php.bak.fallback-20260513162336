@@ -1,0 +1,297 @@
+@extends('admin.layouts.index')
+
+@section('content')
+<div class="content-wrapper p-3 p-md-4">
+
+    <x-page-header title="Отчёт по анкетам"
+                   subtitle="b24_call_survey_logs · {{ $total }} анкет за период {{ $from_date }} — {{ $to_date }}"
+                   :breadcrumbs="[
+                       ['label' => 'Главная', 'url' => route('admin.bigreport')],
+                       ['label' => 'Отчёт по анкетам'],
+                   ]">
+        <x-slot name="actions">
+            <a href="{{ route('admin.survey-reports') }}?{{ http_build_query(array_merge(request()->query(), ['export'=>'csv'])) }}"
+               class="btn btn-success btn-sm">
+                <i class="fas fa-file-csv"></i> Экспорт CSV
+            </a>
+            <a href="{{ route('admin.survey-settings') }}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-cogs"></i> Настройки
+            </a>
+        </x-slot>
+    </x-page-header>
+
+    @if(session('success'))<div class="alert alert-success" style="border-radius:12px;"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+
+    {{-- Stat cards --}}
+    <div class="row">
+        <div class="col-md-3 col-6 mb-3">
+            <x-stat-card label="Всего анкет" value="{{ number_format($total) }}"
+                hint="за выбранный период · {{ $days }} дн" variant="primary" icon="poll"/>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <x-stat-card label="В среднем" value="{{ $avgPerDay }}"
+                hint="анкет в день" variant="info" icon="chart-line"/>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <x-stat-card label="С комментарием"
+                value="{{ number_format($withComment) }}"
+                hint="{{ $total > 0 ? round($withComment/$total*100) : 0 }}% · оператор расписал"
+                variant="success" icon="comment-dots"/>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <x-stat-card label="Топ причина"
+                value="{{ $topReasons->first()->reason_label ?? '—' }}"
+                hint="{{ $topReasons->first()->c ?? 0 }} анкет"
+                variant="warning" icon="star"/>
+        </div>
+    </div>
+
+    {{-- Top widgets row --}}
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h3 class="card-title mb-0" style="font-weight:600;font-size:1rem;"><i class="fas fa-list"></i> Топ причин</h3></div>
+                <div class="card-body p-3">
+                    @php $maxR = $topReasons->max('c') ?: 1; @endphp
+                    @forelse($topReasons as $r)
+                        @php $w = round($r->c / $maxR * 100); @endphp
+                        <div class="d-flex align-items-center mb-2" style="gap:10px;">
+                            <span class="ph-badge is-primary" style="min-width:50px;justify-content:center;">{{ $r->c }}</span>
+                            <a href="{{ route('admin.survey-reports', array_merge(request()->query(), ['reason_key' => $r->reason_key])) }}"
+                               style="flex:1;color:var(--ph-text);text-decoration:none;">
+                                <div style="background:#f1f5f9;border-radius:6px;height:18px;overflow:hidden;position:relative;">
+                                    <div style="width:{{ $w }}%;background:var(--ph-primary-soft);height:100%;"></div>
+                                    <span style="position:absolute;top:0;left:8px;line-height:18px;font-size:0.82rem;font-weight:600;">{{ $r->reason_label }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="text-muted small">Нет данных</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h3 class="card-title mb-0" style="font-weight:600;font-size:1rem;"><i class="fas fa-tasks"></i> Топ статусов</h3></div>
+                <div class="card-body p-3">
+                    @php $maxS = $topStatuses->max('c') ?: 1; @endphp
+                    @forelse($topStatuses as $s)
+                        @php $w = round($s->c / $maxS * 100); @endphp
+                        <div class="d-flex align-items-center mb-2" style="gap:10px;">
+                            <span class="ph-badge is-info" style="min-width:50px;justify-content:center;">{{ $s->c }}</span>
+                            <a href="{{ route('admin.survey-reports', array_merge(request()->query(), ['status_label' => $s->status_label])) }}"
+                               style="flex:1;color:var(--ph-text);text-decoration:none;">
+                                <div style="background:#f1f5f9;border-radius:6px;height:18px;overflow:hidden;position:relative;">
+                                    <div style="width:{{ $w }}%;background:var(--ph-info-soft);height:100%;"></div>
+                                    <span style="position:absolute;top:0;left:8px;line-height:18px;font-size:0.82rem;font-weight:600;">{{ $s->status_label }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="text-muted small">Нет данных</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h3 class="card-title mb-0" style="font-weight:600;font-size:1rem;"><i class="fas fa-users"></i> Топ операторов</h3></div>
+                <div class="card-body p-3">
+                    @php $maxO = $topOperators->max('c') ?: 1; @endphp
+                    @forelse($topOperators as $o)
+                        @php $w = round($o->c / $maxO * 100); @endphp
+                        <div class="d-flex align-items-center mb-2" style="gap:10px;">
+                            <span class="ph-badge is-success" style="min-width:50px;justify-content:center;">{{ $o->c }}</span>
+                            <a href="{{ route('admin.survey-reports', array_merge(request()->query(), ['operator' => $o->actor_user_name])) }}"
+                               style="flex:1;color:var(--ph-text);text-decoration:none;">
+                                <div style="background:#f1f5f9;border-radius:6px;height:18px;overflow:hidden;position:relative;">
+                                    <div style="width:{{ $w }}%;background:var(--ph-success-soft);height:100%;"></div>
+                                    <span style="position:absolute;top:0;left:8px;line-height:18px;font-size:0.82rem;font-weight:600;">{{ $o->actor_user_name }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="text-muted small">Нет данных</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Filter card --}}
+    <form action="{{ route('admin.survey-reports') }}" method="get" class="ph-filter-card">
+        <div class="ph-filter-row">
+            <div>
+                <label>От</label>
+                <input type="date" name="from_date" value="{{ $from_date }}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>До</label>
+                <input type="date" name="to_date" value="{{ $to_date }}" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>Причина</label>
+                <select name="reason_key" class="form-control form-control-sm">
+                    <option value="">Все</option>
+                    @foreach($reasonOptions as $opt)
+                        <option value="{{ $opt->k }}" {{ $reason === $opt->k ? 'selected' : '' }}>{{ $opt->l }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Статус</label>
+                <select name="status_label" class="form-control form-control-sm">
+                    <option value="">Все</option>
+                    @foreach($statusOptions as $opt)
+                        <option value="{{ $opt }}" {{ $status === $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Отдел</label>
+                <select name="department" class="form-control form-control-sm">
+                    <option value="">Все</option>
+                    @foreach($departmentOptions ?? [] as $d)
+                        <option value="{{ $d }}" {{ ($department ?? '') === $d ? 'selected' : '' }}>{{ $d }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Оператор</label>
+                <select name="operator" class="form-control form-control-sm">
+                    <option value="">Все</option>
+                    @foreach($operatorOptions ?? [] as $op)
+                        <option value="{{ $op }}" {{ ($operator ?? '') === $op ? 'selected' : '' }}>{{ $op }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Телефон</label>
+                <input type="search" name="phone" value="{{ $phone }}" placeholder="998..." class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>Модуль</label>
+                <input type="search" name="module" value="{{ $module }}" placeholder="часть имени..." class="form-control form-control-sm">
+            </div>
+            <div>
+                <label>Комментарий</label>
+                <select name="has_comment" class="form-control form-control-sm">
+                    <option value="">Любой</option>
+                    <option value="yes" {{ $hasCmt === 'yes' ? 'selected' : '' }}>Есть</option>
+                    <option value="no" {{ $hasCmt === 'no' ? 'selected' : '' }}>Нет</option>
+                </select>
+            </div>
+        </div>
+        <div class="ph-filter-actions">
+            <a href="{{ route('admin.survey-reports') }}" class="btn btn-light btn-sm"><i class="fas fa-undo"></i> Сбросить</a>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Применить</button>
+        </div>
+    </form>
+
+    {{-- Table --}}
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0" style="font-weight:600;font-size:1rem;">Анкеты ({{ $items->total() }})</h3>
+            <small class="text-muted">страница {{ $items->currentPage() }} / {{ $items->lastPage() }}</small>
+        </div>
+        <div class="card-body p-0">
+            @if($items->isEmpty())
+                <div class="ph-empty">
+                    <div class="ph-empty-icon"><i class="fas fa-search"></i></div>
+                    <h4>Ничего не найдено</h4>
+                    <div class="text-muted small">Попробуйте сменить фильтры или период.</div>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Дата</th>
+                                <th>Клиент</th>
+                                <th>Причина</th>
+                                <th>Статус</th>
+                                <th>Отдел</th>
+                                <th>Оператор</th>
+                                <th>Модули</th>
+                                <th style="min-width:240px;">Комментарий</th>
+                                <th>Call</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($items as $r)
+                                @php
+                                    $modules = [];
+                                    if (!empty($r->modules_json)) {
+                                        $m = json_decode($r->modules_json, true);
+                                        if (is_array($m)) $modules = $m;
+                                    }
+                                    // Status colour
+                                    $sLabel = (string)$r->status_label;
+                                    $sVar = 'muted';
+                                    if (mb_stripos($sLabel, 'решен') !== false || mb_stripos($sLabel, 'закры') !== false) $sVar = 'success';
+                                    elseif (mb_stripos($sLabel, 'работ') !== false) $sVar = 'info';
+                                    elseif (mb_stripos($sLabel, 'ожида') !== false || mb_stripos($sLabel, 'уточн') !== false) $sVar = 'warning';
+                                    elseif (mb_stripos($sLabel, 'сброс') !== false || mb_stripos($sLabel, 'отказ') !== false) $sVar = 'danger';
+                                @endphp
+                                <tr>
+                                    <td><small class="text-muted">#{{ $r->id }}</small></td>
+                                    <td><small>{{ \Carbon\Carbon::parse($r->created_at)->format('d.m H:i') }}</small></td>
+                                    <td>
+                                        <a href="{{ route('admin.report.calls', ['phone' => $r->phone_number, 'from_date' => date('Y-m-d', strtotime($r->created_at)), 'to_date' => date('Y-m-d', strtotime($r->created_at))]) }}">
+                                            <small>{{ ph_format_phone($r->phone_number) }}</small>
+                                        </a>
+                                    </td>
+                                    <td><span class="ph-badge is-primary">{{ $r->reason_label ?: '—' }}</span></td>
+                                    <td>
+                                        @if($sLabel !== '')
+                                            <span class="ph-badge is-{{ $sVar }}">{{ $sLabel }}</span>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $deptArr = !empty($r->actor_department_names_json) ? json_decode($r->actor_department_names_json, true) : null;
+                                            $deptList = is_array($deptArr) ? array_filter(array_map('trim', $deptArr)) : [];
+                                        @endphp
+                                        @if(!empty($deptList))
+                                            <small>{{ implode(', ', $deptList) }}</small>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td><small>{{ $r->actor_user_name ?: '—' }}</small></td>
+                                    <td>
+                                        @if(!empty($modules))
+                                            <small>{{ ph_short_text(implode(', ', $modules), 50) }}</small>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td style="white-space:normal;">
+                                        @if(!empty($r->comment_text))
+                                            <small>{{ ph_short_text($r->comment_text, 120) }}</small>
+                                        @else
+                                            <small class="text-muted">—</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php $callIdShort = preg_replace('/^.*:call:(\d+):.*/', '#$1', (string)$r->call_id); @endphp
+                                        <small class="text-muted">{{ $callIdShort }}</small>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+        @if(!$items->isEmpty())
+            <div class="card-footer bg-transparent">{{ $items->links() }}</div>
+        @endif
+    </div>
+
+</div>
+@endsection

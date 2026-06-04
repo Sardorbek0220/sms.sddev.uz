@@ -12,38 +12,22 @@ class BigreportController extends Controller
 {
     public function index(Request $request)
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
-        $key_and_id = $auth->key_id.":".$auth->key;
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
-
-        return view('admin.layouts.bigreport', compact('key_and_id', 'auth_key'));
+        return view('admin.layouts.bigreport');
     }
 
     public function live(Request $request)
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
-        $key_and_id = $auth->key_id.":".$auth->key;
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
-
-        return view('admin.layouts.live', compact('key_and_id', 'auth_key'));
+        return view('admin.layouts.live');
     }
 
     public function operator(Request $request)
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
-        $key_and_id = $auth->key_id.":".$auth->key;
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
-
-        return view('operator.layouts.bigreport', compact('key_and_id', 'auth_key'));
+        return view('operator.layouts.bigreport');
     }
 
     public function piece(Request $request)
     {
-        $auth = json_decode(file_get_contents("configs/auth.txt"));
-        $key_and_id = $auth->key_id.":".$auth->key;
-        $auth_key = "OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM";
-
-        return view('admin.layouts.piece', compact('key_and_id', 'auth_key'));
+        return view('admin.layouts.piece');
     }
 
     public function extra(Request $request)

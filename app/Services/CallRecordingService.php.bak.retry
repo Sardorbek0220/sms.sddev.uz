@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Services;
+
+use App\Call;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Manages local copies of call recordings:
+ *   - downloadPending(): fetches fresh recordings from pbx_audio_url into
+ *     storage/app/call-recordings/YYYY/MM/call-<id>-<uuid>.mp3
+ *   - purgeOlderThan(days): deletes files older than N days and clears
+ *     recording_local_path so the row no longer points at a missing file.
+ *
+ * Retention is set to 3 days by default — enough to listen to recent calls
+ * but small enough to keep disk usage bounded (≈25 MB/day at 500 calls).
+ */
+class CallRecordingService
+{
+    public const DEFAULT_RETENTION_DAYS = 30;
+    private const HTTP_TIMEOUT_SECONDS  = 30;
+    private const MIN_VALID_BYTES       = 1024; // anything smaller is almost certainly a 404 page
+
+    public function downloadPending(int $batch = 50, int $maxAgeDays = self::DEFAULT_RETENTION_DAYS): array
+    {
+        $cutoff = Carbon::now()->subDays($maxAgeDays);
+
+        $calls = Call::query()
+            ->whereNotNull('pbx_audio_url')
+            ->where('pbx_audio_url', '!=', '')
+            ->whereNull('recording_local_path')
+            ->whereNull('recording_download_error')
+            ->where('created_at', '>=', $cutoff)
+            ->orderByDesc('created_at')
+            ->limit($batch)
+            ->get();
+
+        $stats = ['attempted' => 0, 'success' => 0, 'failed' => 0];
+
+        foreach ($calls as $call) {
+            $stats['attempted']++;
+            $relative = $this->buildRelativePath($call);
+            $absolute = storage_path('app/' . $relative);
+
+            try {
+                @mkdir(dirname($absolute), 0775, true);
+                $bytes = $this->httpDownload($call->pbx_audio_url, $absolute);
+                if ($bytes < self::MIN_VALID_BYTES) {
+                    @unlink($absolute);
+                    throw new \RuntimeException("downloaded too small ({$bytes} bytes)");
+                }
+                $call->recording_local_path     = $relative;
+                $call->recording_downloaded_at  = Carbon::now();
+                $call->recording_download_error = null;
+                $call->save();
+                $stats['success']++;
+            } catch (\Throwable $e) {
+                $call->recording_download_error = mb_substr($e->getMessage(), 0, 250);
+                $call->save();
+                $stats['failed']++;
+            }
+        }
+
+        return $stats;
+    }
+
+    public function purgeOlderThan(int $days = self::DEFAULT_RETENTION_DAYS, int $batch = 500): array
+    {
+        $cutoff = Carbon::now()->subDays($days);
+
+        $calls = Call::query()
+            ->whereNotNull('recording_local_path')
+            ->where('created_at', '<', $cutoff)
+            ->orderBy('created_at')
+            ->limit($batch)
+            ->get();
+
+        $stats = ['deleted' => 0, 'missing' => 0];
+
+        foreach ($calls as $call) {
+            $absolute = storage_path('app/' . $call->recording_local_path);
+            if (is_file($absolute)) {
+                @unlink($absolute);
+                $stats['deleted']++;
+            } else {
+                $stats['missing']++;
+            }
+            $call->recording_local_path    = null;
+            $call->recording_downloaded_at = null;
+            $call->save();
+        }
+
+        // Best-effort: remove now-empty directories for tidy disk.
+        $this->cleanupEmptyDirs(storage_path('app/call-recordings'));
+
+        return $stats;
+    }
+
+    private function buildRelativePath(Call $call): string
+    {
+        $created = $call->created_at ?: Carbon::now();
+        $year  = $created->format('Y');
+        $month = $created->format('m');
+        $uuid  = preg_replace('/[^A-Za-z0-9_\-]/', '', (string) ($call->uuid ?: 'noid'));
+        return sprintf('call-recordings/%s/%s/call-%d-%s.mp3', $year, $month, $call->id, $uuid);
+    }
+
+    private function httpDownload(string $url, string $dest): int
+    {
+        $ch = curl_init($url);
+        $fp = fopen($dest, 'w');
+        if (!$fp) throw new \RuntimeException("can't open dest for writing");
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $fp,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => self::HTTP_TIMEOUT_SECONDS,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT      => 'phone.sdteam.uz recording fetcher',
+        ]);
+        $ok   = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        fclose($fp);
+
+        if ($ok === false) throw new \RuntimeException("curl: " . $err);
+        if ($code !== 200)  throw new \RuntimeException("HTTP {$code}");
+
+        return is_file($dest) ? filesize($dest) : 0;
+    }
+
+    private function cleanupEmptyDirs(string $root): void
+    {
+        if (!is_dir($root)) return;
+        foreach (glob($root . '/*', GLOB_ONLYDIR) as $year) {
+            foreach (glob($year . '/*', GLOB_ONLYDIR) as $month) {
+                if (count(scandir($month)) <= 2) @rmdir($month);
+            }
+            if (count(scandir($year)) <= 2) @rmdir($year);
+        }
+    }
+}

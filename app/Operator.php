@@ -23,4 +23,9 @@ class Operator extends Model
         return $this->hasMany(Call::class);
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'operator_id');
+    }
+
 }

@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\Event;
 class EventServiceProvider extends ServiceProvider
 {
     /**
+     * The event subscribers for audit logging.
+     */
+    protected $subscribe = [
+        \App\Listeners\AuditAuthSubscriber::class,
+    ];
+
+    /**
      * The event listener mappings for the application.
      *
      * @var array

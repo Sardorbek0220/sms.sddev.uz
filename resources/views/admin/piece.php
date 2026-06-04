@@ -116,9 +116,9 @@
               <v-col>
                   <div class="float-right">
                     <select style="display:inline-block; width: auto;" class="form-control" v-model="company" @change="set_company()">
-                      <option value="1">Sales Doctor</option>
-                      <option value="2">Ibox</option>
-                      <option value="3">Ido'kon</option>
+                      <option value="1">Тех поддержка Sales Doctor</option>
+                      <option value="2">Тех поддержка Ibox</option>
+                      <option value="3">Тех поддержка IDokon</option>
                     </select>
                     <select class="form-control" v-model="operator_id" style="display: inline;width: auto;">
                       <option selected value="">Все операторы</option>
@@ -811,18 +811,25 @@ new Vue({
         });
         return arr1
       },
+      normalizeFifoUsers(rawUsers) {
+        if (Array.isArray(rawUsers)) {
+          return rawUsers
+            .map((item) => String(item || '').split(':')[0].trim())
+            .filter(Boolean)
+        }
+
+        if (typeof rawUsers === 'string') {
+          return rawUsers
+            .split(';')
+            .map((item) => String(item || '').split(':')[0].trim())
+            .filter(Boolean)
+        }
+
+        return []
+      },
       async getFifo(){
-        let response = await axios({
-          method: 'post',
-          url: "https://api2.onlinepbx.ru/pbx12127.onpbx.ru/fifo/get.json",
-          data: {
-            asd: 'asdad'
-          },
-          headers: {
-              "x-pbx-authentication": "<?= $key_and_id ?>"
-          }
-        });
-        this.fifos = response.data.data;		 		
+        let response = await axios.get('/admin/monitoring/fifo');
+        this.fifos = Array.isArray(response.data.data) ? response.data.data : [];
       },
       async fifoToReport(){
         let user_5995;
@@ -833,7 +840,7 @@ new Vue({
           }
         }
         
-        var myArray_5995 = user_5995;	
+        var myArray_5995 = this.normalizeFifoUsers(user_5995);	
         this.availableOperators = myArray_5995;
         await this.personalMissed();
 

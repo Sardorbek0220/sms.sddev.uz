@@ -1,0 +1,652 @@
+<?php
+
+namespace App\Services;
+
+use App\Support\PhoneNumber;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class BitrixSurveyService
+{
+    public function attachToCalls(Collection $calls, string $fromDate, string $toDate): Collection
+    {
+        $phones = [];
+
+        foreach ($calls as $call) {
+            $call->normalized_phone = $this->normalizePhone($call->client_telephone ?? null);
+            $call->bitrixSurvey = null;
+
+            if ($call->normalized_phone !== null) {
+                $phones[$call->normalized_phone] = true;
+            }
+        }
+
+        if (empty($phones)) {
+            return $calls;
+        }
+
+        $surveysByPhone = $this->loadSurveysByPhone(array_keys($phones), $fromDate, $toDate);
+
+        foreach ($calls as $call) {
+            if ($call->normalized_phone === null || empty($surveysByPhone[$call->normalized_phone])) {
+                continue;
+            }
+
+            $call->bitrixSurvey = $this->pickNearestSurvey($call, $surveysByPhone[$call->normalized_phone]);
+        }
+
+        return $calls;
+    }
+
+    public function findSurveyForCall($call)
+    {
+        $date = $this->resolveDateString($call->created_at ?? null);
+
+        if ($date === null) {
+            return null;
+        }
+
+        $result = $this->attachToCalls(collect([$call]), $date, $date)->first();
+
+        return $result ? $result->bitrixSurvey : null;
+    }
+
+    public function getFormConfig(): array
+    {
+        $canonical = $this->loadConfigCanonicalFromDb();
+
+        if (!is_array($canonical)) {
+            $canonical = $this->defaultConfigCanonical();
+        }
+
+        return $this->buildWidgetUiConfig($canonical);
+    }
+
+    /**
+     * Phase X: Read raw canonical config (for admin settings form).
+     * Falls back to defaults if DB row is missing or malformed.
+     */
+    public function getCanonicalConfig(): array
+    {
+        $cfg = $this->loadConfigCanonicalFromDb();
+        return is_array($cfg) ? $cfg : $this->defaultConfigCanonical();
+    }
+
+    /**
+     * Phase X: Save canonical config to b24_call_survey_app_settings (UPSERT).
+     * Validates + normalizes via existing normalizeConfigCanonical.
+     */
+    public function saveCanonicalConfig(array $raw, $source = 'phone.sdteam.uz/admin/survey-settings'): array
+    {
+        $canonical = $this->normalizeConfigCanonical($raw);
+        $payload = json_encode($canonical, JSON_UNESCAPED_UNICODE);
+
+        $exists = DB::connection('bitrix_survey')
+            ->table($this->settingsTable())
+            ->where('settings_key', 'survey_ui_config')
+            ->exists();
+
+        if ($exists) {
+            DB::connection('bitrix_survey')
+                ->table($this->settingsTable())
+                ->where('settings_key', 'survey_ui_config')
+                ->update([
+                    'settings_json'  => $payload,
+                    'updated_at'     => date('Y-m-d H:i:s'),
+                    'updated_source' => $source,
+                ]);
+        } else {
+            DB::connection('bitrix_survey')
+                ->table($this->settingsTable())
+                ->insert([
+                    'settings_key'   => 'survey_ui_config',
+                    'settings_json'  => $payload,
+                    'updated_at'     => date('Y-m-d H:i:s'),
+                    'updated_source' => $source,
+                ]);
+        }
+
+        return $canonical;
+    }
+
+    public function createManualSurveyForCall($call, array $payload, $actor = null): array
+    {
+        $config = $this->getFormConfig();
+        $reason = $this->resolveReasonConfig($config, (string) ($payload['reason_key'] ?? ''));
+        $status = trim((string) ($payload['status_label'] ?? ''));
+        $comment = trim((string) ($payload['comment_text'] ?? ''));
+
+        if ($reason === null) {
+            throw ValidationException::withMessages([
+                'reason_key' => 'Выберите причину обращения.',
+            ]);
+        }
+
+        $modules = $this->normalizeSelectedModules($payload['modules'] ?? [], $reason['m'] ?? []);
+
+        if ($status === '') {
+            throw ValidationException::withMessages([
+                'status_label' => 'Выберите статус.',
+            ]);
+        }
+
+        if (!empty($reason['req']) && $comment === '') {
+            throw ValidationException::withMessages([
+                'comment_text' => 'Для этой причины комментарий обязателен.',
+            ]);
+        }
+
+        $table = $this->surveyTable();
+        $summaryText = $this->buildSummaryText($call, $reason, $modules, $status, $comment, $actor);
+        $rawPayload = [
+            'source' => parse_url(config('app.url'), PHP_URL_HOST) . '.manual_form',
+            'call' => [
+                'id' => $call->id ?? null,
+                'uuid' => $call->uuid ?? null,
+                'phone' => $call->client_telephone ?? null,
+                'direction' => $call->direction ?? null,
+                'event' => $call->event ?? null,
+                'created_at' => (string) ($call->created_at ?? ''),
+            ],
+            'actor' => [
+                'user_id' => $actor->id ?? null,
+                'user_name' => $actor->name ?? '',
+                'role' => $actor->role ?? '',
+            ],
+            'survey' => [
+                'reason_key' => $reason['k'],
+                'reason_label' => $reason['l'],
+                'module_title' => $reason['mTitle'] ?? 'Модули',
+                'modules' => $modules,
+                'status_label' => $status,
+                'comment_text' => $comment,
+                'summary_text' => $summaryText,
+            ],
+        ];
+
+        $row = [
+            'created_at' => gmdate('Y-m-d H:i:s'),
+            'phone_number' => $this->limitString($call->client_telephone ?? '', 64),
+            'call_id' => $this->limitString($this->buildManualCallIdentifier($call), 255),
+            'placement' => 'PHONE_SDDEV_CALLS',
+            'call_direction' => $this->limitString($call->direction ?? '', 32),
+            'call_state' => $this->limitString($call->event ?? '', 32),
+            'crm_entity_type' => '',
+            'crm_entity_id' => null,
+            'crm_owner_type_id' => null,
+            'crm_owner_id' => null,
+            'crm_save_method' => 'phone_sddev_manual_form',
+            'actor_user_id' => $actor->id ?? null,
+            'actor_user_name' => $this->limitString($actor->name ?? '', 255),
+            'actor_department_ids_json' => json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'actor_department_names_json' => json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'reason_key' => $this->limitString($reason['k'], 64),
+            'reason_label' => $this->limitString($reason['l'], 255),
+            'module_title' => $this->limitString($reason['mTitle'] ?? 'Модули', 64),
+            'modules_json' => json_encode($modules, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'status_label' => $this->limitString($status, 255),
+            'comment_text' => $comment,
+            'summary_text' => $summaryText,
+            'raw_payload_json' => json_encode($rawPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ];
+
+        $id = DB::connection('bitrix_survey')->table($table)->insertGetId($row);
+
+        return [
+            'id' => $id,
+            'table' => $table,
+            'summary_text' => $summaryText,
+        ];
+    }
+
+    public function normalizePhone($value): ?string
+    {
+        return PhoneNumber::canonicalUzDigits($value);
+    }
+
+    protected function surveyTable(): string
+    {
+        $table = (string) env('BITRIX_SURVEY_DB_TABLE', 'b24_call_survey_logs');
+
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+            throw ValidationException::withMessages([
+                'survey' => 'Некорректно настроена таблица анкеты.',
+            ]);
+        }
+
+        return $table;
+    }
+
+    protected function settingsTable(): string
+    {
+        $table = (string) env('BITRIX_SURVEY_DB_SETTINGS_TABLE', 'b24_call_survey_app_settings');
+
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+            return 'b24_call_survey_app_settings';
+        }
+
+        return $table;
+    }
+
+    protected function loadSurveysByPhone(array $normalizedPhones, string $fromDate, string $toDate): array
+    {
+        $from = Carbon::parse($fromDate . ' 00:00:00')
+            ->subHours((int) env('BITRIX_SURVEY_MATCH_HOURS', 72))
+            ->format('Y-m-d H:i:s');
+
+        $to = Carbon::parse($toDate . ' 23:59:59')
+            ->addHours((int) env('BITRIX_SURVEY_MATCH_HOURS', 72))
+            ->format('Y-m-d H:i:s');
+
+        $query = DB::connection('bitrix_survey')
+            ->table($this->surveyTable())
+            ->select([
+                'id',
+                'created_at',
+                'phone_number',
+                'call_id',
+                'reason_key',
+                'reason_label',
+                'module_title',
+                'modules_json',
+                'status_label',
+                'comment_text',
+                'summary_text',
+            ])
+            ->whereBetween('created_at', [$from, $to]);
+
+        $phoneExpression = PhoneNumber::mysqlCanonicalUzDigitsExpression('phone_number');
+
+        $query->where(function ($builder) use ($normalizedPhones, $phoneExpression) {
+            foreach (array_chunk($normalizedPhones, 100) as $chunk) {
+                $placeholders = implode(',', array_fill(0, count($chunk), '?'));
+                $builder->orWhereRaw($phoneExpression . " IN ($placeholders)", $chunk);
+            }
+        });
+
+        $surveys = $query
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
+
+        $grouped = [];
+
+        foreach ($surveys as $survey) {
+            $normalizedPhone = $this->normalizePhone($survey->phone_number ?? null);
+
+            if ($normalizedPhone === null) {
+                continue;
+            }
+
+            $grouped[$normalizedPhone][] = $survey;
+        }
+
+        return $grouped;
+    }
+
+    protected function pickNearestSurvey($call, array $surveys)
+    {
+        $callTime = $this->resolveTimestamp($call->created_at ?? null);
+
+        if ($callTime === null) {
+            return null;
+        }
+
+        $bestSurvey = null;
+        $bestDiff = null;
+        $maxDiff = (int) env('BITRIX_SURVEY_MATCH_HOURS', 72) * 3600;
+
+        foreach ($surveys as $survey) {
+            $surveyTime = $this->resolveTimestamp($survey->created_at ?? null);
+
+            if ($surveyTime === null) {
+                continue;
+            }
+
+            $diff = abs($callTime - $surveyTime);
+
+            if ($bestDiff === null || $diff < $bestDiff) {
+                $bestSurvey = $survey;
+                $bestDiff = $diff;
+            }
+        }
+
+        if ($bestSurvey === null || $bestDiff === null || $bestDiff > $maxDiff) {
+            return null;
+        }
+
+        $bestSurvey->match_diff_minutes = (int) floor($bestDiff / 60);
+
+        return $bestSurvey;
+    }
+
+    protected function resolveTimestamp($value): ?int
+    {
+        if ($value instanceof Carbon) {
+            return $value->getTimestamp();
+        }
+
+        if (is_string($value) && $value !== '') {
+            try {
+                return Carbon::parse($value)->getTimestamp();
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    protected function resolveDateString($value): ?string
+    {
+        if ($value instanceof Carbon) {
+            return $value->format('Y-m-d');
+        }
+
+        if (is_string($value) && $value !== '') {
+            try {
+                return Carbon::parse($value)->format('Y-m-d');
+            } catch (\Throwable $e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    protected function loadConfigCanonicalFromDb(): ?array
+    {
+        try {
+            $row = DB::connection('bitrix_survey')
+                ->table($this->settingsTable())
+                ->where('settings_key', 'survey_ui_config')
+                ->first();
+
+            if (!$row || empty($row->settings_json)) {
+                return null;
+            }
+
+            $decoded = json_decode((string) $row->settings_json, true);
+
+            if (!is_array($decoded)) {
+                return null;
+            }
+
+            return $this->normalizeConfigCanonical($decoded);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    protected function defaultConfigCanonical(): array
+    {
+        return [
+            'version' => 1,
+            'common_modules' => [
+                'Дашборд',
+                'Настройки',
+                'Аудит 2',
+                'Команда',
+                'Клиенты',
+                'Маркировка',
+                'Заявки',
+                'Планы',
+                'Супервайзер',
+                'Продажи',
+                'Финансы',
+                'Отчёты',
+                'Касса',
+                'GPS',
+                'Биллинг',
+                'Мобильные приложения : SD Agent, SD Доставка, SD Audit, SD Manager',
+                'Партнёр',
+                'Код объединения',
+                'Накладные',
+                'Принтеры',
+                'Обучение',
+                'Новый клиент',
+            ],
+            'payment_topics' => [
+                'Продление / смена тарифа',
+                'Жалоба на цену',
+                'Ускорить получение оплаты',
+                'Возврат денег',
+                'Счета и документы',
+                'Другое',
+            ],
+            'unified_statuses' => [
+                'Решено на звонке',
+                'В работе',
+                'В ожидании разработки',
+                'Требует уточнения / проверки',
+            ],
+            'reasons' => [
+                ['k' => 'bug', 'l' => 'Баг', 'module_set' => 'common', 'module_title' => 'Модули', 'req' => false, 'custom_modules' => [], 'custom_statuses' => []],
+                ['k' => 'product', 'l' => 'Вопрос по продукту', 'module_set' => 'common', 'module_title' => 'Модули', 'req' => false, 'custom_modules' => [], 'custom_statuses' => []],
+                ['k' => 'improvement', 'l' => 'Запрос на доработку', 'module_set' => 'common', 'module_title' => 'Модули', 'req' => false, 'custom_modules' => [], 'custom_statuses' => []],
+                ['k' => 'other', 'l' => 'Другое', 'module_set' => 'common', 'module_title' => 'Модули', 'req' => true, 'custom_modules' => [], 'custom_statuses' => []],
+                ['k' => 'payment', 'l' => 'Вопрос по оплате', 'module_set' => 'payment', 'module_title' => 'Оплата', 'req' => false, 'custom_modules' => [], 'custom_statuses' => []],
+            ],
+        ];
+    }
+
+    protected function normalizeConfigCanonical($value): array
+    {
+        $defaults = $this->defaultConfigCanonical();
+
+        if (!is_array($value)) {
+            return $defaults;
+        }
+
+        $commonModules = $this->stringArray($value['common_modules'] ?? [], 200, 255);
+        $paymentTopics = $this->stringArray($value['payment_topics'] ?? [], 200, 255);
+        $statuses = $this->stringArray($value['unified_statuses'] ?? [], 100, 255);
+
+        if (!$commonModules) {
+            $commonModules = $defaults['common_modules'];
+        }
+
+        if (!$paymentTopics) {
+            $paymentTopics = $defaults['payment_topics'];
+        }
+
+        if (!$statuses) {
+            $statuses = $defaults['unified_statuses'];
+        }
+
+        $reasons = [];
+        $seen = [];
+
+        foreach ((array) ($value['reasons'] ?? []) as $reasonRaw) {
+            $reason = $this->normalizeReasonCanonical($reasonRaw);
+
+            if ($reason === null || isset($seen[$reason['k']])) {
+                continue;
+            }
+
+            $seen[$reason['k']] = true;
+            $reasons[] = $reason;
+        }
+
+        if (!$reasons) {
+            $reasons = $defaults['reasons'];
+        }
+
+        return [
+            'version' => 1,
+            'common_modules' => $commonModules,
+            'payment_topics' => $paymentTopics,
+            'unified_statuses' => $statuses,
+            'reasons' => $reasons,
+        ];
+    }
+
+    protected function normalizeReasonCanonical($value): ?array
+    {
+        if (!is_array($value)) {
+            return null;
+        }
+
+        $key = strtolower(trim((string) ($value['k'] ?? '')));
+        $label = trim((string) ($value['l'] ?? ''));
+        $moduleSet = strtolower(trim((string) ($value['module_set'] ?? ($value['moduleSet'] ?? 'common'))));
+        $moduleTitle = trim((string) ($value['module_title'] ?? ($value['mTitle'] ?? 'Модули')));
+        $reqRaw = $value['req'] ?? false;
+
+        if ($key === '' || $label === '' || !preg_match('/^[a-z0-9_\-]{1,64}$/', $key)) {
+            return null;
+        }
+
+        if (!in_array($moduleSet, ['common', 'payment', 'custom'], true)) {
+            $moduleSet = 'common';
+        }
+
+        return [
+            'k' => $key,
+            'l' => $label,
+            'module_set' => $moduleSet,
+            'module_title' => $moduleTitle !== '' ? $moduleTitle : 'Модули',
+            'req' => is_bool($reqRaw) ? $reqRaw : in_array(strtolower((string) $reqRaw), ['1', 'true', 'yes', 'on'], true),
+            'custom_modules' => $this->stringArray($value['custom_modules'] ?? ($value['m'] ?? []), 200, 255),
+            'custom_statuses' => $this->stringArray($value['custom_statuses'] ?? ($value['s'] ?? []), 100, 255),
+        ];
+    }
+
+    protected function buildWidgetUiConfig(array $canonical): array
+    {
+        $canonical = $this->normalizeConfigCanonical($canonical);
+        $common = $canonical['common_modules'];
+        $payment = $canonical['payment_topics'];
+        $statuses = $canonical['unified_statuses'];
+        $reasonsUi = [];
+
+        foreach ($canonical['reasons'] as $reason) {
+            $moduleSet = (string) ($reason['module_set'] ?? 'common');
+            $modules = $moduleSet === 'payment'
+                ? $payment
+                : ($moduleSet === 'custom'
+                    ? $this->stringArray($reason['custom_modules'] ?? [], 200, 255)
+                    : $common);
+
+            $reasonStatuses = $this->stringArray($reason['custom_statuses'] ?? [], 100, 255);
+
+            if (!$modules) {
+                $modules = $common;
+            }
+
+            if (!$reasonStatuses) {
+                $reasonStatuses = $statuses;
+            }
+
+            $reasonsUi[] = [
+                'k' => (string) $reason['k'],
+                'l' => (string) $reason['l'],
+                'mTitle' => (string) $reason['module_title'],
+                'm' => $modules,
+                's' => $reasonStatuses,
+                'req' => (bool) ($reason['req'] ?? false),
+            ];
+        }
+
+        return [
+            'version' => 1,
+            'commonModules' => $common,
+            'paymentTopics' => $payment,
+            'unifiedStatuses' => $statuses,
+            'reasons' => $reasonsUi,
+        ];
+    }
+
+    protected function resolveReasonConfig(array $config, string $reasonKey): ?array
+    {
+        foreach ((array) ($config['reasons'] ?? []) as $reason) {
+            if ((string) ($reason['k'] ?? '') === $reasonKey) {
+                return $reason;
+            }
+        }
+
+        return null;
+    }
+
+    protected function normalizeSelectedModules($value, array $allowedModules): array
+    {
+        return $this->stringArray(is_array($value) ? $value : [], 50, 255);
+    }
+
+    protected function buildManualCallIdentifier($call): string
+    {
+        $parts = [parse_url(config('app.url'), PHP_URL_HOST), 'call', (string) ($call->id ?? '')];
+
+        if (!empty($call->uuid)) {
+            $parts[] = (string) $call->uuid;
+        }
+
+        return implode(':', array_filter($parts));
+    }
+
+    protected function buildSummaryText($call, array $reason, array $modules, string $status, string $comment, $actor = null): string
+    {
+        $lines = [
+            'ОПРОС ПО ЗВОНКУ',
+            'Причина: ' . ($reason['l'] ?? '-'),
+            ($reason['mTitle'] ?? 'Модули') . ': ' . ($modules ? implode(', ', $modules) : 'не выбрано'),
+            'Статус: ' . ($status !== '' ? $status : '-'),
+            'Телефон: ' . ((string) ($call->client_telephone ?? '-')),
+            'Дата звонка: ' . ((string) ($call->created_at ?? '-')),
+        ];
+
+        if (!empty($actor->name)) {
+            $lines[] = 'Заполнил: ' . $actor->name;
+        }
+
+        $lines[] = 'Комментарий: ' . ($comment !== '' ? $comment : '-');
+
+        return implode("\n", $lines);
+    }
+
+    protected function stringArray($value, int $maxItems = 100, int $maxLen = 255): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $out = [];
+
+        foreach ($value as $item) {
+            $text = trim((string) $item);
+
+            if ($text === '') {
+                continue;
+            }
+
+            $text = $this->limitString($text, $maxLen);
+
+            if (!in_array($text, $out, true)) {
+                $out[] = $text;
+            }
+
+            if (count($out) >= $maxItems) {
+                break;
+            }
+        }
+
+        return $out;
+    }
+
+    protected function limitString($value, int $maxLength): string
+    {
+        $text = is_string($value) ? $value : (string) $value;
+
+        if ($maxLength <= 0) {
+            return '';
+        }
+
+        if (function_exists('mb_substr')) {
+            return (string) mb_substr($text, 0, $maxLength);
+        }
+
+        return substr($text, 0, $maxLength);
+    }
+}

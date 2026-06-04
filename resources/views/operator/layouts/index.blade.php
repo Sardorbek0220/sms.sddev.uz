@@ -33,13 +33,10 @@
   <link rel="stylesheet" href="{{ asset('assets/dist/css/adminlte.min.css')}}">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-  <style>
-    #example2_info{
-      display: none;
-    }
-  </style>
+  <!-- Phone unified theme (Phase 1) -->
+  <link rel="stylesheet" href="{{ asset('assets/dist/css/theme.css') }}?v={{ filemtime(public_path('assets/dist/css/theme.css')) }}">
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed role-operator">
 <div class="wrapper">
 
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -54,6 +51,10 @@
   @include('operator.inc.sidebar')
 
   @yield('content')
+
+  @if(auth()->user() && auth()->user()->live_survey_widget_enabled)
+  @include('operator.inc.live-survey-widget')
+  @endif
 
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">

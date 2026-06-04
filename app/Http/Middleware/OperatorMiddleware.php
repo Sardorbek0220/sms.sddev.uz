@@ -17,9 +17,10 @@ class OperatorMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->email=='operator@gmail.com') {
+        if (Auth::check() && Auth::user()->isOperator() && !empty(Auth::user()->operator_id)) {
             return $next($request);
         }
+
         return redirect()->route('logout');
     }
 }

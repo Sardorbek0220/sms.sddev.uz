@@ -1,0 +1,221 @@
+<?php
+
+namespace App\Services;
+
+use Ratchet\Client\Connector;
+use React\EventLoop\Factory;
+use React\Socket\Connector as ReactConnector;
+use App\Operator_time;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * WebSocket bridge to OnlinePBX → feeds the live monitoring page.
+ *
+ * Run as a daemon (systemd unit phone-bridge.service):
+ *   php artisan websocket:connect
+ *
+ * Responsibilities:
+ *   - Subscribe to user_registration / user_blf / user_status event groups.
+ *   - Forward every relevant event to PbxLiveStateService::ingest() so
+ *     /admin/monitoring shows real-time operator state.
+ *   - Track operator register/unregister times in `operator_times` table
+ *     (preserves legacy attendance-report behaviour).
+ *   - Emit a synthetic bridge_heartbeat every 10s so the monitoring page
+ *     reports "bridge_connected = true".
+ *   - Auto-reconnect indefinitely with exponential backoff (max 30s).
+ */
+class WebSocketClient
+{
+    private const WS_URL = 'wss://pbx12127.onpbx.ru:3342/?key=OGV3MWNuVkw0VWJuZHc3c1lUeFViaWVJYnA5UXdGaXM';
+    private const SUBSCRIBE_GROUPS = ['user_registration', 'user_blf', 'user_status'];
+    private const HEARTBEAT_INTERVAL_SECONDS = 3;
+    private const RECONNECT_INITIAL_BACKOFF = 1;
+    private const RECONNECT_MAX_BACKOFF = 30;
+
+    /** @var \React\EventLoop\LoopInterface */
+    protected $loop;
+
+    /** @var Connector */
+    protected $connector;
+
+    /** @var PbxLiveStateService */
+    protected $liveState;
+
+    /** @var int */
+    protected $reconnectBackoff = self::RECONNECT_INITIAL_BACKOFF;
+
+    /** @var \React\EventLoop\TimerInterface|null */
+    protected $heartbeatTimer = null;
+
+    public function __construct(PbxLiveStateService $liveState)
+    {
+        $this->loop = Factory::create();
+        $reactConnector = new ReactConnector($this->loop);
+        $this->connector = new Connector($this->loop, $reactConnector);
+        $this->liveState = $liveState;
+    }
+
+    public function connect()
+    {
+        $this->log('connecting to ' . self::WS_URL);
+
+        ($this->connector)(self::WS_URL)
+            ->then(
+                function ($conn) {
+                    $this->onOpen($conn);
+                },
+                function ($e) {
+                    $this->log('connect failed: ' . $e->getMessage(), 'error');
+                    $this->scheduleReconnect();
+                }
+            );
+
+        $this->loop->run();
+    }
+
+    protected function onOpen($conn): void
+    {
+        $this->reconnectBackoff = self::RECONNECT_INITIAL_BACKOFF;
+        $this->log('connected, subscribing to ' . implode(',', self::SUBSCRIBE_GROUPS));
+
+        $conn->send(json_encode([
+            'command' => 'subscribe',
+            'reqId'   => (string) time(),
+            'data'    => ['eventGroups' => self::SUBSCRIBE_GROUPS],
+        ]));
+
+        // Synthetic bridge_connected immediately so monitoring flips to "alive"
+        $this->safeIngest(['event' => 'bridge_connected', 'data' => []]);
+
+        // Heartbeat keeps PbxLiveStateService::bridge_seen_at fresh.
+        $this->heartbeatTimer = $this->loop->addPeriodicTimer(self::HEARTBEAT_INTERVAL_SECONDS, function () {
+            $this->safeIngest(['event' => 'bridge_heartbeat', 'data' => []]);
+        });
+
+        $conn->on('message', function ($msg) {
+            $this->onMessage((string) $msg);
+        });
+
+        $conn->on('close', function ($code = null, $reason = null) {
+            $this->log("connection closed (code={$code} reason={$reason})", 'warning');
+            $this->stopHeartbeat();
+            $this->scheduleReconnect();
+        });
+
+        $conn->on('error', function ($e) {
+            $this->log('connection error: ' . $e->getMessage(), 'error');
+        });
+    }
+
+    protected function onMessage(string $raw): void
+    {
+        $msg = json_decode($raw);
+        if (!$msg || !isset($msg->event)) {
+            return;
+        }
+
+        $event = (string) $msg->event;
+        $data = isset($msg->data) ? (array) $msg->data : [];
+
+        // Always forward to live-state so monitoring updates.
+        $this->safeIngest(['event' => $event, 'data' => $data]);
+
+        // Legacy attendance tracking — only on user_registration.
+        if ($event === 'user_registration') {
+            $this->trackOperatorTime($data);
+        }
+    }
+
+    protected function trackOperatorTime(array $data): void
+    {
+        $state = $data['state'] ?? null;
+        $uid   = $data['uid']   ?? null;
+        $port  = $data['port']  ?? null;
+        $ip    = $data['ip']    ?? null;
+        $date  = $data['date']  ?? null;
+
+        if (!$uid || !$port || !$ip) {
+            return;
+        }
+
+        try {
+            if ($state === 'register') {
+                $exist = Operator_time::where('uid', $uid)
+                    ->where('port', $port)
+                    ->where('ip', $ip)
+                    ->where('unregister', 0)
+                    ->where('created_at', '>', date('Y-m-d'))
+                    ->first();
+                if ($exist === null) {
+                    Operator_time::create([
+                        'uid'             => $uid,
+                        'register'        => 1,
+                        'unregister'      => 0,
+                        'ip'              => $ip,
+                        'port'            => $port,
+                        'timestamp_reg'   => $date ?? time(),
+                    ]);
+                }
+            } elseif ($state === 'unregister') {
+                $row = Operator_time::where('uid', $uid)
+                    ->where('port', $port)
+                    ->where('ip', $ip)
+                    ->orderBy('timestamp_reg', 'desc')
+                    ->first();
+                if ($row !== null) {
+                    $row->unregister = 1;
+                    $row->timestamp_unreg = $date ?? time();
+                    $row->save();
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->log('trackOperatorTime failed: ' . $e->getMessage(), 'error');
+        }
+    }
+
+    protected function safeIngest(array $payload): void
+    {
+        try {
+            $this->liveState->ingest($payload);
+        } catch (\Throwable $e) {
+            $this->log('ingest failed: ' . $e->getMessage(), 'error');
+        }
+    }
+
+    protected function stopHeartbeat(): void
+    {
+        if ($this->heartbeatTimer !== null) {
+            $this->loop->cancelTimer($this->heartbeatTimer);
+            $this->heartbeatTimer = null;
+        }
+    }
+
+    protected function scheduleReconnect(): void
+    {
+        $delay = $this->reconnectBackoff;
+        $this->reconnectBackoff = min(self::RECONNECT_MAX_BACKOFF, $this->reconnectBackoff * 2);
+        $this->log("reconnecting in {$delay}s");
+        $this->loop->addTimer($delay, function () {
+            ($this->connector)(self::WS_URL)
+                ->then(
+                    function ($conn) { $this->onOpen($conn); },
+                    function ($e) {
+                        $this->log('reconnect failed: ' . $e->getMessage(), 'error');
+                        $this->scheduleReconnect();
+                    }
+                );
+        });
+    }
+
+    protected function log(string $msg, string $level = 'info'): void
+    {
+        $line = '[' . date('Y-m-d H:i:s') . "] [{$level}] phone-bridge: {$msg}";
+        // Write to stdout so systemd journal captures it.
+        echo $line . PHP_EOL;
+        @file_put_contents(
+            storage_path('logs/phone-bridge.log'),
+            $line . PHP_EOL,
+            FILE_APPEND
+        );
+    }
+}

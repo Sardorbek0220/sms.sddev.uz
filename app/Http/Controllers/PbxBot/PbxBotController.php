@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Response;
+use App\Support\PhoneNumber;
 use App\Unknown_client;
 use App\Pbx\Text;
 use App\Pbx\Amocrm;
@@ -38,6 +39,8 @@ class PbxBotController extends Controller
     public function sendTextMessage($chat_id, $text, $entities = [], $queryStatus = false) {
         $ch = curl_init(self::BOT_URL."sendMessage");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Content-Type: application/json"
         ]);
@@ -82,47 +85,92 @@ class PbxBotController extends Controller
     }
 
     public function sendAudioMessage($chat_id, $caption, $caption_entities = [], $url, $queryStatus = false) {
+        // OnlinePBX records sometimes lack Content-Type/Length headers, so
+        // Telegram's URL-fetch fails with "wrong type of the web page content".
+        // Solution: download the file locally first and upload via multipart.
+        $tmp = null;
+        try {
+            $tmp = tempnam(sys_get_temp_dir(), "pbxaudio_") . ".mp3";
+            $dch = curl_init($url);
+            $fp  = fopen($tmp, "w");
+            curl_setopt_array($dch, [
+                CURLOPT_FILE           => $fp,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT        => 12,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $okDl   = curl_exec($dch);
+            $dlCode = (int) curl_getinfo($dch, CURLINFO_HTTP_CODE);
+            curl_close($dch);
+            fclose($fp);
+
+            if ($okDl === false || $dlCode !== 200 || !is_file($tmp) || filesize($tmp) < 1024) {
+                // Download failed → fall back to plain URL (Telegram tries fetch)
+                @unlink($tmp);
+                return $this->sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus);
+            }
+
+            // Multipart upload to Telegram.
+            $request = [
+                "chat_id"            => $chat_id,
+                "caption"            => $caption,
+                "caption_entities"   => json_encode($caption_entities),
+                "audio"              => new \CURLFile($tmp, "audio/mpeg", basename($tmp)),
+            ];
+            if ($queryStatus) {
+                $request["reply_markup"] = json_encode($this->callOutcomeKeyboard());
+            }
+            $uch = curl_init(self::BOT_URL . "sendAudio");
+            curl_setopt_array($uch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT        => 25,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $request,
+            ]);
+            $resp = curl_exec($uch);
+            $code = (int) curl_getinfo($uch, CURLINFO_HTTP_CODE);
+            $err  = curl_error($uch);
+            curl_close($uch);
+            if ($code !== 200 || !$resp) {
+                \Illuminate\Support\Facades\Log::warning("PbxBot.sendAudio multipart failed", [
+                    "code" => $code, "err" => $err, "resp_head" => mb_substr((string) $resp, 0, 250),
+                ]);
+            }
+        } finally {
+            if ($tmp && is_file($tmp)) @unlink($tmp);
+        }
+    }
+
+    private function sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus) {
         $ch = curl_init(self::BOT_URL."sendAudio");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json"
-        ]);
-
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
         $request = [
             "chat_id" => $chat_id,
             "caption" => $caption,
             "caption_entities" => $caption_entities,
-            "audio" => $url
+            "audio" => $url,
         ];
-        
         if ($queryStatus) {
-            $request['reply_markup'] = [
-                'inline_keyboard' => [
-                    [
-                        [
-                            'text' => 'Проблема решена',
-                            'callback_data' => 'problem_solved'
-                        ],
-                    ],
-                    [
-                        [
-                            'text' => 'Проблема не решена',
-                            'callback_data' => 'problem_not_solved'
-                        ],
-                    ],
-                    [
-                        [
-                            'text' => 'Звонок перенаправлен',
-                            'callback_data' => 'call_forwarded'
-                        ],
-                    ]
-                ]
-            ];
+            $request["reply_markup"] = $this->callOutcomeKeyboard();
         }
-
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
         curl_exec($ch);
         curl_close($ch);
+    }
+
+    private function callOutcomeKeyboard(): array {
+        return [
+            "inline_keyboard" => [
+                [["text" => "Проблема решена",     "callback_data" => "problem_solved"]],
+                [["text" => "Проблема не решена", "callback_data" => "problem_not_solved"]],
+                [["text" => "Звонок перенаправлен","callback_data" => "call_forwarded"]],
+            ],
+        ];
     }
 
     public function getCallSummary() {
@@ -154,8 +202,10 @@ class PbxBotController extends Controller
             return $text;
         }
 
+        $clientPhone = PhoneNumber::formatUz($client) ?? $client;
+
         // add client phone number
-        $text->appendEntity("Клиент: ", "bold")->appendEntity($client, "phone_number")->endl();
+        $text->appendEntity("Клиент: ", "bold")->appendEntity($clientPhone, "phone_number")->endl();
 
 
         // add client details 
@@ -168,7 +218,7 @@ class PbxBotController extends Controller
                     $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
                     $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
                     Unknown_client::create([
-                        'phone' => $client,
+                        'phone' => $clientPhone,
                         'direction' => $_POST["direction"],
                         'operator' => $operator,
                         'event' => $_POST["event"]
@@ -195,7 +245,7 @@ class PbxBotController extends Controller
 
                         if (empty($serverName) || empty($info["name"])) {
                             Unknown_client::create([
-                                'phone' => $client,
+                                'phone' => $clientPhone,
                                 'direction' => $_POST["direction"],
                                 'operator' => $operator,
                                 'event' => $_POST["event"]
@@ -209,7 +259,7 @@ class PbxBotController extends Controller
                 $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
                 $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
                 Unknown_client::create([
-                    'phone' => $client,
+                    'phone' => $clientPhone,
                     'direction' => $_POST["direction"],
                     'operator' => $operator,
                     'event' => $_POST["event"]
@@ -222,7 +272,7 @@ class PbxBotController extends Controller
             $text->appendEntity("    Сервер: ", "bold")->appendText("Не указан")->endl();
             $text->appendEntity("    Компания: ", "bold")->appendText("Не указана")->endl();
             Unknown_client::create([
-                'phone' => $client,
+                'phone' => $clientPhone,
                 'direction' => $_POST["direction"],
                 'operator' => $operator,
                 'event' => $_POST["event"]
@@ -257,11 +307,33 @@ class PbxBotController extends Controller
 
     public function send()
     {
-        if ($_SERVER["HTTP_CONTENT_TYPE"] != "application/x-www-form-urlencoded") {
+        // Diagnostic log: capture content-type + payload size so we can verify
+        // the relay is sending what we expect. Logs go to laravel.log.
+        $ctype  = $_SERVER["HTTP_CONTENT_TYPE"] ?? "";
+        $rawLen = strlen((string) file_get_contents("php://input"));
+        $postKeys = implode(",", array_keys($_POST ?: []));
+        if (in_array($_POST["event"] ?? null, ["call_end", "call_missed"], true)) {
+            \Illuminate\Support\Facades\Log::info("PbxBot.send called", [
+            "content_type" => $ctype,
+            "raw_len"      => $rawLen,
+            "post_keys"    => $postKeys,
+            "post_event"   => $_POST["event"] ?? null,
+        ]);
+        }
+
+        // Accept both form-urlencoded (legacy) AND JSON (axios default sends JSON).
+        if (stripos($ctype, "application/json") !== false) {
+            $raw = file_get_contents("php://input");
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                $_POST = array_merge($_POST ?: [], $decoded);
+            }
+        } elseif (stripos($ctype, "application/x-www-form-urlencoded") === false) {
+            \Illuminate\Support\Facades\Log::warning("PbxBot.send unsupported content-type", ["ctype" => $ctype]);
             return;
         }
-    
-        $event = $_POST["event"];
+
+        $event = $_POST["event"] ?? null;
         
         if (isset($_POST["test"]) && $_POST["test"]) {
             if (!empty($_POST['text'])) {

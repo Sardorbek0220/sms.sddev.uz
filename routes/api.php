@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +17,4 @@ use App\Http\Controllers\Admin\ReportController;
 //     return $request->user();
 // });
 
-Route::get('monitoring/keys', [ReportController::class, 'monitoringKeys']);
-Route::get('monitoring/users', [ReportController::class, 'monitoringUsers']);
-Route::get('monitoring/data', [ReportController::class, 'monitoringData']);
-Route::get('monitoring/bigData', [ReportController::class, 'monitoringBigData']);
-Route::get('monitoring/operatorCondition', [ReportController::class, 'monitoringOperatorCondition']);
-Route::get('monitoring/operatorTime', [ReportController::class, 'monitoringOperatorTime']);
+// Monitoring endpoints are served only from authenticated web routes.

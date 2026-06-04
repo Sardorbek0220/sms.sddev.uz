@@ -1,0 +1,130 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Services\BitrixSurveyService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Survey reports — analytics for filled call surveys (b24_call_survey_logs).
+ *
+ * Shows admins:
+ *   - aggregated stats (total, period, avg/day, with-comment%)
+ *   - top-N rankings (reason, status, operator)
+ *   - filterable table with CSV export
+ */
+class SurveyReportsController extends Controller
+{
+    public function index(Request $request, BitrixSurveyService $svc)
+    {
+        $from_date = $request->input('from_date', date('Y-m-d', strtotime('-7 days')));
+        $to_date   = $request->input('to_date', date('Y-m-d'));
+        $reason    = $request->input('reason_key', '');
+        $status    = $request->input('status_label', '');
+        $operator  = trim((string) $request->input('operator', ''));
+        $phone     = trim((string) $request->input('phone', ''));
+        $module    = trim((string) $request->input('module', ''));
+        $hasCmt    = $request->input('has_comment', '');
+
+        $base = DB::connection('bitrix_survey')->table('b24_call_survey_logs')
+            ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
+
+        $base->when($reason !== '', function ($q) use ($reason) { $q->where('reason_key', $reason); });
+        $base->when($status !== '', function ($q) use ($status) { $q->where('status_label', $status); });
+        $base->when($operator !== '', function ($q) use ($operator) { $q->where('actor_user_name', 'like', '%' . $operator . '%'); });
+        $base->when($phone !== '', function ($q) use ($phone) {
+            $digits = preg_replace('/\D+/', '', $phone);
+            $q->where(function ($qq) use ($phone, $digits) {
+                $qq->where('phone_number', 'like', '%' . $phone . '%');
+                if ($digits !== '') $qq->orWhere('phone_number', 'like', '%' . $digits . '%');
+            });
+        });
+        $base->when($module !== '', function ($q) use ($module) { $q->where('modules_json', 'like', '%' . $module . '%'); });
+        $base->when($hasCmt === 'yes', function ($q) { $q->whereNotNull('comment_text')->where('comment_text', '<>', ''); });
+        $base->when($hasCmt === 'no', function ($q) { $q->where(function ($qq) { $qq->whereNull('comment_text')->orWhere('comment_text', ''); }); });
+
+        // CSV export
+        if ($request->input('export') === 'csv') {
+            $rows = (clone $base)->orderByDesc('created_at')->limit(10000)->get();
+            $filename = 'surveys_' . $from_date . '_' . $to_date . '.csv';
+            return response()->stream(function () use ($rows) {
+                $h = fopen('php://output', 'w');
+                fwrite($h, "\xEF\xBB\xBF");
+                fputcsv($h, ['ID','Дата','Телефон','Причина','Статус','Оператор','Модули','Комментарий','Call ID'], ';');
+                foreach ($rows as $r) {
+                    $modules = '';
+                    if (!empty($r->modules_json)) {
+                        $mods = json_decode($r->modules_json, true);
+                        if (is_array($mods)) $modules = implode(', ', $mods);
+                    }
+                    fputcsv($h, [
+                        $r->id,
+                        $r->created_at,
+                        $r->phone_number,
+                        $r->reason_label,
+                        $r->status_label,
+                        $r->actor_user_name,
+                        $modules,
+                        $r->comment_text,
+                        $r->call_id,
+                    ], ';');
+                }
+                fclose($h);
+            }, 200, [
+                'Content-Type' => 'text/csv; charset=utf-8',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        }
+
+        // Aggregates
+        $total = (clone $base)->count();
+        $withComment = (clone $base)->whereNotNull('comment_text')->where('comment_text', '<>', '')->count();
+        $days = max(1, (strtotime($to_date) - strtotime($from_date)) / 86400 + 1);
+        $avgPerDay = round($total / $days, 1);
+
+        $topReasons = (clone $base)
+            ->selectRaw('reason_key, reason_label, COUNT(*) AS c')
+            ->groupBy('reason_key', 'reason_label')
+            ->orderByDesc('c')->limit(8)->get();
+
+        $topStatuses = (clone $base)
+            ->selectRaw('status_label, COUNT(*) AS c')
+            ->whereNotNull('status_label')->where('status_label', '<>', '')
+            ->groupBy('status_label')
+            ->orderByDesc('c')->limit(8)->get();
+
+        $topOperators = (clone $base)
+            ->selectRaw('actor_user_name, COUNT(*) AS c')
+            ->whereNotNull('actor_user_name')->where('actor_user_name', '<>', '')
+            ->groupBy('actor_user_name')
+            ->orderByDesc('c')->limit(8)->get();
+
+        $items = (clone $base)->orderByDesc('created_at')->paginate(50)->appends($request->query());
+
+        // Dropdown options
+        $reasonOptions = $this->distinctOptions('reason_key', 'reason_label', $from_date, $to_date);
+        $statusOptions = (clone $base)->select('status_label')->whereNotNull('status_label')->where('status_label','<>','')
+            ->groupBy('status_label')->orderBy('status_label')->pluck('status_label');
+
+        return view('admin.survey-reports', compact(
+            'items', 'from_date', 'to_date',
+            'reason', 'status', 'operator', 'phone', 'module', 'hasCmt',
+            'total', 'withComment', 'avgPerDay', 'days',
+            'topReasons', 'topStatuses', 'topOperators',
+            'reasonOptions', 'statusOptions'
+        ));
+    }
+
+    private function distinctOptions(string $keyCol, string $labelCol, string $from, string $to): array
+    {
+        return DB::connection('bitrix_survey')->table('b24_call_survey_logs')
+            ->selectRaw("$keyCol AS k, $labelCol AS l")
+            ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+            ->whereNotNull($keyCol)->where($keyCol, '<>', '')
+            ->groupBy('k', 'l')
+            ->orderBy('l')
+            ->get()->all();
+    }
+}

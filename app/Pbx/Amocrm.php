@@ -9,6 +9,7 @@ class Amocrm {
 	private $authCode;
 	private $redirectURI;
 	private $tokenFile;
+	private $disabled;
 
 	function __construct($subdomain, $clientID, $clientSecret, $authCode, $redirectURI, $tokenFile) {
 		$this->subdomain = $subdomain;
@@ -17,9 +18,12 @@ class Amocrm {
 		$this->authCode = $authCode;
 		$this->redirectURI = $redirectURI;
 		$this->tokenFile = $tokenFile;
+		// Kill-switch — set AMOCRM_ENABLED=false in .env to stop all API calls.
+		$this->disabled = !config('amocrm.enabled', true);
 	}
 
 	public function exchangeAuthorizationCode() {
+		if ($this->disabled) return null;
 
 		$ch = curl_init("https://{$this->subdomain}.amocrm.ru/oauth2/access_token");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -180,6 +184,7 @@ class Amocrm {
 	}
 	
 	public function getClientInfo($phoneNumber) {
+		if ($this->disabled) return false;
 
 		$infoClient = $this->get("/api/v4/contacts", ["query" => $phoneNumber]);
 		if (empty($infoClient)) {
@@ -236,6 +241,7 @@ class Amocrm {
 	}
 
 	public function createLead($name, $phone, $email, $company, $pipelineID, $formName, $formPage, $referer, $ip) {
+		if ($this->disabled) return null;
 		return $this->post('/api/v4/leads/complex', [
 			[
 				"name" => $phone,
@@ -286,6 +292,7 @@ class Amocrm {
 	}
 
 	public function createNote($leadID, $note) {
+		if ($this->disabled) return null;
 		return $this->post('/api/v4/leads/notes', [
 			[
 				'entity_id' => $leadID,
