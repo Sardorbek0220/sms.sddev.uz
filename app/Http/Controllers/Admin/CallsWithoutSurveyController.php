@@ -132,15 +132,67 @@ class CallsWithoutSurveyController extends Controller
         return array_keys($ids);
     }
 
-    /** Sidebar badge — count of unanswered surveys in the last 7 days. */
+    /** Sidebar badge — today's calls without a Bitrix survey.
+     *
+     *  Mirrors ReportController::monitoringSurveysCount EXACTLY (today range,
+     *  phone normalized + ±BITRIX_SURVEY_MATCH_HOURS window) so the badge equals
+     *  the "без анкеты" complement of survey.today shown on /admin/monitoring,
+     *  i.e. total_calls(today) − with_survey(today). */
     public static function pendingCount(): int
     {
-        $from = date('Y-m-d', strtotime('-7 days')) . ' 00:00:00';
+        $from = date('Y-m-d') . ' 00:00:00';
         $to   = date('Y-m-d') . ' 23:59:59';
-        $surveyedIds = (new self)->loadSurveyedCallIds(substr($from, 0, 10), substr($to, 0, 10));
-        return DB::table('calls')->whereBetween('created_at', [$from, $to])
-            ->whereNotIn('id', $surveyedIds ?: [0])
-            ->where('dialog_duration', '>', 0)  // only those with actual conversation
+
+        $totalCalls = (int) DB::table('calls')
+            ->whereBetween('created_at', [$from, $to])
             ->count();
+        if ($totalCalls === 0) return 0;
+
+        $matchHours = (int) env('BITRIX_SURVEY_MATCH_HOURS', 72);
+        $b24Table = env('BITRIX_SURVEY_DB_TABLE', 'b24_call_survey_logs');
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $b24Table)) $b24Table = 'b24_call_survey_logs';
+
+        // Index today's calls by normalized phone.
+        $calls = DB::table('calls')
+            ->whereBetween('created_at', [$from, $to])
+            ->select('id', 'client_telephone', 'created_at')
+            ->get();
+
+        $phoneIndex = []; // normalized_phone => [['id'=>int,'ts'=>int], ...]
+        foreach ($calls as $c) {
+            $norm = \App\Support\PhoneNumber::canonicalUzDigits($c->client_telephone);
+            if ($norm === null) continue;
+            $phoneIndex[$norm][] = ['id' => (int) $c->id, 'ts' => strtotime($c->created_at)];
+        }
+
+        // Match against Bitrix surveys in the extended ±matchHours window.
+        $extFrom = Carbon::parse($from)->subHours($matchHours)->format('Y-m-d H:i:s');
+        $extTo   = Carbon::parse($to)->addHours($matchHours)->format('Y-m-d H:i:s');
+        $windowSec = $matchHours * 3600;
+        $matchedCallIds = [];
+
+        try {
+            $b24 = DB::connection('bitrix_survey')
+                ->table($b24Table)
+                ->whereBetween('created_at', [$extFrom, $extTo])
+                ->select('phone_number', 'created_at')
+                ->get();
+
+            foreach ($b24 as $b) {
+                $norm = \App\Support\PhoneNumber::canonicalUzDigits($b->phone_number);
+                if ($norm === null || empty($phoneIndex[$norm])) continue;
+                $bts = strtotime($b->created_at);
+                foreach ($phoneIndex[$norm] as $cc) {
+                    if (abs($bts - $cc['ts']) <= $windowSec) {
+                        $matchedCallIds[$cc['id']] = true;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Bitrix DB unavailable — treat all calls as un-surveyed (same
+            // fallback behaviour as monitoringSurveysCount).
+        }
+
+        return max(0, $totalCalls - count($matchedCallIds));
     }
 }

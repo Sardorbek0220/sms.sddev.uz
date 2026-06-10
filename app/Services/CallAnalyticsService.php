@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\All_call;
 use App\Call;
+use App\Exception as TimeException;
 use App\Support\PhoneNumber;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -132,13 +134,21 @@ class CallAnalyticsService
             return (int) ($call->dialog_duration ?? 0) > 0;
         })->values();
 
+        // Headline stat cards (Всего звонков / С разговором / Пропущено /
+        // Avg разговор / Total talk) must show the SAME numbers as the
+        // /admin/monitoring dashboard. Monitoring counts from the `all_calls`
+        // table with its own definitions, so we recompute those aggregates from
+        // the same source instead of the `calls` table used by the callback
+        // (перезвон) resolution pipeline below.
+        $monitoringTotals = $this->buildMonitoringAlignedTotals($fromDate, $toDate, $gateway);
+
         return [
             'period' => [
                 'from_date' => $from->format('Y-m-d'),
                 'to_date' => $to->format('Y-m-d'),
                 'search_end' => $searchEnd->format('Y-m-d H:i:s'),
             ],
-            'summary' => $this->buildSummary($rangeCalls, $talkedCalls, $resolvedMissedCalls),
+            'summary' => $this->buildSummary($rangeCalls, $talkedCalls, $resolvedMissedCalls, $monitoringTotals),
             'operator_rows' => $this->buildOperatorRows($rangeCalls, $resolvedMissedCalls),
             'recent_missed_rows' => $resolvedMissedCalls->sortByDesc('missed_at')->take(40)->values()->all(),
             'charts' => [
@@ -150,28 +160,27 @@ class CallAnalyticsService
         ];
     }
 
-    protected function buildSummary(Collection $rangeCalls, Collection $talkedCalls, Collection $resolvedMissedCalls): array
+    protected function buildSummary(Collection $rangeCalls, Collection $talkedCalls, Collection $resolvedMissedCalls, array $monitoringTotals): array
     {
-        $missedTotal = $resolvedMissedCalls->count();
+        // "Пропущено" must match the monitoring dashboard, so the missed total
+        // comes from the all_calls-based aggregate. The перезвон pipeline
+        // (calls table) still supplies how many of those were called back.
+        $missedTotal = (int) $monitoringTotals['missed_inbound'];
         $resolvedTotal = $resolvedMissedCalls->where('is_resolved', true)->count();
         $unresolvedTotal = max($missedTotal - $resolvedTotal, 0);
         $resolvedCollection = $resolvedMissedCalls->where('is_resolved', true)->values();
         $avgWorkingDelay = $resolvedCollection->avg('working_delay_seconds') ?: 0;
         $avgRawDelay = $resolvedCollection->avg('raw_delay_seconds') ?: 0;
-        $avgTalkSeconds = $talkedCalls->avg(function (Call $call) {
-            return (int) ($call->dialog_duration ?? 0);
-        }) ?: 0;
-        $totalTalkSeconds = $talkedCalls->sum(function (Call $call) {
-            return (int) ($call->dialog_duration ?? 0);
-        });
+        $avgTalkSeconds = (int) $monitoringTotals['avg_talk_seconds'];
+        $totalTalkSeconds = (int) $monitoringTotals['total_talk_seconds'];
 
         return [
-            'total_calls' => $rangeCalls->count(),
-            'talked_calls' => $talkedCalls->count(),
+            'total_calls' => (int) $monitoringTotals['total_calls'],
+            'talked_calls' => (int) $monitoringTotals['talked_calls'],
             'missed_inbound_calls' => $missedTotal,
             'resolved_missed_calls' => $resolvedTotal,
             'unresolved_missed_calls' => $unresolvedTotal,
-            'resolution_rate_percent' => $missedTotal > 0 ? round(($resolvedTotal / $missedTotal) * 100, 1) : 0,
+            'resolution_rate_percent' => $missedTotal > 0 ? min(round(($resolvedTotal / $missedTotal) * 100, 1), 100) : 0,
             'avg_working_callback_seconds' => (int) round($avgWorkingDelay),
             'avg_working_callback_human' => $this->formatDuration((int) round($avgWorkingDelay)),
             'avg_raw_callback_seconds' => (int) round($avgRawDelay),
@@ -183,6 +192,98 @@ class CallAnalyticsService
             'sla_5_percent' => $this->percentWithinSla($resolvedCollection, 5 * 60),
             'sla_15_percent' => $this->percentWithinSla($resolvedCollection, 15 * 60),
             'sla_30_percent' => $this->percentWithinSla($resolvedCollection, 30 * 60),
+        ];
+    }
+
+    /**
+     * Recompute the headline aggregates from the `all_calls` table using the
+     * exact same source, filters and definitions as the /admin/monitoring
+     * dashboard (ReportController::monitoringData + the blade's JS counting),
+     * so the two reports never disagree.
+     *
+     * Monitoring definitions, per row of all_calls:
+     *   - talked  (С разговором): user_talk_time > 0   (both directions)
+     *   - missed  (Пропущено):    inbound && user_talk_time <= 0 && duration > 5
+     *   - outbound missed:        outbound && user_talk_time <= 0
+     *   - total   (Всего):        talked + missed (inbound) + missed (outbound)
+     *   - avg talk:               sum(user_talk_time) / total
+     */
+    protected function buildMonitoringAlignedTotals(string $fromDate, string $toDate, ?int $gateway): array
+    {
+        $fromTs = strtotime($fromDate . ' 00:00:00');
+        $toTs = strtotime($toDate . ' 23:59:59');
+
+        // Replicate ReportController::timeExceptions / timeExceptionsTalk:
+        // exception windows are excluded from the range, except calls inside
+        // those windows that actually had talk time (user_talk_time > 0).
+        $exceptions = TimeException::whereBetween('day', [
+            gmdate('Y-m-d H:i:s', $fromTs),
+            gmdate('Y-m-d H:i:s', $toTs),
+        ])->get();
+
+        $windows = [];
+        foreach ($exceptions as $exc) {
+            $day = substr($exc->day, 0, -9); // 'Y-m-d'
+            $windows[] = [
+                strtotime($day . ' ' . $exc->from_exc . ':00'),
+                strtotime($day . ' ' . $exc->to_exc . ':00'),
+            ];
+        }
+
+        $query = All_call::query()->whereBetween('start_stamp', [$fromTs, $toTs]);
+        if ($gateway) {
+            $query->where('gateway', $gateway);
+        }
+        foreach ($windows as [$excFrom, $excTo]) {
+            $query->whereNotBetween('start_stamp', [$excFrom, $excTo]);
+        }
+        $rows = $query->get();
+
+        if (!empty($windows)) {
+            $talkQuery = All_call::query()->where('user_talk_time', '>', 0)
+                ->where(function ($q) use ($windows) {
+                    foreach ($windows as [$excFrom, $excTo]) {
+                        $q->orWhereBetween('start_stamp', [$excFrom, $excTo]);
+                    }
+                });
+            if ($gateway) {
+                $talkQuery->where('gateway', $gateway);
+            }
+            $rows = $rows->merge($talkQuery->get());
+        }
+
+        $talked = 0;        // user_talk_time > 0 (both directions)
+        $missedInbound = 0; // inbound, no talk, duration > 5
+        $missedOutbound = 0;
+        $totalTalkSeconds = 0;
+
+        foreach ($rows as $row) {
+            $talk = (int) $row->user_talk_time;
+            $totalTalkSeconds += $talk;
+
+            if ($row->accountcode === 'inbound') {
+                if ($talk > 0) {
+                    $talked++;
+                } elseif ((int) $row->duration > 5) {
+                    $missedInbound++;
+                }
+            } else {
+                if ($talk > 0) {
+                    $talked++;
+                } else {
+                    $missedOutbound++;
+                }
+            }
+        }
+
+        $totalCalls = $talked + $missedInbound + $missedOutbound;
+
+        return [
+            'total_calls' => $totalCalls,
+            'talked_calls' => $talked,
+            'missed_inbound' => $missedInbound,
+            'total_talk_seconds' => $totalTalkSeconds,
+            'avg_talk_seconds' => $totalCalls > 0 ? (int) round($totalTalkSeconds / $totalCalls) : 0,
         ];
     }
 
