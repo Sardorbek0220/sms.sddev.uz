@@ -46,8 +46,16 @@ class CallReportService
         $outbound = (clone $base)->where('direction', 'outbound')->count();
         // Answered = actually had a conversation. call_missed never qualifies.
         $answered = (clone $smsBase)->where('dialog_duration', '>=', self::MIN_ANSWERED_SECONDS)->count();
-        // Missed = call_missed events PLUS call_end with zero dialog (technically completed but no talk).
-        $missed = $total - $answered;
+        // Missed = "Пропущенные" — inbound calls only, matching the inbound
+        // card on /admin/monitoring: unanswered AND rang more than 5s.
+        // Outbound unanswered ("Не дозвонились") is NOT counted here.
+        $missed = (clone $base)
+            ->where('direction', 'inbound')
+            ->where(function ($q) {
+                $q->whereNull('dialog_duration')->orWhere('dialog_duration', '<', self::MIN_ANSWERED_SECONDS);
+            })
+            ->where('call_duration', '>', 5)
+            ->count();
 
         $avg = (clone $smsBase)
             ->where('dialog_duration', '>', 0)
@@ -119,8 +127,10 @@ class CallReportService
         $date = $date ? Carbon::parse($date)->toDateString() : Carbon::today()->toDateString();
 
         $rows = Call::query()
-            ->selectRaw('HOUR(created_at) AS h, COUNT(*) AS total, SUM(CASE WHEN event = "call_end" AND dialog_duration >= ? THEN 1 ELSE 0 END) AS answered',
-                [self::MIN_ANSWERED_SECONDS])
+            ->selectRaw('HOUR(created_at) AS h, COUNT(*) AS total,
+                SUM(CASE WHEN event = "call_end" AND dialog_duration >= ? THEN 1 ELSE 0 END) AS answered,
+                SUM(CASE WHEN direction = "inbound" AND (dialog_duration IS NULL OR dialog_duration < ?) AND call_duration > 5 THEN 1 ELSE 0 END) AS missed',
+                [self::MIN_ANSWERED_SECONDS, self::MIN_ANSWERED_SECONDS])
             ->whereIn('event', ['call_end', 'call_missed'])
             ->whereDate('created_at', $date)
             ->when($gateway, function ($q) use ($gateway) { $q->where('gateway', (int)$gateway); })
@@ -137,7 +147,7 @@ class CallReportService
                 'hour'     => $h,
                 'total'    => $total,
                 'answered' => $answered,
-                'missed'   => $total - $answered,
+                'missed'   => $r ? (int)$r->missed : 0,
             ];
         }
         return $out;
@@ -152,8 +162,10 @@ class CallReportService
         $date = $date ? Carbon::parse($date)->toDateString() : Carbon::today()->toDateString();
 
         $rows = Call::query()
-            ->selectRaw('gateway, COUNT(*) AS total, SUM(CASE WHEN event = "call_end" AND dialog_duration >= ? THEN 1 ELSE 0 END) AS answered',
-                [self::MIN_ANSWERED_SECONDS])
+            ->selectRaw('gateway, COUNT(*) AS total,
+                SUM(CASE WHEN event = "call_end" AND dialog_duration >= ? THEN 1 ELSE 0 END) AS answered,
+                SUM(CASE WHEN direction = "inbound" AND (dialog_duration IS NULL OR dialog_duration < ?) AND call_duration > 5 THEN 1 ELSE 0 END) AS missed',
+                [self::MIN_ANSWERED_SECONDS, self::MIN_ANSWERED_SECONDS])
             ->whereIn('event', ['call_end', 'call_missed'])
             ->whereDate('created_at', $date)
             ->groupBy('gateway')
@@ -167,7 +179,7 @@ class CallReportService
                 'name'     => GatewayService::name($r->gateway),
                 'total'    => (int)$r->total,
                 'answered' => (int)$r->answered,
-                'missed'   => (int)$r->total - (int)$r->answered,
+                'missed'   => (int)$r->missed,
             ];
         }
         return $out;

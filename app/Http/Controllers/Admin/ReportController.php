@@ -555,19 +555,48 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * Build the inner SELECT that exposes `calls` rows (the same table the
+     * dashboard reads) in the column shape the monitoring frontend expects
+     * from `all_calls`. Wrapped in a subquery so the aliased `start_stamp` /
+     * `user_talk_time` columns are usable in the outer WHERE (and by the
+     * existing time-exception condition strings).
+     */
+    private function monitoringCallsSubquery($gateway): string
+    {
+        $gateway = (int) $gateway;
+
+        return "SELECT
+                c.gateway,
+                c.direction AS accountcode,
+                c.direction,
+                UNIX_TIMESTAMP(c.created_at) AS start_stamp,
+                (UNIX_TIMESTAMP(c.created_at) + c.call_duration) AS end_stamp,
+                c.dialog_duration AS user_talk_time,
+                c.call_duration AS duration,
+                CASE WHEN c.direction = 'outbound' THEN o.phone ELSE c.client_telephone END AS caller_id_number,
+                CASE WHEN c.direction = 'outbound' THEN c.client_telephone ELSE o.phone END AS destination_number,
+                c.uuid
+            FROM calls c
+            LEFT JOIN operators o ON o.id = c.operator_id
+            WHERE c.gateway = $gateway
+              AND c.event IN ('call_end', 'call_missed')";
+    }
+
     public function monitoringData(Request $request)
     {
-        $from = $request['from'];
-        $to = $request['to'];
+        $from = (int) $request['from'];
+        $to = (int) $request['to'];
         $gateway = $request['gateway'] ?? '712075995';
 
         $excCondition = $this->timeExceptions($from, $to);
+        $inner = $this->monitoringCallsSubquery($gateway);
 
-        $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
+        $calls = DB::select("SELECT * FROM ($inner) t WHERE t.start_stamp BETWEEN $from AND $to $excCondition");
 
         if (!empty($excCondition)) {
             $excConditionTalk = $this->timeExceptionsTalk($from, $to);
-            $callsTalk = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND $excConditionTalk");
+            $callsTalk = DB::select("SELECT * FROM ($inner) t WHERE $excConditionTalk");
             if (!empty($callsTalk)) {
                 $calls = array_merge($calls, $callsTalk);
             }
@@ -706,12 +735,13 @@ class ReportController extends Controller
         }
         $gateway = $request['gateway'] ?? '712075995';
         $excCondition = $this->timeExceptions($from, $to);
-        
-        $calls = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND start_stamp BETWEEN $from AND $to $excCondition");
+        $inner = $this->monitoringCallsSubquery($gateway);
+
+        $calls = DB::select("SELECT * FROM ($inner) t WHERE t.start_stamp BETWEEN $from AND $to $excCondition");
 
         if (!empty($excCondition)) {
             $excConditionTalk = $this->timeExceptionsTalk($from, $to);
-            $callsTalk = DB::select("SELECT * FROM all_calls WHERE gateway = $gateway AND $excConditionTalk");
+            $callsTalk = DB::select("SELECT * FROM ($inner) t WHERE $excConditionTalk");
             if (!empty($callsTalk)) {
                 $calls = array_merge($calls, $callsTalk);
             }
