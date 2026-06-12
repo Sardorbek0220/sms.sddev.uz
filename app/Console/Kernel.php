@@ -153,6 +153,8 @@ class Kernel extends ConsoleKernel
 		curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 		$res = json_decode(curl_exec($ch));
 
+		info($res);
+
 		if (curl_errno($ch)) {
 			curl_close($ch);
 			info(curl_error($ch));
