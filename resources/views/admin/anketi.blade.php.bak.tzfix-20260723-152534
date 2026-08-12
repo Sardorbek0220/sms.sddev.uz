@@ -241,7 +241,7 @@ if (!function_exists('ank_color')) {
                             $opName  = (string) ($r->actor_user_name ?? '');
                         @endphp
                         <tr>
-                            <td class="ds-num">{{ \Carbon\Carbon::parse($r->created_at, 'UTC')->setTimezone('Asia/Tashkent')->format('d.m.y · H:i') }}</td>
+                            <td class="ds-num">{{ \Carbon\Carbon::parse($r->created_at)->format('d.m.y · H:i') }}</td>
                             <td class="ds-mono">{{ $r->phone_number ?: '—' }}</td>
                             <td>
                                 @forelse($deptList as $d)

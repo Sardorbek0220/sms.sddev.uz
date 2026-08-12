@@ -29,13 +29,8 @@ class SurveyReportsController extends Controller
         $module    = trim((string) $request->input('module', ''));
         $hasCmt    = $request->input('has_comment', '');
 
-        // TZ FIX: created_at is stored as UTC (BitrixSurveyService writes gmdate('Y-m-d H:i:s')),
-        // but the picker is in Asia/Tashkent. Compare in the storage TZ (UTC) to keep results
-        // consistent with what the user picked in local time.
-        [$fromUtc, $toUtc] = self::localRangeToUtc($from_date, $to_date, 'Asia/Tashkent');
-
         $base = DB::connection('bitrix_survey')->table('b24_call_survey_logs')
-            ->whereBetween('created_at', [$fromUtc, $toUtc]);
+            ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
 
         $base->when($reason !== '', function ($q) use ($reason) { $q->where('reason_key', $reason); });
         $base->when($status !== '', function ($q) use ($status) { $q->where('status_label', $status); });
@@ -78,7 +73,7 @@ class SurveyReportsController extends Controller
                     }
                     fputcsv($h, [
                         $r->id,
-                        self::utcToLocal($r->created_at, 'Asia/Tashkent'),
+                        $r->created_at,
                         $r->phone_number,
                         $r->reason_label,
                         $r->status_label,
@@ -112,7 +107,7 @@ class SurveyReportsController extends Controller
                 $modList  = is_array($modArr) ? array_values(array_filter(array_map('trim', $modArr))) : [];
                 $data[] = [
                     (string) $r->id,
-                    self::utcToLocal($r->created_at, 'Asia/Tashkent'),
+                    (string) $r->created_at,
                     (string) ($r->phone_number ?? ''),
                     implode(', ', $deptList),
                     (string) ($r->actor_user_name ?? ''),
@@ -162,7 +157,7 @@ class SurveyReportsController extends Controller
             ->groupBy('status_label')->orderBy('status_label')->pluck('status_label');
 
         $operatorOptions = DB::connection('bitrix_survey')->table('b24_call_survey_logs')
-            ->whereBetween('created_at', [$fromUtc, $toUtc])
+            ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
             ->whereNotNull('actor_user_name')->where('actor_user_name', '<>', '')
             ->groupBy('actor_user_name')->orderBy('actor_user_name')
             ->pluck('actor_user_name');
@@ -237,9 +232,8 @@ class SurveyReportsController extends Controller
         // Current operators in the selected date window (plus a safety buffer of 14 days
         // so blade dept-fallback covers operators who didn't show up in this window).
         $bufferFrom = date('Y-m-d', strtotime($from_date . ' -14 days'));
-        [$bufFromUtc, $bufToUtc] = self::localRangeToUtc($bufferFrom, $to_date, 'Asia/Tashkent');
         $cur = DB::connection('bitrix_survey')->table('b24_call_survey_logs')
-            ->whereBetween('created_at', [$bufFromUtc, $bufToUtc])
+            ->whereBetween('created_at', [$bufferFrom . ' 00:00:00', $to_date . ' 23:59:59'])
             ->whereNotNull('actor_user_id')
             ->select('actor_user_id', DB::raw('MAX(actor_user_name) AS actor_user_name'))
             ->groupBy('actor_user_id')->get();
@@ -418,48 +412,11 @@ class SurveyReportsController extends Controller
         return $tmp;
     }
 
-    /**
-     * TZ helpers. `created_at` in b24_call_survey_logs is written as UTC
-     * (BitrixSurveyService::log_survey uses gmdate). The picker is Tashkent-local.
-     *
-     * localRangeToUtc:  local 'Y-m-d' range → UTC 'Y-m-d H:i:s' bounds for whereBetween
-     * utcToLocal:       stored UTC 'Y-m-d H:i:s' → display 'd.m.Y H:i' in the given TZ
-     */
-    private static function localRangeToUtc(string $fromLocal, string $toLocal, string $tz = 'Asia/Tashkent'): array
-    {
-        try {
-            $z = new \DateTimeZone($tz);
-            $f = new \DateTime($fromLocal . ' 00:00:00', $z);
-            $t = new \DateTime($toLocal   . ' 23:59:59', $z);
-            $utc = new \DateTimeZone('UTC');
-            $f->setTimezone($utc);
-            $t->setTimezone($utc);
-            return [$f->format('Y-m-d H:i:s'), $t->format('Y-m-d H:i:s')];
-        } catch (\Throwable $_) {
-            // Fallback to raw bounds — better broken filter than 500
-            return [$fromLocal . ' 00:00:00', $toLocal . ' 23:59:59'];
-        }
-    }
-
-    private static function utcToLocal($utcString, string $tz = 'Asia/Tashkent'): string
-    {
-        $utcString = (string) ($utcString ?? '');
-        if ($utcString === '') return '';
-        try {
-            $dt = new \DateTime($utcString, new \DateTimeZone('UTC'));
-            $dt->setTimezone(new \DateTimeZone($tz));
-            return $dt->format('Y-m-d H:i:s');
-        } catch (\Throwable $_) {
-            return $utcString;
-        }
-    }
-
     private function distinctOptions(string $keyCol, string $labelCol, string $from, string $to): array
     {
-        [$fromUtc, $toUtc] = self::localRangeToUtc($from, $to, 'Asia/Tashkent');
         return DB::connection('bitrix_survey')->table('b24_call_survey_logs')
             ->selectRaw("$keyCol AS k, $labelCol AS l")
-            ->whereBetween('created_at', [$fromUtc, $toUtc])
+            ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->whereNotNull($keyCol)->where($keyCol, '<>', '')
             ->groupBy('k', 'l')
             ->orderBy('l')

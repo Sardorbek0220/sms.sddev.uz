@@ -225,7 +225,7 @@ if (!function_exists('ank_color_v2')) {
                 <tbody>
                     @foreach($items as $r)
                         @php
-                            $opName  = $opDisplayMap[$r->id] ?? ($opNames[$r->operator_id] ?? ($r->operator_id ? ('op#'.$r->operator_id) : ''));
+                            $opName  = $opNames[$r->operator_id] ?? ($r->operator_id ? ('op#'.$r->operator_id) : '');
                             $gw      = \App\Http\Controllers\Admin\CallsWithoutSurveyController::GATEWAYS[$r->gateway] ?? $r->gateway;
                             $dur     = (int) ($r->dialog_duration ?? 0);
                             $dialogStr = $dur > 0 ? sprintf('%d:%02d', intdiv($dur, 60), $dur % 60) : '0:00';

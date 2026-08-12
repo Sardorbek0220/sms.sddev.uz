@@ -702,7 +702,7 @@
 						<select class="form-control mt-4" name="propuw" id="propuw" @change="get_by_filter()">
 						 	<option value="0">По умолчанию</option>
 							<option value="1">Не дозвон.</option>
-							<option value="2">Пропущенный</option>
+							<option value="2">Похоже на DND</option>
 						</select>
 					</label>
 				</div>
@@ -788,7 +788,7 @@
 						<td>{{report.number.replace('+998', '')}}</td>
 						<td>{{report.count_pro}}</td>
 						<td>{{report.count_nedoz}}</td>
-						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Пропущенный' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
+						<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Похоже на DND' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
 						<td>{{report.user_call}}</td>
 						<td>
 							<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
@@ -884,7 +884,7 @@
 							<td>{{report.number}}</td>
 							<td>{{report.count_pro}}</td>
 							<td>{{report.count_nedoz}}</td>
-							<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Пропущенный' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
+							<td :class="[report.status == 'Успешно' ? 'cl-green' : report.status == 'Похоже на DND' ? 'cl-dnd' : 'cl-warn-red']">{{report.status}}</td>
 							<td>{{report.user_call}}</td>
 							<td>
 								<span :class="[report.start_talking_ymd.getFullYear() === today.getFullYear() && report.start_talking_ymd.getMonth() === today.getMonth() && report.start_talking_ymd.getDate() === today.getDate() ? 'date_none' : report.start_talking_ymd == my_year ? 'date_none' : 'date_ymd']">
@@ -1026,7 +1026,7 @@
     })();
 	const statuses = {
 		SUCCESS: "Успешно",
-		NO_ATTEMPT: "Пропущенный",
+		NO_ATTEMPT: "Похоже на DND",
 		DIDNT_ANSWER: "Не дозв."
 	};
 	window.monitoringApp = new Vue({
@@ -2114,12 +2114,7 @@
 		  			all_missed.push(notTalk_5995[i]);
 		  		}
 
-		  		// Phone-match fix (2026-08-10): OnlinePBX sometimes stores the same
-		  		// subscriber as "+998911245353" on inbound and "911245353" on outbound
-		  		// (or with extra prefixes). Strict === missed the pair → "перезвон не посчитался".
-		  		// Compare by the LAST 9 digits (UZ operator+subscriber, no country code).
-		  		const tailPhone9 = s => String(s || '').replace(/\D/g, '').slice(-9);
-		  		let result = inTalk_5995.filter(o1 => notTalk_5995.some(o2 => tailPhone9(o1.caller_id_number) === tailPhone9(o2.caller_id_number)));
+		  		let result = inTalk_5995.filter(o1 => notTalk_5995.some(o2 => o1.caller_id_number === o2.caller_id_number));
 
 		  		for (var i = 0; i < result.length; i++) {
 					all_missed.push(result[i]);
@@ -2153,8 +2148,7 @@
 					data.push(info);
 				}
 
-				// Same phone-match fix — outbound "destination" vs inbound "number".
-				let resulto = outbounds_5995.filter(o1 => data.some(o2 => tailPhone9(o1.destination_number) === tailPhone9(o2.number)));
+				let resulto = outbounds_5995.filter(o1 => data.some(o2 => o1.destination_number === o2.number));
 
 				for (var i = 0; i < resulto.length; i++) {
 					let info;

@@ -160,12 +160,7 @@
                                     <td><small>{{ \Carbon\Carbon::parse($datum->created_at)->format('d.m H:i') }}</small></td>
                                     <td><span class="ph-badge is-info">{{ $gwInfo['short'] }}</span></td>
                                     <td><small>{{ ph_format_phone($datum->client_telephone) }}</small></td>
-                                    <td>
-                                        <small>{{ $datum->operator_display_name ?? (optional($datum->operator)->name ?: '—') }}</small>
-                                        @if(!empty($datum->operator_display_hint))
-                                            <br><small class="text-muted" style="font-size:10px;">{{ $datum->operator_display_hint }}</small>
-                                        @endif
-                                    </td>
+                                    <td><small>{{ optional($datum->operator)->name ?: '—' }}</small></td>
                                     <td>
                                         @if($datum->direction === 'inbound')
                                             <span class="ph-badge is-info"><i class="fas fa-arrow-down"></i> Вх.</span>
@@ -245,7 +240,7 @@
                                                 href="{{ route($createSurveyRouteName, ['call' => $datum->id, 'back' => request()->fullUrl()]) }}"
                                                 data-call-id="{{ $datum->id }}"
                                                 data-call-phone="{{ $datum->client_telephone }}"
-                                                data-call-operator="{{ $datum->operator_display_name ?? (optional($datum->operator)->name ?: '-') }}"
+                                                data-call-operator="{{ optional($datum->operator)->name ?: '-' }}"
                                                 data-call-date="{{ $datum->created_at }}"
                                                 data-call-direction="{{ $datum->direction ?: '-' }}"
                                                 data-call-gateway="{{ $datum->gateway ?: '-' }}"

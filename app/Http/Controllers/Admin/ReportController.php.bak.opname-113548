@@ -17,7 +17,6 @@ use App\Score;
 use App\Exception;
 use App\Call;
 use App\Services\BitrixSurveyService;
-use App\Services\OperatorDisplayService;
 use App\Services\CallAnalyticsService;
 use App\Services\OperatorWorkspaceService;
 use App\Services\PbxLiveStateService;
@@ -316,9 +315,6 @@ class ReportController extends Controller
 
         $data = $data->paginate(100)->appends($request->query());
 
-        // Replace 'Operator_name' placeholders with last real operator (or 'Ext. {phone}')
-        OperatorDisplayService::attach($data);
-
         $data->setCollection(
             $bitrixSurveyService->attachToCalls(collect($data->items()), $from_date, $to_date)
         );
@@ -574,8 +570,8 @@ class ReportController extends Controller
                 c.gateway,
                 c.direction AS accountcode,
                 c.direction,
-                COALESCE(NULLIF(c.date, 0), UNIX_TIMESTAMP(c.created_at)) AS start_stamp,
-                (COALESCE(NULLIF(c.date, 0), UNIX_TIMESTAMP(c.created_at)) + c.call_duration) AS end_stamp,
+                UNIX_TIMESTAMP(c.created_at) AS start_stamp,
+                (UNIX_TIMESTAMP(c.created_at) + c.call_duration) AS end_stamp,
                 c.dialog_duration AS user_talk_time,
                 c.call_duration AS duration,
                 CASE WHEN c.direction = 'outbound' THEN o.phone ELSE c.client_telephone END AS caller_id_number,

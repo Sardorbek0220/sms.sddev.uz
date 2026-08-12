@@ -98,45 +98,13 @@ class CallsWithoutSurveyController extends Controller
         $items = $base->orderByDesc('created_at')
             ->paginate(50)->appends($request->query());
 
-        // Replace 'Operator_name' placeholder ops with last real op of same client (or Ext.{phone})
-        $opDisplayMap = []; // call->id => display name
-        $placeholderClientPhones = [];
-        $placeholderOpExt = [];   // call->id => ext phone
-        foreach ($items as $r) {
-            $opn = $opNames[$r->operator_id] ?? '';
-            if (trim($opn) === 'Operator_name') {
-                $placeholderClientPhones[$r->client_telephone] = true;
-                $placeholderOpExt[$r->id] = DB::table('operators')->where('id', $r->operator_id)->value('phone');
-            }
-        }
-        if (!empty($placeholderClientPhones)) {
-            $rows = DB::table('calls AS c')
-                ->join('operators AS o', 'o.id', '=', 'c.operator_id')
-                ->whereIn('c.client_telephone', array_keys($placeholderClientPhones))
-                ->where('o.name', '<>', 'Operator_name')
-                ->where('c.dialog_duration', '>', 0)
-                ->orderByDesc('c.created_at')
-                ->select('c.client_telephone', 'o.name')
-                ->get();
-            $lastReal = [];
-            foreach ($rows as $rr) {
-                if (!isset($lastReal[$rr->client_telephone])) $lastReal[$rr->client_telephone] = $rr->name;
-            }
-            foreach ($items as $r) {
-                $opn = $opNames[$r->operator_id] ?? '';
-                if (trim($opn) === 'Operator_name') {
-                    $opDisplayMap[$r->id] = $lastReal[$r->client_telephone] ?? ('Ext. ' . ($placeholderOpExt[$r->id] ?? '?'));
-                }
-            }
-        }
-
         $days = max(1, (strtotime($to_date) - strtotime($from_date)) / 86400 + 1);
 
         return response()->view('admin.calls-no-anketa', compact(
             'items', 'from_date', 'to_date',
             'operator', 'gateway', 'direction', 'callState', 'phone', 'minDialog',
             'total', 'withDialog', 'missed', 'totalInPeriod', 'coveragePct', 'days',
-            'byOperator', 'opNames', 'operatorOptions', 'isOperator', 'opDisplayMap'
+            'byOperator', 'opNames', 'operatorOptions', 'isOperator'
         ))->withHeaders([
             'Cache-Control' => 'no-store, no-cache, private, must-revalidate, max-age=0',
             'CDN-Cache-Control' => 'no-store',

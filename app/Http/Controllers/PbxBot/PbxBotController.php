@@ -18,12 +18,26 @@ class PbxBotController extends Controller
 {
     const SALESDOC_TG_USER_CHANNEL = -1001467861516;
     const SALESDOC_TG_MISSED_CALLS_CHANNEL = -1001964582608;
-    const IDOKON_TG_USER_CHANNEL =  -1002662562307;
-    const IDOKON_TG_MISSED_CALLS_CHANNEL = -1002586700948;
+    const IDOKON_TG_USER_CHANNEL =  -1004389524262;
+    const IDOKON_TG_MISSED_CALLS_CHANNEL = -1003984096734;
     const IBOX_TG_USER_CHANNEL =  -1002445571260;
     const IBOX_TG_MISSED_CALLS_CHANNEL = -1002639243146;
     const TG_USER_ME = 39672912;
     const BOT_URL = "https://api.telegram.org/bot5705052290:AAF5VkxlbjnEKzovZQW23mppKaOQIRc6sSQ/";
+    const IDOKON_BOT_URL = "https://api.telegram.org/bot8823976471:AAHmRvoEAPZHfyu9y3sCuNinVbiknWPIFQw/";
+    const IDOKON_MISSED_BOT_URL = "https://api.telegram.org/bot8722300271:AAHWHX0OH1J57scb7L5iitJLKI_PseBmPnE/";
+
+    // Maps a phone number (gateway) to the Telegram bot whose token owns the
+    // target channel. IDOKON's user channel and missed-calls channel live under
+    // two different bots, so $missed selects between them. Everyone else uses the
+    // shared default bot. Keep this in sync with getUserChannel().
+    public function getBotUrl($phoneNumber, $missed = false) {
+        $phoneNumber = preg_replace ('/[^\d]/i', '', $phoneNumber);
+        if (in_array($phoneNumber, ['998781136022', '781136022'])) {
+            return $missed ? self::IDOKON_MISSED_BOT_URL : self::IDOKON_BOT_URL;
+        }
+        return self::BOT_URL;
+    }
 
     public function getUserChannel($phoneNumber, $missed = false) {
         $phoneNumber = preg_replace ('/[^\d]/i', '', $phoneNumber);
@@ -36,8 +50,8 @@ class PbxBotController extends Controller
         }
     }
 
-    public function sendTextMessage($chat_id, $text, $entities = [], $queryStatus = false) {
-        $ch = curl_init(self::BOT_URL."sendMessage");
+    public function sendTextMessage($chat_id, $text, $entities = [], $queryStatus = false, $botUrl = self::BOT_URL) {
+        $ch = curl_init($botUrl."sendMessage");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -84,7 +98,7 @@ class PbxBotController extends Controller
         echo $response;
     }
 
-    public function sendAudioMessage($chat_id, $caption, $caption_entities = [], $url, $queryStatus = false) {
+    public function sendAudioMessage($chat_id, $caption, $caption_entities = [], $url, $queryStatus = false, $botUrl = self::BOT_URL) {
         // OnlinePBX records sometimes lack Content-Type/Length headers, so
         // Telegram's URL-fetch fails with "wrong type of the web page content".
         // Solution: download the file locally first and upload via multipart.
@@ -108,7 +122,7 @@ class PbxBotController extends Controller
             if ($okDl === false || $dlCode !== 200 || !is_file($tmp) || filesize($tmp) < 1024) {
                 // Download failed → fall back to plain URL (Telegram tries fetch)
                 @unlink($tmp);
-                return $this->sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus);
+                return $this->sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus, $botUrl);
             }
 
             // Multipart upload to Telegram.
@@ -121,7 +135,7 @@ class PbxBotController extends Controller
             if ($queryStatus) {
                 $request["reply_markup"] = json_encode($this->callOutcomeKeyboard());
             }
-            $uch = curl_init(self::BOT_URL . "sendAudio");
+            $uch = curl_init($botUrl . "sendAudio");
             curl_setopt_array($uch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_CONNECTTIMEOUT => 5,
@@ -143,8 +157,8 @@ class PbxBotController extends Controller
         }
     }
 
-    private function sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus) {
-        $ch = curl_init(self::BOT_URL."sendAudio");
+    private function sendAudioByUrl($chat_id, $caption, $caption_entities, $url, $queryStatus, $botUrl = self::BOT_URL) {
+        $ch = curl_init($botUrl."sendAudio");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
@@ -353,18 +367,18 @@ class PbxBotController extends Controller
         else if ($event == "call_missed") {
             if ($_POST["direction"] == "inbound") {
                 $summary = $this->getCallSummary();
-                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities);
-                $this->sendTextMessage($this->getUserChannel($_POST['gateway'], true), $summary->text, $summary->entities);
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, false, $this->getBotUrl($_POST['gateway']));
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway'], true), $summary->text, $summary->entities, false, $this->getBotUrl($_POST['gateway'], true));
             } 
         }
         else if ($event == "call_end") {
     
             $summary = $this->getCallSummary();
             if (isset($_POST["download_url"]) && !empty($_POST["download_url"])) {
-                $this->sendAudioMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, $_POST["download_url"], true);
+                $this->sendAudioMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, $_POST["download_url"], true, $this->getBotUrl($_POST['gateway']));
             }
             else {
-                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, true);
+                $this->sendTextMessage($this->getUserChannel($_POST['gateway']), $summary->text, $summary->entities, true, $this->getBotUrl($_POST['gateway']));
             }
     
         }

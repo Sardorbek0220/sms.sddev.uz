@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 const TG_USER_CHANNEL = -1002077092594;
 const BOT_URL = "https://api.telegram.org/bot6021707011:AAHXaS_dKTC5r2Jl-bwZueTs6Qb5zdXEZqk/";
 
-const IBOX_TG_USER_CHANNEL = -4850688661;
-const IBOX_BOT_URL = "https://api.telegram.org/bot8434467105:AAFOxMrVAUrnVdRXhy40CWUSGD7G7AXIYPI/";
+const IBOX_TG_USER_CHANNEL = -1004384978207;
+const IBOX_BOT_URL = "https://api.telegram.org/bot8996619356:AAEo6p1g0RAmaz-UXETfOJaU_cGuaRMBvWs/";
 
 const IDOKON_TG_USER_CHANNEL = -4897748669;
 const IDOKON_BOT_URL= "https://api.telegram.org/bot8435561111:AAFZDQhJPAIGJ4iVUDEHmT9NSbMinuOtZAE/";
